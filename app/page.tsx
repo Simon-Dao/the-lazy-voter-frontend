@@ -1,11 +1,19 @@
 "use client"
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
 
-  useEffect(() => {
-    const res = fetch("https://api.thelazyvoter.org/bills")
+  const [resp,setResp] = useState("loading..."); 
 
+  useEffect(() => {
+    
+    async function getTestRout() {
+      const res = await fetch("https://thelazyvoter.org/api/test");
+      console.log(res)
+
+    } 
+
+    getTestRout()
   }, [])
 
   return (
