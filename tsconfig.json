@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "api/test/GET.js"  ],
   "exclude": ["node_modules"]
 }

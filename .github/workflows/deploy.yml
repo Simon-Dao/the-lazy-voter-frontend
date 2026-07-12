@@ -28,7 +28,30 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
+        
+      # Pushing the backend APIs to Lambda
+      # Note that the root lambda directory is hardcoded
+      - name: Build Lambda Zips
+        run: |
+          for dir in api/*/; do
+            name=$(basename "$dir")
+            [ "$name" == "shared" ] && continue
+            find "$dir" -name "GET.js" -o -name "POST.js" -o -name "PUT.js" -o -name "DELETE.js" | while read -r handler; do
+              handler_dir=$(dirname "$handler")
+              cd "$handler_dir"
+              [ -f package.json ] && npm ci --production
+              zip -r function.zip . -x "function.zip"
+              cd - > /dev/null
+            done
+          done
+          
+      - name: Terraform init and apply
+        working-directory: iac
+        run: |
+          terraform init
+          terraform apply -auto-approve
+      
+      # Update frontend static files for serving
       - name: Sync to S3
         run: aws s3 sync ./out s3://${{ secrets.S3_BUCKET }} --delete
 
