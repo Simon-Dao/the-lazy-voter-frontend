@@ -46,3 +46,7 @@ next-env.d.ts
 
 # Local .terraform directories
 **/.terraform/*
+
+# Terraform backups and state
+*.tfstate.*
+*.tfstate
