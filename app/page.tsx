@@ -9,7 +9,8 @@ export default function Home() {
     
     async function getTestRout() {
       const res = await fetch("https://thelazyvoter.org/api/test");
-      console.log(res)
+      const data = await res.json();
+      console.log(data)
 
     } 
 
