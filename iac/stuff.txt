@@ -1,0 +1,334 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [32m+[0m create[0m
+ [36m<=[0m read (data resources)[0m
+
+Terraform will perform the following actions:
+
+[1m  # data.aws_iam_policy_document.site_policy[0m will be read during apply
+  # (config refers to values not yet known)
+[0m [36m<=[0m[0m data "aws_iam_policy_document" "site_policy" {
+      [32m+[0m[0m id            = (known after apply)
+      [32m+[0m[0m json          = (known after apply)
+      [32m+[0m[0m minified_json = (known after apply)
+
+      [32m+[0m[0m statement {
+          [32m+[0m[0m actions   = [
+              [32m+[0m[0m "s3:GetObject",
+            ]
+          [32m+[0m[0m effect    = "Allow"
+          [32m+[0m[0m resources = [
+              [32m+[0m[0m (known after apply),
+            ]
+          [32m+[0m[0m sid       = "AllowCloudFrontOAC"
+
+          [32m+[0m[0m condition {
+              [32m+[0m[0m test     = "StringEquals"
+              [32m+[0m[0m values   = [
+                  [32m+[0m[0m (known after apply),
+                ]
+              [32m+[0m[0m variable = "AWS:SourceArn"
+            }
+
+          [32m+[0m[0m principals {
+              [32m+[0m[0m identifiers = [
+                  [32m+[0m[0m "cloudfront.amazonaws.com",
+                ]
+              [32m+[0m[0m type        = "Service"
+            }
+        }
+    }
+
+[1m  # aws_acm_certificate.site[0m will be created
+[0m  [32m+[0m[0m resource "aws_acm_certificate" "site" {
+      [32m+[0m[0m arn                       = (known after apply)
+      [32m+[0m[0m domain_name               = "thelazyvoter.org"
+      [32m+[0m[0m domain_validation_options = [
+          [32m+[0m[0m {
+              [32m+[0m[0m domain_name           = "thelazyvoter.org"
+              [32m+[0m[0m resource_record_name  = (known after apply)
+              [32m+[0m[0m resource_record_type  = (known after apply)
+              [32m+[0m[0m resource_record_value = (known after apply)
+            },
+          [32m+[0m[0m {
+              [32m+[0m[0m domain_name           = "www.thelazyvoter.org"
+              [32m+[0m[0m resource_record_name  = (known after apply)
+              [32m+[0m[0m resource_record_type  = (known after apply)
+              [32m+[0m[0m resource_record_value = (known after apply)
+            },
+        ]
+      [32m+[0m[0m id                        = (known after apply)
+      [32m+[0m[0m key_algorithm             = (known after apply)
+      [32m+[0m[0m not_after                 = (known after apply)
+      [32m+[0m[0m not_before                = (known after apply)
+      [32m+[0m[0m pending_renewal           = (known after apply)
+      [32m+[0m[0m renewal_eligibility       = (known after apply)
+      [32m+[0m[0m renewal_summary           = (known after apply)
+      [32m+[0m[0m status                    = (known after apply)
+      [32m+[0m[0m subject_alternative_names = [
+          [32m+[0m[0m "thelazyvoter.org",
+          [32m+[0m[0m "www.thelazyvoter.org",
+        ]
+      [32m+[0m[0m tags_all                  = (known after apply)
+      [32m+[0m[0m type                      = (known after apply)
+      [32m+[0m[0m validation_emails         = (known after apply)
+      [32m+[0m[0m validation_method         = "DNS"
+
+      [32m+[0m[0m options (known after apply)
+    }
+
+[1m  # aws_acm_certificate_validation.site[0m will be created
+[0m  [32m+[0m[0m resource "aws_acm_certificate_validation" "site" {
+      [32m+[0m[0m certificate_arn         = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m validation_record_fqdns = (known after apply)
+    }
+
+[1m  # aws_cloudfront_distribution.site[0m will be created
+[0m  [32m+[0m[0m resource "aws_cloudfront_distribution" "site" {
+      [32m+[0m[0m aliases                         = [
+          [32m+[0m[0m "thelazyvoter.org",
+          [32m+[0m[0m "www.thelazyvoter.org",
+        ]
+      [32m+[0m[0m arn                             = (known after apply)
+      [32m+[0m[0m caller_reference                = (known after apply)
+      [32m+[0m[0m continuous_deployment_policy_id = (known after apply)
+      [32m+[0m[0m default_root_object             = "index.html"
+      [32m+[0m[0m domain_name                     = (known after apply)
+      [32m+[0m[0m enabled                         = true
+      [32m+[0m[0m etag                            = (known after apply)
+      [32m+[0m[0m hosted_zone_id                  = (known after apply)
+      [32m+[0m[0m http_version                    = "http2"
+      [32m+[0m[0m id                              = (known after apply)
+      [32m+[0m[0m in_progress_validation_batches  = (known after apply)
+      [32m+[0m[0m is_ipv6_enabled                 = false
+      [32m+[0m[0m last_modified_time              = (known after apply)
+      [32m+[0m[0m price_class                     = "PriceClass_All"
+      [32m+[0m[0m retain_on_delete                = false
+      [32m+[0m[0m staging                         = false
+      [32m+[0m[0m status                          = (known after apply)
+      [32m+[0m[0m tags_all                        = (known after apply)
+      [32m+[0m[0m trusted_key_groups              = (known after apply)
+      [32m+[0m[0m trusted_signers                 = (known after apply)
+      [32m+[0m[0m wait_for_deployment             = true
+
+      [32m+[0m[0m custom_error_response {
+          [32m+[0m[0m error_code         = 404
+          [32m+[0m[0m response_code      = 200
+          [32m+[0m[0m response_page_path = "/404.html"
+        }
+
+      [32m+[0m[0m default_cache_behavior {
+          [32m+[0m[0m allowed_methods        = [
+              [32m+[0m[0m "GET",
+              [32m+[0m[0m "HEAD",
+            ]
+          [32m+[0m[0m cached_methods         = [
+              [32m+[0m[0m "GET",
+              [32m+[0m[0m "HEAD",
+            ]
+          [32m+[0m[0m compress               = true
+          [32m+[0m[0m default_ttl            = (known after apply)
+          [32m+[0m[0m max_ttl                = (known after apply)
+          [32m+[0m[0m min_ttl                = 0
+          [32m+[0m[0m target_origin_id       = "s3-site-origin"
+          [32m+[0m[0m trusted_key_groups     = (known after apply)
+          [32m+[0m[0m trusted_signers        = (known after apply)
+          [32m+[0m[0m viewer_protocol_policy = "redirect-to-https"
+
+          [32m+[0m[0m forwarded_values {
+              [32m+[0m[0m headers                 = (known after apply)
+              [32m+[0m[0m query_string            = false
+              [32m+[0m[0m query_string_cache_keys = (known after apply)
+
+              [32m+[0m[0m cookies {
+                  [32m+[0m[0m forward           = "none"
+                  [32m+[0m[0m whitelisted_names = (known after apply)
+                }
+            }
+
+          [32m+[0m[0m grpc_config (known after apply)
+        }
+
+      [32m+[0m[0m origin {
+          [32m+[0m[0m connection_attempts      = 3
+          [32m+[0m[0m connection_timeout       = 10
+          [32m+[0m[0m domain_name              = (known after apply)
+          [32m+[0m[0m origin_access_control_id = (known after apply)
+          [32m+[0m[0m origin_id                = "s3-site-origin"
+            [90m# (1 unchanged attribute hidden)[0m[0m
+        }
+
+      [32m+[0m[0m restrictions {
+          [32m+[0m[0m geo_restriction {
+              [32m+[0m[0m locations        = (known after apply)
+              [32m+[0m[0m restriction_type = "none"
+            }
+        }
+
+      [32m+[0m[0m viewer_certificate {
+          [32m+[0m[0m acm_certificate_arn      = (known after apply)
+          [32m+[0m[0m minimum_protocol_version = "TLSv1.2_2021"
+          [32m+[0m[0m ssl_support_method       = "sni-only"
+        }
+    }
+
+[1m  # aws_cloudfront_origin_access_control.site[0m will be created
+[0m  [32m+[0m[0m resource "aws_cloudfront_origin_access_control" "site" {
+      [32m+[0m[0m arn                               = (known after apply)
+      [32m+[0m[0m description                       = "Managed by Terraform"
+      [32m+[0m[0m etag                              = (known after apply)
+      [32m+[0m[0m id                                = (known after apply)
+      [32m+[0m[0m name                              = "the-lazy-voter-serving-oac"
+      [32m+[0m[0m origin_access_control_origin_type = "s3"
+      [32m+[0m[0m signing_behavior                  = "always"
+      [32m+[0m[0m signing_protocol                  = "sigv4"
+    }
+
+[1m  # aws_route53_record.cert_validation["thelazyvoter.org"][0m will be created
+[0m  [32m+[0m[0m resource "aws_route53_record" "cert_validation" {
+      [32m+[0m[0m allow_overwrite = (known after apply)
+      [32m+[0m[0m fqdn            = (known after apply)
+      [32m+[0m[0m id              = (known after apply)
+      [32m+[0m[0m name            = (known after apply)
+      [32m+[0m[0m records         = (known after apply)
+      [32m+[0m[0m ttl             = 60
+      [32m+[0m[0m type            = (known after apply)
+      [32m+[0m[0m zone_id         = (known after apply)
+    }
+
+[1m  # aws_route53_record.cert_validation["www.thelazyvoter.org"][0m will be created
+[0m  [32m+[0m[0m resource "aws_route53_record" "cert_validation" {
+      [32m+[0m[0m allow_overwrite = (known after apply)
+      [32m+[0m[0m fqdn            = (known after apply)
+      [32m+[0m[0m id              = (known after apply)
+      [32m+[0m[0m name            = (known after apply)
+      [32m+[0m[0m records         = (known after apply)
+      [32m+[0m[0m ttl             = 60
+      [32m+[0m[0m type            = (known after apply)
+      [32m+[0m[0m zone_id         = (known after apply)
+    }
+
+[1m  # aws_route53_record.root[0m will be created
+[0m  [32m+[0m[0m resource "aws_route53_record" "root" {
+      [32m+[0m[0m allow_overwrite = (known after apply)
+      [32m+[0m[0m fqdn            = (known after apply)
+      [32m+[0m[0m id              = (known after apply)
+      [32m+[0m[0m name            = "thelazyvoter.org"
+      [32m+[0m[0m type            = "A"
+      [32m+[0m[0m zone_id         = (known after apply)
+
+      [32m+[0m[0m alias {
+          [32m+[0m[0m evaluate_target_health = false
+          [32m+[0m[0m name                   = (known after apply)
+          [32m+[0m[0m zone_id                = (known after apply)
+        }
+    }
+
+[1m  # aws_route53_record.www[0m will be created
+[0m  [32m+[0m[0m resource "aws_route53_record" "www" {
+      [32m+[0m[0m allow_overwrite = (known after apply)
+      [32m+[0m[0m fqdn            = (known after apply)
+      [32m+[0m[0m id              = (known after apply)
+      [32m+[0m[0m name            = "www.thelazyvoter.org"
+      [32m+[0m[0m type            = "A"
+      [32m+[0m[0m zone_id         = (known after apply)
+
+      [32m+[0m[0m alias {
+          [32m+[0m[0m evaluate_target_health = false
+          [32m+[0m[0m name                   = (known after apply)
+          [32m+[0m[0m zone_id                = (known after apply)
+        }
+    }
+
+[1m  # aws_route53_zone.site[0m will be created
+[0m  [32m+[0m[0m resource "aws_route53_zone" "site" {
+      [32m+[0m[0m arn                 = (known after apply)
+      [32m+[0m[0m comment             = "Managed by Terraform"
+      [32m+[0m[0m force_destroy       = false
+      [32m+[0m[0m id                  = (known after apply)
+      [32m+[0m[0m name                = "thelazyvoter.org"
+      [32m+[0m[0m name_servers        = (known after apply)
+      [32m+[0m[0m primary_name_server = (known after apply)
+      [32m+[0m[0m tags_all            = (known after apply)
+      [32m+[0m[0m zone_id             = (known after apply)
+    }
+
+[1m  # aws_s3_bucket.site[0m will be created
+[0m  [32m+[0m[0m resource "aws_s3_bucket" "site" {
+      [32m+[0m[0m acceleration_status         = (known after apply)
+      [32m+[0m[0m acl                         = (known after apply)
+      [32m+[0m[0m arn                         = (known after apply)
+      [32m+[0m[0m bucket                      = "the-lazy-voter-serving"
+      [32m+[0m[0m bucket_domain_name          = (known after apply)
+      [32m+[0m[0m bucket_prefix               = (known after apply)
+      [32m+[0m[0m bucket_regional_domain_name = (known after apply)
+      [32m+[0m[0m force_destroy               = false
+      [32m+[0m[0m hosted_zone_id              = (known after apply)
+      [32m+[0m[0m id                          = (known after apply)
+      [32m+[0m[0m object_lock_enabled         = (known after apply)
+      [32m+[0m[0m policy                      = (known after apply)
+      [32m+[0m[0m region                      = (known after apply)
+      [32m+[0m[0m request_payer               = (known after apply)
+      [32m+[0m[0m tags_all                    = (known after apply)
+      [32m+[0m[0m website_domain              = (known after apply)
+      [32m+[0m[0m website_endpoint            = (known after apply)
+
+      [32m+[0m[0m cors_rule (known after apply)
+
+      [32m+[0m[0m grant (known after apply)
+
+      [32m+[0m[0m lifecycle_rule (known after apply)
+
+      [32m+[0m[0m logging (known after apply)
+
+      [32m+[0m[0m object_lock_configuration (known after apply)
+
+      [32m+[0m[0m replication_configuration (known after apply)
+
+      [32m+[0m[0m server_side_encryption_configuration (known after apply)
+
+      [32m+[0m[0m versioning (known after apply)
+
+      [32m+[0m[0m website (known after apply)
+    }
+
+[1m  # aws_s3_bucket_ownership_controls.site[0m will be created
+[0m  [32m+[0m[0m resource "aws_s3_bucket_ownership_controls" "site" {
+      [32m+[0m[0m bucket = (known after apply)
+      [32m+[0m[0m id     = (known after apply)
+
+      [32m+[0m[0m rule {
+          [32m+[0m[0m object_ownership = "BucketOwnerEnforced"
+        }
+    }
+
+[1m  # aws_s3_bucket_policy.site[0m will be created
+[0m  [32m+[0m[0m resource "aws_s3_bucket_policy" "site" {
+      [32m+[0m[0m bucket = (known after apply)
+      [32m+[0m[0m id     = (known after apply)
+      [32m+[0m[0m policy = (known after apply)
+    }
+
+[1m  # aws_s3_bucket_public_access_block.site[0m will be created
+[0m  [32m+[0m[0m resource "aws_s3_bucket_public_access_block" "site" {
+      [32m+[0m[0m block_public_acls       = true
+      [32m+[0m[0m block_public_policy     = true
+      [32m+[0m[0m bucket                  = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m ignore_public_acls      = true
+      [32m+[0m[0m restrict_public_buckets = true
+    }
+
+[1mPlan:[0m [0m13 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  [32m+[0m[0m bucket_name                = (known after apply)
+  [32m+[0m[0m cloudfront_distribution_id = (known after apply)
+  [32m+[0m[0m cloudfront_domain_name     = (known after apply)
+[90m
+─────────────────────────────────────────────────────────────────────────────[0m
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.
