@@ -61,7 +61,7 @@ resource "aws_lambda_function" "api" {
   for_each = local.flat_routes
 
   function_name    = each.key
-  runtime          = "nodejs24.x"
+  runtime          = "nodejs"
   handler          = "${trimsuffix(basename(each.value.file_path), ".js")}.handler"
   filename         = "${local.functions_root}/${dirname(each.value.file_path)}/function.zip"
   source_code_hash = filebase64sha256("${local.functions_root}/${dirname(each.value.file_path)}/function.zip")
