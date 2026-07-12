@@ -44,7 +44,10 @@ jobs:
               cd - > /dev/null
             done
           done
-          
+      
+      - name: Setup Terraform          
+        uses: hashicorp/setup-terraform@v3
+
       - name: Terraform init and apply
         working-directory: iac
         run: |
