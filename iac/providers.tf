@@ -1,4 +1,13 @@
 terraform {
+
+  backend "s3" {
+    bucket       = "the-lazy-voter-tfstate"
+    key          = "terraform.tfstate"
+    region       = "us-west-2"
+    encrypt      = true
+    use_lockfile = true
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
