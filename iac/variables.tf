@@ -21,3 +21,31 @@ variable "domain_name" {
   type        = string
   default = "thelazyvoter.org"
 }
+
+variable "pghost" {
+  description = "PostgreSQL host"
+  type        = string
+}
+
+variable "pgdatabase" {
+  description = "PostgreSQL database name"
+  type        = string
+  default     = "databricks_postgres"
+}
+
+variable "pguser" {
+  description = "PostgreSQL username"
+  type        = string
+}
+
+variable "pgpassword" {
+  description = "PostgreSQL password"
+  type        = string
+  sensitive   = true
+}
+
+variable "pgsslmode" {
+  description = "PostgreSQL SSL mode"
+  type        = string
+  default     = "require"
+}
