@@ -75,7 +75,6 @@ resource "aws_lambda_function" "api" {
       PGDATABASE = var.pgdatabase
       PGUSER     = var.pguser
       PGPASSWORD = var.pgpassword
-      PGSSLMODE  = var.pgsslmode
     }
   }
 }

@@ -48,12 +48,23 @@ jobs:
       - name: Setup Terraform          
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform init and apply
+      - name: Terraform
         working-directory: iac
         run: |
           terraform init
+
+      - name: Terraform apply
+        working-directory: iac
+        env:
+          TF_VAR_pghost: ${{ secrets.PGHOST }}
+          TF_VAR_pgdatabase: ${{ secrets.PGDATABASE }}
+          TF_VAR_pguser: ${{ secrets.PGUSER }}
+          TF_VAR_pgpassword: ${{ secrets.PGPASSWORD }}
+        run: |
+          terraform init
           terraform apply -auto-approve
-      
+                
+
       # Update frontend static files for serving
       - name: Sync to S3
         run: aws s3 sync ./out s3://${{ secrets.S3_BUCKET }} --delete
