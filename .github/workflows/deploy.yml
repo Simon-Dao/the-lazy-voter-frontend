@@ -44,12 +44,23 @@ jobs:
             esac
 
             echo "Building: $handler_dir"
+            build_dir=$(mktemp -d)
+
+            # only copy files directly in this folder - NOT subdirectories,
+            # since a parent route folder (e.g. politicians/[people_id]/) can
+            # contain nested route folders (votes/, finance/, etc.) that are
+            # separate Lambdas and must not be bundled into this one
+            find "$handler_dir" -maxdepth 1 -type f ! -name "function.zip" -exec cp {} "$build_dir/" \;
+
             (
-              cd "$handler_dir"
+              cd "$build_dir"
               [ -f package.json ] || npm init -y > /dev/null 2>&1
-              npm install pg --loglevel=verbose
+              npm install pg --silent
               zip -r function.zip . -x "function.zip" > /dev/null
             )
+
+            cp "$build_dir/function.zip" "$handler_dir/function.zip"
+            rm -rf "$build_dir"
           done
 
       - name: Setup Terraform
