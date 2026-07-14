@@ -9,11 +9,14 @@
 locals {
   functions_root = "${path.module}/../api"
 
-  # every .js handler file under functions/, excluding the shared/ folder
+  # only match actual handler files (GET.js, POST.js, etc.) - excludes
+  # node_modules, shared/, and any helper .js files inside route folders
   all_handlers = [
     for f in fileset(local.functions_root, "**/*.js")
     : f
     if !startswith(f, "shared/")
+    && !strcontains(f, "node_modules/")
+    && contains(["GET.js", "POST.js", "PUT.js", "DELETE.js", "PATCH.js"], basename(f))
   ]
 
   # build one route entry per handler file
