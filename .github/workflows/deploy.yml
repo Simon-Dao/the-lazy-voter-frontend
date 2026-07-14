@@ -69,10 +69,10 @@ jobs:
       - name: Terraform apply
         working-directory: iac
         env:
-          TF_VAR_pg_host: ${{ secrets.PGHOST }}
-          TF_VAR_pg_database: ${{ secrets.PGDATABASE }}
-          TF_VAR_pg_user: ${{ secrets.PGUSER }}
-          TF_VAR_pg_password: ${{ secrets.PGPASSWORD }}
+          TF_VAR_pghost: ${{ secrets.PGHOST }}
+          TF_VAR_pgdatabase: ${{ secrets.PGDATABASE }}
+          TF_VAR_pguser: ${{ secrets.PGUSER }}
+          TF_VAR_pgpassword: ${{ secrets.PGPASSWORD }}
         run: |
           terraform init
           terraform apply -auto-approve
