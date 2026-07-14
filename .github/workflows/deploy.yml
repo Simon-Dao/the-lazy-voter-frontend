@@ -39,6 +39,8 @@ jobs:
             find "$dir" -name "GET.js" -o -name "POST.js" -o -name "PUT.js" -o -name "DELETE.js" | while read -r handler; do
               handler_dir=$(dirname "$handler")
               cd "$handler_dir"
+              npm init -y > /dev/null 2>&1
+              npm install pg
               zip -r function.zip . -x "function.zip"
               cd - > /dev/null
             done
