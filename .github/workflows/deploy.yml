@@ -28,52 +28,43 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-        
+
       # Pushing the backend APIs to Lambda
       # Note that the root lambda directory is hardcoded
       - name: Build Lambda Zips
         run: |
-          set -x
-          for dir in api/*/; do
-            name=$(basename "$dir")
-            [ "$name" == "shared" ] && continue
+          set -e
+          find api -type f \( -name "GET.js" -o -name "POST.js" -o -name "PUT.js" -o -name "DELETE.js" -o -name "PATCH.js" \) -print0 |
+          while IFS= read -r -d '' handler; do
+            handler_dir=$(dirname "$handler")
 
-            for handler in "$dir"*.js "$dir"*/*.js; do
-              [ -f "$handler" ] || continue
-              case "$(basename "$handler")" in
-                GET.js|POST.js|PUT.js|DELETE.js) ;;
-                *) continue ;;
-              esac
+            # skip anything under api/shared
+            case "$handler_dir" in
+              api/shared*) continue ;;
+            esac
 
-              handler_dir=$(dirname "$handler")
-              echo "Building: $handler_dir"
+            echo "Building: $handler_dir"
+            (
               cd "$handler_dir"
-              npm init -y > /dev/null 2>&1 || true
+              [ -f package.json ] || npm init -y > /dev/null 2>&1
               npm install pg --silent
-              zip -r function.zip . -x "function.zip"
-              cd "$GITHUB_WORKSPACE"
-            done
+              zip -r function.zip . -x "function.zip" > /dev/null
+            )
           done
-      
-      - name: Setup Terraform          
-        uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform
-        working-directory: iac
-        run: |
-          terraform init
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
       - name: Terraform apply
         working-directory: iac
         env:
-          TF_VAR_pghost: ${{ secrets.PGHOST }}
-          TF_VAR_pgdatabase: ${{ secrets.PGDATABASE }}
-          TF_VAR_pguser: ${{ secrets.PGUSER }}
-          TF_VAR_pgpassword: ${{ secrets.PGPASSWORD }}
+          TF_VAR_pg_host: ${{ secrets.PGHOST }}
+          TF_VAR_pg_database: ${{ secrets.PGDATABASE }}
+          TF_VAR_pg_user: ${{ secrets.PGUSER }}
+          TF_VAR_pg_password: ${{ secrets.PGPASSWORD }}
         run: |
           terraform init
           terraform apply -auto-approve
-                
 
       # Update frontend static files for serving
       - name: Sync to S3
