@@ -31,7 +31,7 @@ exports.handler = async (event) => {
 
   try {
     // Check if bill exists
-    const billCheck = await client.query('SELECT id FROM legiscan_bills WHERE bill_id = $1', [billId]);
+    const billCheck = await client.query('SELECT id FROM legiscan_bill WHERE bill_id = $1', [billId]);
     if (billCheck.rows.length === 0) {
       return {
         statusCode: 404,
