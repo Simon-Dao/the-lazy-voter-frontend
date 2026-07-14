@@ -47,7 +47,7 @@ jobs:
             (
               cd "$handler_dir"
               [ -f package.json ] || npm init -y > /dev/null 2>&1
-              npm install pg --silent
+              npm install pg --loglevel=verbose
               zip -r function.zip . -x "function.zip" > /dev/null
             )
           done
