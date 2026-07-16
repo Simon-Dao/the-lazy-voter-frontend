@@ -5,6 +5,13 @@ resource "aws_cloudfront_origin_access_control" "site" {
   signing_protocol                  = "sigv4"
 }
 
+resource "aws_cloudfront_function" "url_rewrite" {
+  name    = "url-rewrite"
+  runtime = "cloudfront-js-2.0"
+  publish = true
+  code    = file("${path.module}/cloudfront-function.js")
+}
+
 resource "aws_cloudfront_distribution" "site" {
   enabled             = true
   default_root_object = "index.html"
@@ -27,9 +34,9 @@ resource "aws_cloudfront_distribution" "site" {
 
     custom_origin_config {
       http_port              = 80
-      https_port              = 443
-      origin_protocol_policy  = "https-only"
-      origin_ssl_protocols    = ["TLSv1.2"]
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
     }
   }
 
@@ -39,6 +46,11 @@ resource "aws_cloudfront_distribution" "site" {
     target_origin_id        = "s3-site-origin"
     viewer_protocol_policy   = "redirect-to-https"
     compress                 = true
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.url_rewrite.arn
+    }
 
     forwarded_values {
       query_string = false
@@ -72,12 +84,20 @@ resource "aws_cloudfront_distribution" "site" {
     max_ttl     = 0
   }
 
-  # Next.js static export produces no trailing-slash routes by default in some
-  # configs - a 404 handler pointing back to index.html keeps client-side
-  # routing working for any dynamic paths
+  # S3 with OAC returns 403 (not 404) for missing keys, since it's a private
+  # bucket - this maps that into a clean 404 response instead of a raw
+  # AccessDenied error reaching the viewer.
+  custom_error_response {
+    error_code         = 403
+    response_code      = 404
+    response_page_path = "/404.html"
+  }
+
+  # True 404s (page genuinely doesn't exist) - kept as a real 404 status,
+  # not remapped to 200, so search engines/crawlers don't index missing pages.
   custom_error_response {
     error_code         = 404
-    response_code      = 200
+    response_code      = 404
     response_page_path = "/404.html"
   }
 
