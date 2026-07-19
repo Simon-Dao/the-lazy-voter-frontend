@@ -40,7 +40,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({ message: "Bill not found" }),
       };
     }
-
+    
     const sponsors = await client.query(`
       SELECT p.name, b.title, b.description
       FROM the_lazy_voter_serving.legiscan_sponsor s
