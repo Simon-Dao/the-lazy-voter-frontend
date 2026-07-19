@@ -1,0 +1,23 @@
+<svg width="200" height="200" viewBox="220 40 120 120" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>TheLazyVoter mark</title>
+<desc>A low-poly civic building icon in red, white, and blue on a navy badge.</desc>
+
+<rect x="220" y="40" width="120" height="120" rx="24" fill="#14274E"/>
+
+<polygon points="280,58 295,80 280,80" fill="#C8102E"/>
+<polygon points="280,58 265,80 280,80" fill="#4C8BF5"/>
+<line x1="280" y1="58" x2="280" y2="46" stroke="#C8102E" stroke-width="2"/>
+<polygon points="280,46 292,50 280,54" fill="#C8102E"/>
+
+<polygon points="248,104 280,104 280,80 264,80" fill="#F4F7FA"/>
+<polygon points="312,104 280,104 280,80 296,80" fill="#D7DEE8"/>
+
+<rect x="253" y="104" width="6" height="24" fill="#F4F7FA"/>
+<rect x="266" y="104" width="6" height="24" fill="#D7DEE8"/>
+<rect x="277" y="104" width="6" height="24" fill="#F4F7FA"/>
+<rect x="288" y="104" width="6" height="24" fill="#D7DEE8"/>
+<rect x="301" y="104" width="6" height="24" fill="#F4F7FA"/>
+
+<rect x="242" y="128" width="76" height="10" rx="2" fill="#F4F7FA"/>
+<rect x="236" y="138" width="88" height="10" rx="2" fill="#D7DEE8"/>
+</svg>
