@@ -9,6 +9,7 @@ import Header from '../../components/dashboard/Header';
 import MainGrid from '../../components/dashboard/MainGrid';
 import SideMenu from '../../components/dashboard/SideMenu';
 import AppTheme from '../../shared-theme/AppTheme';
+import AppAppBar from '../../components/landing/AppAppBar';
 
 import {
   chartsCustomizations,
@@ -26,6 +27,7 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
+      <AppAppBar/>
       <Box sx={{ display: 'flex' }}>
         <SideMenu />
         <AppNavbar />
@@ -49,8 +51,7 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
               mt: { xs: 8, md: 0 },
             }}
           >
-            <Header />
-            <MainGrid />
+          <MainGrid />
           </Stack>
         </Box>
       </Box>

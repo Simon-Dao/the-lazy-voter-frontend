@@ -95,7 +95,7 @@ export default function FAQ() {
               sx={{ maxWidth: { sm: '100%', md: '70%' } }}
             >
               The Lazy Voter is a nonprofit started by <Link href="https://simondao.me">Simon Dao</Link>, a recent Computer Science graduate interested in politics. 
-              Simon has no ties to any political instutions or governing bodies. He just wants voting data to be as accessible to all.
+              Simon has no ties to any political instutions or governing bodies, he just wants voting data to be as accessible to all. For more information on data usage, checkout the
               {" "}<Link href="/privacy-policy">Privacy Policy</Link> and <Link href="/terms-of-service">Terms of Service</Link>
             </Typography>
           </AccordionDetails>

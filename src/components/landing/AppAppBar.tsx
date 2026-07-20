@@ -65,12 +65,12 @@ export default function AppAppBar() {
               </Button>
               <Button
                 component={NextLink}
-                href="/learn"
+                href="/vote"
                 variant="text"
                 color="info"
                 size="small"
               >
-                Learn
+                Vote
               </Button>
               <Button
                 component={NextLink}
@@ -141,12 +141,12 @@ export default function AppAppBar() {
                 </Button>
                 <Button
                   component={NextLink}
-                  href="/learn"
+                  href="/vote"
                   variant="text"
                   color="info"
                   size="small"
                 >
-                  Learn
+                  Vote
                 </Button>
                 <Button
                   component={NextLink}
