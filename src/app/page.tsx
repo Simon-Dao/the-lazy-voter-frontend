@@ -15,7 +15,7 @@ export default function MarketingPage(props: { disableCustomTheme?: boolean }) {
       <Hero />
       <div>
         <LogoCollection />
-        <Features />
+        {/* <Features /> */}
         <Divider />
         <FAQ />
         <Divider />
