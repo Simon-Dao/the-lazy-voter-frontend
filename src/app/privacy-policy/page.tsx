@@ -1,97 +1,111 @@
-"use client"
+"use client";
 
-import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import Link from '@mui/material/Link';
-import { useColorScheme } from '@mui/material/styles';
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
+import Link from "@mui/material/Link";
+import Button from "@mui/material/Button";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import NextLink from "next/link";
 
 const sections = [
   {
-    heading: '1. Information we collect',
+    heading: "1. Who runs this Site",
     body: [
-      `Information you provide. If you contact us, sign up for a newsletter, or create an account, we may collect your name, email address, and any other information you choose to include.`,
-      `Automatically collected information. Like most websites, we may automatically collect certain technical information when you visit, including your IP address, browser type, device type, pages viewed, and referring URLs. This is typically gathered through standard web server logs and, if used, analytics tools (e.g. cookies or similar tracking technologies).`,
-      `Public data. The core content on this Site — information about politicians, bills, campaign finance, and votes — is drawn from public government and civic data sources (including the Federal Election Commission, Congress.gov, and LegiScan). This data is not personal information provided by you, and its use is governed by the terms of the original public data source, not by this policy.`,
+      `TheLazyVoter is an independent project built and maintained by a single individual, not a company or organization. References to "we," "us," and "our" throughout this policy refer to that individual.`,
     ],
   },
   {
-    heading: '2. How we use information',
+    heading: "2. We do not collect personal information",
     body: [
-      `We use collected information to operate, maintain, and improve the Site; respond to inquiries you send us; understand aggregate usage patterns (e.g. which pages are most visited); and send communications you've opted into, such as a newsletter.`,
-      `We do not sell your personal information to third parties.`,
+      `TheLazyVoter does not require an account, does not have a login, and does not ask you to submit any personal information to use the Site. No personal data, such as your name, email address, or other identifying information, is collected through your use of the Site.`,
     ],
   },
   {
-    heading: '3. Cookies and tracking',
+    heading: "3. Public data displayed on the Site",
     body: [
-      `The Site may use cookies or similar technologies for basic functionality (such as remembering a dark/light mode preference) and, if enabled, analytics (such as Google Analytics or a similar service) to understand how visitors use the Site. You can control cookies through your browser settings; disabling them may affect some Site functionality.`,
+      `The core content on this Site, information about politicians, bills, campaign finance, and votes, is drawn entirely from public government and civic data sources, including the Federal Election Commission, Congress.gov, and LegiScan. This data concerns public officials and public records; it is not personal information collected from you, and its use is governed by the terms of the original public data source, not by this policy.`,
     ],
   },
   {
-    heading: '4. Third-party services',
+    heading: "4. Basic technical logs",
     body: [
-      `The Site may link to or embed data from third-party sources (FEC, Congress.gov, LegiScan, and similar public data providers). We are not responsible for the privacy practices of these third parties. Review their respective privacy policies for information about how they handle data.`,
-      `If we use third-party hosting or analytics infrastructure (e.g. AWS, analytics providers), those providers may process technical data on our behalf under their own privacy and security practices.`,
+      `Like virtually all websites, the hosting infrastructure behind this Site may automatically generate standard server logs (such as IP address, browser type, and pages requested) as a byproduct of serving web pages. These logs exist for security and reliability purposes only. They are not used to build visitor profiles, track individuals across visits, or combine with any other data.`,
     ],
   },
   {
-    heading: '5. Data retention',
+    heading: "5. No cookies, no tracking, no analytics",
     body: [
-      `We retain information only as long as necessary for the purposes described in this policy, or as required by law.`,
+      `The Site does not use tracking cookies, advertising cookies, or third-party analytics services. If this ever changes, this policy will be updated before any such change takes effect.`,
     ],
   },
   {
-    heading: '6. Your choices',
+    heading: "6. No data sharing or sale",
     body: [
-      `You may opt out of any newsletter or email communications via an unsubscribe link, request that we delete personal information you've provided to us by contacting us at the email below, or disable cookies through your browser settings.`,
+      `Because no personal information is collected in the first place, there is none to share or sell. Any public data displayed on the Site remains subject to the terms of its original government or civic data source.`,
     ],
   },
   {
     heading: "7. Children's privacy",
     body: [
-      `The Site is not directed at children under 13, and we do not knowingly collect personal information from children under 13.`,
+      `Because the Site does not collect personal information from any visitor, it does not knowingly collect personal information from children under 13.`,
     ],
   },
   {
-    heading: '8. Changes to this policy',
+    heading: "8. Changes to this policy",
     body: [
-      `We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated "Last updated" date.`,
+      `If practices ever change - for example, if optional accounts, a newsletter, or analytics are introduced - this Privacy Policy will be updated first, with a revised "Last updated" date, so visitors always know what to expect.`,
     ],
   },
 ];
 
 export default function PrivacyPolicyPage() {
-  const { mode, systemMode } = useColorScheme();
-
   return (
     <Container maxWidth="md" sx={{ py: { xs: 6, sm: 10 } }}>
+      <Button
+        component={NextLink}
+        href="/"
+        startIcon={<ArrowBackIcon />}
+        variant="contained"
+        color="primary"
+        size="large"
+        sx={{ mb: 4 }}
+      >
+        Back to home
+      </Button>
+
       <Typography variant="h3" component="h1" sx={{ fontWeight: 600, mb: 1 }}>
         Privacy Policy
       </Typography>
-      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 4 }}>
-        Last updated: [DATE]
+      <Typography variant="body2" sx={{ color: "text.secondary", mb: 4 }}>
+        Last updated: 7/19/2026
       </Typography>
 
       <Typography variant="body1" sx={{ mb: 4 }}>
-        TheLazyVoter (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) operates thelazyvoter.org (the
-        &quot;Site&quot;). This Privacy Policy explains what information we collect, how we use it,
-        and the choices you have.
+        Welcome to TheLazyVoter (&quot;we,&quot; &quot;us,&quot; or
+        &quot;our&quot;), accessible at thelazyvoter.org (the &quot;Site&quot;).
+        By accessing or using the Site, you agree to be bound by these Terms of
+        Service (&quot;Terms&quot;). If you do not agree, please do not use the
+        Site.
       </Typography>
 
       <Divider sx={{ mb: 4 }} />
 
       {sections.map((section, index) => (
         <Box key={section.heading} sx={{ mb: 4 }}>
-          <Typography variant="h6" component="h2" sx={{ fontWeight: 600, mb: 1.5 }}>
+          <Typography
+            variant="h6"
+            component="h2"
+            sx={{ fontWeight: 600, mb: 1.5 }}
+          >
             {section.heading}
           </Typography>
           {section.body.map((paragraph) => (
             <Typography
               key={paragraph.slice(0, 24)}
               variant="body1"
-              sx={{ color: 'text.secondary', mb: 1.5 }}
+              sx={{ color: "text.secondary", mb: 1.5 }}
             >
               {paragraph}
             </Typography>
@@ -101,12 +115,19 @@ export default function PrivacyPolicyPage() {
       ))}
 
       <Box sx={{ mt: 2 }}>
-        <Typography variant="h6" component="h2" sx={{ fontWeight: 600, mb: 1.5 }}>
-          9. Contact us
+        <Typography
+          variant="h6"
+          component="h2"
+          sx={{ fontWeight: 600, mb: 1.5 }}
+        >
+          13. Contact us
         </Typography>
-        <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-          If you have questions about this Privacy Policy, contact us at{' '}
-          <Link href="mailto:hello@thelazyvoter.org">hello@thelazyvoter.org</Link>.
+        <Typography variant="body1" sx={{ color: "text.secondary" }}>
+          Questions about these Terms can be directed to{" "}
+          <Link href="mailto:SimonNDao13@gmail.com">
+            SimonNDao13@gmail.com
+          </Link>
+          .
         </Typography>
       </Box>
     </Container>
