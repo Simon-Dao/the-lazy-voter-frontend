@@ -126,14 +126,14 @@ export default function Page(props: { disableCustomTheme?: boolean }) {
               </Grid>
             ))}
           </Grid>
-          
+
           <Typography
             variant="h5"
             sx={{ fontWeight: 600, mb: 3, mt: 8, textAlign: "center" }}
           >
             Created By
           </Typography>
-          
+
           <Stack
             direction="row"
             spacing={3}
@@ -184,9 +184,9 @@ export default function Page(props: { disableCustomTheme?: boolean }) {
                   >
                     TheLazyVoter is an independent project, not affiliated with
                     any campaign, party, or government agency. Have feedback or
-                    found something that looks wrong?{" "}
-                    <Link href="mailto:contact@thelazyvoter.org">
-                      Get in touch.
+                    found something that looks wrong?{" "} Email me! {" "}
+                    <Link href="mailto:SimonNDao13@gmail.com">
+                      SimonNDao13@gmail.com
                     </Link>
                   </Typography>
                 </CardContent>
