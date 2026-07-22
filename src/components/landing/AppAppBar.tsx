@@ -90,7 +90,7 @@ export default function AppAppBar() {
               >
                 About
               </Button>
-              <Button
+              {/* <Button
                 component={NextLink}
                 href="/donate"
                 variant="text"
@@ -98,7 +98,7 @@ export default function AppAppBar() {
                 size="small"
               >
                 Donate
-              </Button>
+              </Button> */}
             </Box>
           </Box>
           <Box
@@ -174,7 +174,7 @@ export default function AppAppBar() {
                 >
                   About
                 </Button>
-                <Button
+                {/* <Button
                   component={NextLink}
                   href="/donate"
                   variant="text"
@@ -182,7 +182,7 @@ export default function AppAppBar() {
                   size="small"
                 >
                   Donate
-                </Button>
+                </Button> */}
               </Box>
             </Drawer>
           </Box>

@@ -14,7 +14,7 @@ import Footer from "../../components/landing/Footer";
 const steps = [
   {
     title: "Check your registration",
-    body: "Confirm you're registered at your current address. Registration deadlines vary by state — some allow same-day registration.",
+    body: "Confirm you're registered at your current address. Registration deadlines vary by state, some allow same-day registration.",
     link: "https://vote.gov",
     linkText: "Check status at vote.gov",
   },
