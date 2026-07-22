@@ -1,17 +1,13 @@
 "use client"
 
 import { styled } from '@mui/material/styles';
-import Avatar from '@mui/material/Avatar';
 import MuiDrawer, { drawerClasses } from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import SelectContent from './SelectContent';
 import MenuContent from './MenuContent';
-import CardAlert from './CardAlert';
-import OptionsMenu from './OptionsMenu';
-
+import {useState} from "react"
+import SearchBar from '../common/SearchBar'
+import {Tab} from '../../constants/SideMenu.ts';
 const drawerWidth = 240;
 
 const Drawer = styled(MuiDrawer)({
@@ -26,6 +22,15 @@ const Drawer = styled(MuiDrawer)({
 });
 
 export default function SideMenu() {
+
+    const [value,setValue] = useState<string>();
+    const onChange = (e : any) => {setValue(e.target.value)}
+    const onSubmit = () => {alert("submitted")}
+    const placeholder = "";
+    const fullWidth = false;
+
+    const [tab, setTab] = useState<Tab>();
+
   return (
     <Drawer
       variant="permanent"
@@ -43,7 +48,7 @@ export default function SideMenu() {
           p: 1.5,
         }}
       >
-        <SelectContent />
+        <SearchBar value={value} onChange={onChange} onSubmit={onSubmit} placeholder={placeholder} fullWidth={fullWidth} />
       </Box>
       <Divider />
       <Box
@@ -54,35 +59,8 @@ export default function SideMenu() {
           flexDirection: 'column',
         }}
       >
-        <MenuContent />
-        <CardAlert />
+        <MenuContent tab={tab} setTab={setTab} />
       </Box>
-      <Stack
-        direction="row"
-        sx={{
-          p: 2,
-          gap: 1,
-          alignItems: 'center',
-          borderTop: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        <Avatar
-          sizes="small"
-          alt="Riley Carter"
-          src="/static/images/avatar/7.jpg"
-          sx={{ width: 36, height: 36 }}
-        />
-        <Box sx={{ mr: 'auto' }}>
-          <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: '16px' }}>
-            Riley Carter
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            riley@email.com
-          </Typography>
-        </Box>
-        <OptionsMenu />
-      </Stack>
     </Drawer>
   );
 }
