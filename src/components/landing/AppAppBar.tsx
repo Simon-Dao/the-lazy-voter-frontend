@@ -55,6 +55,15 @@ export default function AppAppBar() {
           >
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
               <Button
+                  component={NextLink}
+                  href="/"
+                  variant="text"
+                  color="info"
+                  size="small"
+                >
+                  Home
+                </Button>
+              <Button
                 component={NextLink}
                 href="/dashboard"
                 variant="text"
@@ -129,7 +138,15 @@ export default function AppAppBar() {
                     <CloseRoundedIcon />
                   </IconButton>
                 </Box>
-
+                <Button
+                  component={NextLink}
+                  href="/"
+                  variant="text"
+                  color="info"
+                  size="small"
+                >
+                  Home
+                </Button>
                 <Button
                   component={NextLink}
                   href="/dashboard"
