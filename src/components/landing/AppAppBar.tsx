@@ -30,6 +30,19 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   padding: "8px 12px",
 }));
 
+// Shared nav links used to render both the desktop toolbar and the mobile
+// drawer, so the two stay in sync automatically. "Track Congress" and
+// "About" both point to /about in the original markup — kept as-is here,
+// but flagging it in case that was meant to be a different route.
+const NAV_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Politicians", href: "/dashboard" },
+  { label: "Legislation", href: "/about" },
+  { label: "Vote", href: "/vote" },
+  { label: "About", href: "/about" },
+  // { label: "Donate", href: "/donate" },
+] as const;
+
 export default function AppAppBar() {
   const [open, setOpen] = React.useState(false);
 
@@ -50,55 +63,24 @@ export default function AppAppBar() {
     >
       <Container maxWidth="lg">
         <StyledToolbar variant="dense" disableGutters>
+
+          {/* Desktop Nav */}
           <Box
             sx={{ flexGrow: 1, display: "flex", alignItems: "center", px: 0 }}
           >
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
-              <Button
+              {NAV_LINKS.map((link) => (
+                <Button
+                  key={link.label}
                   component={NextLink}
-                  href="/"
+                  href={link.href}
                   variant="text"
                   color="info"
                   size="small"
                 >
-                  Home
+                  {link.label}
                 </Button>
-              <Button
-                component={NextLink}
-                href="/dashboard"
-                variant="text"
-                color="info"
-                size="small"
-              >
-                Dashboard
-              </Button>
-              <Button
-                component={NextLink}
-                href="/vote"
-                variant="text"
-                color="info"
-                size="small"
-              >
-                Vote
-              </Button>
-              <Button
-                component={NextLink}
-                href="/about"
-                variant="text"
-                color="info"
-                size="small"
-              >
-                About
-              </Button>
-              {/* <Button
-                component={NextLink}
-                href="/donate"
-                variant="text"
-                color="info"
-                size="small"
-              >
-                Donate
-              </Button> */}
+              ))}
             </Box>
           </Box>
           <Box
@@ -110,6 +92,8 @@ export default function AppAppBar() {
           >
             <ColorModeIconDropdown />
           </Box>
+
+          {/* Mobile Nav */}
           <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
             <ColorModeIconDropdown size="medium" />
             <IconButton aria-label="Menu button" onClick={toggleDrawer(true)}>
@@ -138,51 +122,18 @@ export default function AppAppBar() {
                     <CloseRoundedIcon />
                   </IconButton>
                 </Box>
-                <Button
-                  component={NextLink}
-                  href="/"
-                  variant="text"
-                  color="info"
-                  size="small"
-                >
-                  Home
-                </Button>
-                <Button
-                  component={NextLink}
-                  href="/dashboard"
-                  variant="text"
-                  color="info"
-                  size="small"
-                >
-                  Dashboard
-                </Button>
-                <Button
-                  component={NextLink}
-                  href="/vote"
-                  variant="text"
-                  color="info"
-                  size="small"
-                >
-                  Vote
-                </Button>
-                <Button
-                  component={NextLink}
-                  href="/about"
-                  variant="text"
-                  color="info"
-                  size="small"
-                >
-                  About
-                </Button>
-                {/* <Button
-                  component={NextLink}
-                  href="/donate"
-                  variant="text"
-                  color="info"
-                  size="small"
-                >
-                  Donate
-                </Button> */}
+                {NAV_LINKS.map((link) => (
+                  <Button
+                    key={link.label}
+                    component={NextLink}
+                    href={link.href}
+                    variant="text"
+                    color="info"
+                    size="small"
+                  >
+                    {link.label}
+                  </Button>
+                ))}
               </Box>
             </Drawer>
           </Box>
