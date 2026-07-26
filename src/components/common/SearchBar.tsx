@@ -51,6 +51,7 @@ export default function SearchBar({
   return (
     <ClickAwayListener onClickAway={() => setOpen(false)}>
       <Box sx={{ position: "relative", width: fullWidth ? "100%" : "auto" , padding: 0 }}>
+        
         <TextField
           fullWidth={fullWidth}
           value={value}

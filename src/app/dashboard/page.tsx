@@ -4,12 +4,17 @@ import { alpha } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import AppNavbar from '../../components/dashboard/AppNavbar';
-import Header from '../../components/dashboard/Header';
-import MainGrid from '../../components/dashboard/MainGrid';
 import SideMenu from '../../components/dashboard/SideMenu';
 import AppTheme from '../../shared-theme/AppTheme';
 import AppAppBar from '../../components/landing/AppAppBar';
+import {tabs} from '#/util/constants';
+import Summary from '#/app/dashboard/Summary'
+import Legislation from '#/app/dashboard/Legislation'
+import News from '#/app/dashboard/News'
+import Finances from '#/app/dashboard/Finances'
+import {useState} from "react";
+import {useAtom} from 'jotai';
+import {personAtom} from '#/util/State'
 
 import {
   chartsCustomizations,
@@ -24,13 +29,23 @@ const xThemeComponents = {
 };
 
 export default function Dashboard(props: { disableCustomTheme?: boolean }) {
+
+  const [tab, setTab] = useState(0);
+  const [person, setPerson] = useAtom(personAtom);
+
+  const tabs = [
+    (<Summary />),
+    (<Legislation />),
+    (<Finances />),
+    (<News />),
+  ]
+
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
       <AppAppBar/>
       <Box sx={{ display: 'flex' }}>
-        <SideMenu />
-        <AppNavbar />
+        <SideMenu tab={tab} setTab={setTab} />
         {/* Main content */}
         <Box
           component="main"
@@ -51,7 +66,8 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
               mt: { xs: 8, md: 0 },
             }}
           >
-          <MainGrid />
+          {person.name}
+          {tabs[tab]}
           </Stack>
         </Box>
       </Box>
