@@ -7,7 +7,7 @@ import Stack from '@mui/material/Stack';
 import SideMenu from '../../components/dashboard/SideMenu';
 import AppTheme from '../../shared-theme/AppTheme';
 import AppAppBar from '../../components/landing/AppAppBar';
-import {tabs} from '#/util/constants';
+import {tabs} from '#/util/Constants';
 import Summary from '#/app/dashboard/Summary'
 import Legislation from '#/app/dashboard/Legislation'
 import News from '#/app/dashboard/News'

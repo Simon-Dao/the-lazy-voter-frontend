@@ -18,6 +18,32 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import { PieChart } from "@mui/x-charts/PieChart";
 
+// ---- Types ----
+
+type DonationSlice = {
+  id: number;
+  label: string;
+  value: number;
+};
+
+type TimelineEvent = {
+  year: string;
+  label: string;
+  type: "term" | "campaign";
+};
+
+type NewsArticle = {
+  title: string;
+  source: string;
+  date: string;
+  href: string;
+};
+
+type SponsorCategory = {
+  name: string;
+  amount: string;
+};
+
 // ---- Template data ----
 
 const candidate = {
@@ -28,39 +54,52 @@ const candidate = {
   since: "In office since 2019",
 };
 
-const timeline = [
+const timeline: TimelineEvent[] = [
   { year: "2024", label: "Re-elected to U.S. Senate", type: "term" },
   { year: "2019–2024", label: "First term, U.S. Senate", type: "term" },
-  { year: "2018", label: "Won special election for U.S. Senate", type: "campaign" },
-  { year: "2014–2018", label: "U.S. House of Representatives, WA-7", type: "term" },
+  {
+    year: "2018",
+    label: "Won special election for U.S. Senate",
+    type: "campaign",
+  },
+  {
+    year: "2014–2018",
+    label: "U.S. House of Representatives, WA-7",
+    type: "term",
+  },
   { year: "2012", label: "Elected to U.S. House", type: "campaign" },
 ];
 
-const focusAreas = ["Healthcare", "Climate policy", "Veterans affairs", "Tax reform"];
+const focusAreas = [
+  "Healthcare",
+  "Climate policy",
+  "Veterans affairs",
+  "Tax reform",
+];
 
 const billsSummary =
   "Sponsored 42 bills this term, concentrated in healthcare access and climate infrastructure. Co-sponsored the Rural Broadband Expansion Act and the Veterans Mental Health Funding Act.";
 
-const donationsByYear = {
+const donationsByYear: Record<string, DonationSlice[]> = {
   all: [
     { id: 0, label: "Individual donors", value: 1250000 },
     { id: 1, label: "PACs", value: 480000 },
     { id: 2, label: "Party committee", value: 210000 },
     { id: 3, label: "Self-funded", value: 30000 },
   ],
-  2024: [
+  "2024": [
     { id: 0, label: "Individual donors", value: 520000 },
     { id: 1, label: "PACs", value: 190000 },
     { id: 2, label: "Party committee", value: 90000 },
     { id: 3, label: "Self-funded", value: 10000 },
   ],
-  2023: [
+  "2023": [
     { id: 0, label: "Individual donors", value: 410000 },
     { id: 1, label: "PACs", value: 160000 },
     { id: 2, label: "Party committee", value: 70000 },
     { id: 3, label: "Self-funded", value: 15000 },
   ],
-  2022: [
+  "2022": [
     { id: 0, label: "Individual donors", value: 320000 },
     { id: 1, label: "PACs", value: 130000 },
     { id: 2, label: "Party committee", value: 50000 },
@@ -68,14 +107,14 @@ const donationsByYear = {
   ],
 };
 
-const topSponsorCategories = [
+const topSponsorCategories: SponsorCategory[] = [
   { name: "Healthcare", amount: "$410,000" },
   { name: "Technology", amount: "$275,000" },
   { name: "Energy", amount: "$190,000" },
   { name: "Finance", amount: "$140,000" },
 ];
 
-const newsArticles = [
+const newsArticles: NewsArticle[] = [
   {
     title: "Senator Ellis introduces rural broadband bill",
     source: "Seattle Times",
@@ -99,9 +138,12 @@ const newsArticles = [
 // ---- Component ----
 
 export default function Summary() {
-  const [year, setYear] = React.useState("all");
+  const [year, setYear] = React.useState<string>("all");
   const donations = donationsByYear[year];
-  const totalDonations = donations.reduce((sum, d) => sum + d.value, 0);
+  const totalDonations = donations.reduce(
+    (sum: number, d: DonationSlice) => sum + d.value,
+    0,
+  );
 
   return (
     <Box
@@ -158,9 +200,19 @@ export default function Summary() {
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                   Legislative focus
                 </Typography>
-                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1, mb: 1.5 }}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ flexWrap: "wrap", gap: 1, mb: 1.5 }}
+                >
                   {focusAreas.map((area) => (
-                    <Chip key={area} label={area} size="small" color="primary" variant="outlined" />
+                    <Chip
+                      key={area}
+                      label={area}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
                   ))}
                 </Stack>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
@@ -185,7 +237,9 @@ export default function Summary() {
                             height: 10,
                             borderRadius: "50%",
                             bgcolor:
-                              event.type === "term" ? "primary.main" : "text.disabled",
+                              event.type === "term"
+                                ? "primary.main"
+                                : "text.disabled",
                             mt: 0.7,
                           }}
                         />
@@ -204,7 +258,10 @@ export default function Summary() {
                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
                           {event.year}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "text.secondary" }}
+                        >
                           {event.label}
                         </Typography>
                       </Stack>
@@ -228,13 +285,19 @@ export default function Summary() {
                       sx={{
                         py: 1,
                         borderBottom:
-                          index < newsArticles.length - 1 ? "1px solid" : "none",
+                          index < newsArticles.length - 1
+                            ? "1px solid"
+                            : "none",
                         borderColor: "divider",
                       }}
                     >
                       <ListItemText
                         primary={
-                          <Link href={article.href} variant="body2" sx={{ fontWeight: 500 }}>
+                          <Link
+                            href={article.href}
+                            variant="body2"
+                            sx={{ fontWeight: 500 }}
+                          >
                             {article.title}
                           </Link>
                         }
@@ -259,15 +322,15 @@ export default function Summary() {
                 </Typography>
                 <Tabs
                   value={year}
-                  onChange={(_, value) => setYear(value)}
+                  onChange={(_, value: string) => setYear(value)}
                   variant="scrollable"
                   scrollButtons={false}
                   sx={{ minHeight: 32, mb: 1 }}
                 >
                   <Tab label="All years" value="all" sx={{ minHeight: 32 }} />
-                  <Tab label="2024" value={2024} sx={{ minHeight: 32 }} />
-                  <Tab label="2023" value={2023} sx={{ minHeight: 32 }} />
-                  <Tab label="2022" value={2022} sx={{ minHeight: 32 }} />
+                  <Tab label="2024" value="2024" sx={{ minHeight: 32 }} />
+                  <Tab label="2023" value="2023" sx={{ minHeight: 32 }} />
+                  <Tab label="2022" value="2022" sx={{ minHeight: 32 }} />
                 </Tabs>
                 <PieChart
                   series={[
@@ -279,7 +342,7 @@ export default function Summary() {
                     },
                   ]}
                   height={220}
-                  slotProps={{ legend: { hidden: true } }}
+                  slots={{ legend: () => null }}
                 />
                 <Typography
                   variant="body2"
@@ -290,8 +353,15 @@ export default function Summary() {
                 <Divider sx={{ my: 1.5 }} />
                 <Stack spacing={0.75}>
                   {donations.map((d) => (
-                    <Stack key={d.id} direction="row" sx={{ justifyContent: "space-between" }}>
-                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    <Stack
+                      key={d.id}
+                      direction="row"
+                      sx={{ justifyContent: "space-between" }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "text.secondary" }}
+                      >
                         {d.label}
                       </Typography>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -318,12 +388,17 @@ export default function Summary() {
                         py: 0.75,
                         justifyContent: "space-between",
                         borderBottom:
-                          index < topSponsorCategories.length - 1 ? "1px solid" : "none",
+                          index < topSponsorCategories.length - 1
+                            ? "1px solid"
+                            : "none",
                         borderColor: "divider",
                       }}
                     >
                       <Typography variant="body2">{cat.name}</Typography>
-                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "text.secondary" }}
+                      >
                         {cat.amount}
                       </Typography>
                     </ListItem>

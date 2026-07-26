@@ -45,7 +45,10 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
       setShowReopenButton(false);
       return;
     }
-    const timer = setTimeout(() => setShowReopenButton(true), REOPEN_BUTTON_DELAY);
+    const timer = setTimeout(
+      () => setShowReopenButton(true),
+      REOPEN_BUTTON_DELAY,
+    );
     return () => clearTimeout(timer);
   }, [open]);
 
@@ -107,8 +110,10 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
           value={tab}
           onChange={handleChange}
           aria-label="Vertical tabs"
-          TabIndicatorProps={{
-            sx: { left: 0, width: 3, borderRadius: 1 },
+          slotProps={{
+            indicator: {
+              sx: { left: 0, width: 3, borderRadius: 1 },
+            },
           }}
           sx={{
             "& .MuiTab-root": {
