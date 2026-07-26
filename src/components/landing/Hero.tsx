@@ -198,14 +198,14 @@ function MajorityLabel({ chamber }: { chamber: ChamberKey }) {
       }}
     >
       <Typography variant="body2" color="text.secondary">
-        Majority
+        Majority: 
       </Typography>
       <Typography
         variant="h6"
         color="text.primary"
         sx={{ fontWeight: 700, lineHeight: 1 }}
       >
-        {data.majorityNeeded}
+        _{data.majorityNeeded}_
       </Typography>
     </Stack>
   );
@@ -315,15 +315,22 @@ function ElectionDashboard() {
         width: "100%",
         maxWidth: 480,
         borderRadius: 4,
-        p: { xs: 2.5, sm: 3.5 },
-        minHeight: 420,
+        height: 580,
         position: "relative",
         overflow: "hidden",
       }}
     >
       {/* Loading state */}
       <Fade in={loading} unmountOnExit timeout={{ exit: 400 }}>
-        <Stack spacing={2} sx={{ py: 4 }}>
+        <Stack
+          spacing={2}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            p: { xs: 2.5, sm: 3.5 },
+            justifyContent: "center",
+          }}
+        >
           <Typography variant="overline" color="text.secondary">
             Fetching live congressional data…
           </Typography>
@@ -349,8 +356,16 @@ function ElectionDashboard() {
       </Fade>
 
       {/* Loaded dashboard */}
-      <Grow in={!loading} timeout={500}>
-        <Stack spacing={2} sx={{ display: loading ? "none" : "flex" }}>
+      <Grow in={!loading} timeout={500} mountOnEnter unmountOnExit>
+        <Stack
+          spacing={2}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            p: { xs: 2.5, sm: 3.5 },
+            overflowY: "auto",
+          }}
+        >
           <Stack
             sx={{
               flexDirection: "row",

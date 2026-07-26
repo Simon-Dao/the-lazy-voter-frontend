@@ -33,7 +33,7 @@ const steps = [
   {
     title: "Bring valid ID",
     body: "Many states require photo ID at the polls. Requirements differ by state, so check yours before you go.",
-    link: "https://www.nass.org/can-I-vote/voter-id-requirements",
+    link: "https://www.ncsl.org/elections-and-campaigns/voter-id",
     linkText: "Check your state's ID rules",
   },
 ];

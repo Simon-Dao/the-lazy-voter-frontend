@@ -13,8 +13,6 @@ import Legislation from '#/app/dashboard/Legislation'
 import News from '#/app/dashboard/News'
 import Finances from '#/app/dashboard/Finances'
 import {useState} from "react";
-import {useAtom} from 'jotai';
-import {personAtom} from '#/util/State'
 
 import {
   chartsCustomizations,
@@ -31,7 +29,6 @@ const xThemeComponents = {
 export default function Dashboard(props: { disableCustomTheme?: boolean }) {
 
   const [tab, setTab] = useState(0);
-  const [person, setPerson] = useAtom(personAtom);
 
   const tabs = [
     (<Summary />),
@@ -66,7 +63,6 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
               mt: { xs: 8, md: 0 },
             }}
           >
-          {person.name}
           {tabs[tab]}
           </Stack>
         </Box>

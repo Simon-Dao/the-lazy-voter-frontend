@@ -1,12 +1,13 @@
 "use client";
 
-import * as React from "react";
+import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import {Grow, Fade} from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
@@ -17,35 +18,16 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import { PieChart } from "@mui/x-charts/PieChart";
-
-// ---- Types ----
-
-type DonationSlice = {
-  id: number;
-  label: string;
-  value: number;
-};
-
-type TimelineEvent = {
-  year: string;
-  label: string;
-  type: "term" | "campaign";
-};
-
-type NewsArticle = {
-  title: string;
-  source: string;
-  date: string;
-  href: string;
-};
-
-type SponsorCategory = {
-  name: string;
-  amount: string;
-};
+import { useAtom } from "jotai";
+import {
+  personAtom,
+  DonationSlice,
+  TimelineEvent,
+  NewsArticle,
+  SponsorCategory,
+} from "#/util/State";
 
 // ---- Template data ----
-
 const candidate = {
   name: "Jordan Ellis",
   photo: "/candidates/jordan-ellis.jpg",
@@ -135,10 +117,23 @@ const newsArticles: NewsArticle[] = [
   },
 ];
 
+
+// Animation Timings
+const LOADING_ANIMATION_DURATION = 500;
+const LOADING_DELAY_0 = "0ms";
+const LOADING_DELAY_1 = "100ms";
+const LOADING_DELAY_2 = "200ms";
+const LOADING_DELAY_3 = "300ms";
+
+
 // ---- Component ----
 
 export default function Summary() {
-  const [year, setYear] = React.useState<string>("all");
+  const [year, setYear] = useState<string>("all");
+
+  const [show, setShow] = useState(false);
+  useEffect(() => setShow(true), []);
+
   const donations = donationsByYear[year];
   const totalDonations = donations.reduce(
     (sum: number, d: DonationSlice) => sum + d.value,
@@ -156,256 +151,294 @@ export default function Summary() {
       {/* Header */}
       <Grid container spacing={2} columns={12} sx={{ mb: 3 }}>
         <Grid size={12}>
-          <Card variant="outlined">
-            <CardContent>
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={3}
-                sx={{ alignItems: { xs: "flex-start", sm: "center" } }}
-              >
-                <Avatar
-                  src={candidate.photo}
-                  alt={candidate.name}
-                  sx={{ width: 96, height: 96 }}
-                />
-                <Stack spacing={0.5}>
-                  <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                    {candidate.name}
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: "text.secondary" }}>
-                    {candidate.standing}
-                  </Typography>
-                  <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-                    <Chip label={candidate.party} size="small" />
-                    <Chip
-                      label={candidate.since}
-                      size="small"
-                      variant="outlined"
-                    />
+          <Grow
+            in={show}
+            timeout={LOADING_ANIMATION_DURATION}
+            style={{ transitionDelay: LOADING_DELAY_0 }}
+          >
+            <Card variant="outlined">
+              <CardContent>
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={3}
+                  sx={{ alignItems: { xs: "flex-start", sm: "center" } }}
+                >
+                  <Avatar
+                    src={candidate.photo}
+                    alt={candidate.name}
+                    sx={{ width: 96, height: 96 }}
+                  />
+                  <Stack spacing={0.5}>
+                    <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                      {candidate.name}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      {candidate.standing}
+                    </Typography>
+                    <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
+                      <Chip label={candidate.party} size="small" />
+                      <Chip
+                        label={candidate.since}
+                        size="small"
+                        variant="outlined"
+                      />
+                    </Stack>
                   </Stack>
                 </Stack>
-              </Stack>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Grow>
         </Grid>
       </Grid>
 
       <Grid container spacing={2} columns={12}>
         {/* Left column */}
-        <Grid size={{ xs: 12, lg: 8 }}>
+        <Grid size={{ xs: 12, lg: 6 }}>
           <Stack spacing={2}>
             {/* Bills / focus summary */}
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                  Legislative focus
-                </Typography>
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  sx={{ flexWrap: "wrap", gap: 1, mb: 1.5 }}
-                >
-                  {focusAreas.map((area) => (
-                    <Chip
-                      key={area}
-                      label={area}
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                    />
-                  ))}
-                </Stack>
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {billsSummary}
-                </Typography>
-              </CardContent>
-            </Card>
+            <Grow
+              in={show}
+              timeout={LOADING_ANIMATION_DURATION}
+              style={{ transitionDelay: LOADING_DELAY_1 }}
+            >
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Legislative focus
+                  </Typography>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ flexWrap: "wrap", gap: 1, mb: 1.5 }}
+                  >
+                    {focusAreas.map((area) => (
+                      <Chip
+                        key={area}
+                        label={area}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                      />
+                    ))}
+                  </Stack>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    {billsSummary}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grow>
 
             {/* Timeline */}
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                  Campaign and office timeline
-                </Typography>
-                <Stack spacing={0}>
-                  {timeline.map((event, index) => (
-                    <Stack key={index} direction="row" spacing={2}>
-                      <Stack sx={{ alignItems: "center" }}>
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor:
-                              event.type === "term"
-                                ? "primary.main"
-                                : "text.disabled",
-                            mt: 0.7,
-                          }}
-                        />
-                        {index < timeline.length - 1 && (
+            <Grow
+              in={show}
+              timeout={LOADING_ANIMATION_DURATION}
+              style={{ transitionDelay: LOADING_DELAY_1 }}
+            >
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                    Campaign and office timeline
+                  </Typography>
+                  <Stack spacing={0}>
+                    {timeline.map((event, index) => (
+                      <Stack key={index} direction="row" spacing={2}>
+                        <Stack sx={{ alignItems: "center" }}>
                           <Box
                             sx={{
-                              width: "1px",
-                              flexGrow: 1,
-                              bgcolor: "divider",
-                              minHeight: 24,
+                              width: 10,
+                              height: 10,
+                              borderRadius: "50%",
+                              bgcolor:
+                                event.type === "term"
+                                  ? "primary.main"
+                                  : "text.disabled",
+                              mt: 0.7,
                             }}
                           />
-                        )}
+                          {index < timeline.length - 1 && (
+                            <Box
+                              sx={{
+                                width: "1px",
+                                flexGrow: 1,
+                                bgcolor: "divider",
+                                minHeight: 24,
+                              }}
+                            />
+                          )}
+                        </Stack>
+                        <Stack sx={{ pb: 2 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {event.year}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{ color: "text.secondary" }}
+                          >
+                            {event.label}
+                          </Typography>
+                        </Stack>
                       </Stack>
-                      <Stack sx={{ pb: 2 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {event.year}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{ color: "text.secondary" }}
-                        >
-                          {event.label}
-                        </Typography>
-                      </Stack>
-                    </Stack>
-                  ))}
-                </Stack>
-              </CardContent>
-            </Card>
+                    ))}
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grow>
 
             {/* News */}
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                  Related news
-                </Typography>
-                <List disablePadding>
-                  {newsArticles.map((article, index) => (
-                    <ListItem
-                      key={index}
-                      disablePadding
-                      sx={{
-                        py: 1,
-                        borderBottom:
-                          index < newsArticles.length - 1
-                            ? "1px solid"
-                            : "none",
-                        borderColor: "divider",
-                      }}
-                    >
-                      <ListItemText
-                        primary={
-                          <Link
-                            href={article.href}
-                            variant="body2"
-                            sx={{ fontWeight: 500 }}
-                          >
-                            {article.title}
-                          </Link>
-                        }
-                        secondary={`${article.source} · ${article.date}`}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
+            <Grow
+              in={show}
+              timeout={LOADING_ANIMATION_DURATION}
+              style={{ transitionDelay: LOADING_DELAY_2 }}
+            >
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Related news
+                  </Typography>
+                  <List disablePadding>
+                    {newsArticles.map((article, index) => (
+                      <ListItem
+                        key={index}
+                        disablePadding
+                        sx={{
+                          py: 1,
+                          borderBottom:
+                            index < newsArticles.length - 1
+                              ? "1px solid"
+                              : "none",
+                          borderColor: "divider",
+                        }}
+                      >
+                        <ListItemText
+                          primary={
+                            <Link
+                              href={article.href}
+                              variant="body2"
+                              sx={{ fontWeight: 500 }}
+                            >
+                              {article.title}
+                            </Link>
+                          }
+                          secondary={`${article.source} · ${article.date}`}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </Card>
+            </Grow>
           </Stack>
         </Grid>
 
         {/* Right column */}
-        <Grid size={{ xs: 12, lg: 4 }}>
+        <Grid size={{ xs: 12, lg: 6 }}>
           <Stack spacing={2}>
             {/* Donations pie chart */}
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                  Campaign donations
-                </Typography>
-                <Tabs
-                  value={year}
-                  onChange={(_, value: string) => setYear(value)}
-                  variant="scrollable"
-                  scrollButtons={false}
-                  sx={{ minHeight: 32, mb: 1 }}
-                >
-                  <Tab label="All years" value="all" sx={{ minHeight: 32 }} />
-                  <Tab label="2024" value="2024" sx={{ minHeight: 32 }} />
-                  <Tab label="2023" value="2023" sx={{ minHeight: 32 }} />
-                  <Tab label="2022" value="2022" sx={{ minHeight: 32 }} />
-                </Tabs>
-                <PieChart
-                  series={[
-                    {
-                      data: donations,
-                      innerRadius: 40,
-                      paddingAngle: 1,
-                      cornerRadius: 2,
-                    },
-                  ]}
-                  height={220}
-                  slots={{ legend: () => null }}
-                />
-                <Typography
-                  variant="body2"
-                  sx={{ color: "text.secondary", textAlign: "center", mt: 1 }}
-                >
-                  Total: ${totalDonations.toLocaleString()}
-                </Typography>
-                <Divider sx={{ my: 1.5 }} />
-                <Stack spacing={0.75}>
-                  {donations.map((d) => (
-                    <Stack
-                      key={d.id}
-                      direction="row"
-                      sx={{ justifyContent: "space-between" }}
-                    >
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "text.secondary" }}
+            <Grow
+              in={show}
+              timeout={LOADING_ANIMATION_DURATION}
+              style={{ transitionDelay: LOADING_DELAY_1 }}
+            >
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Campaign donations
+                  </Typography>
+                  <Tabs
+                    value={year}
+                    onChange={(_, value: string) => setYear(value)}
+                    variant="scrollable"
+                    scrollButtons={false}
+                    sx={{ minHeight: 32, mb: 1 }}
+                  >
+                    <Tab label="All years" value="all" sx={{ minHeight: 32 }} />
+                    <Tab label="2024" value="2024" sx={{ minHeight: 32 }} />
+                    <Tab label="2023" value="2023" sx={{ minHeight: 32 }} />
+                    <Tab label="2022" value="2022" sx={{ minHeight: 32 }} />
+                  </Tabs>
+                  <PieChart
+                    series={[
+                      {
+                        data: donations,
+                        innerRadius: 40,
+                        paddingAngle: 1,
+                        cornerRadius: 2,
+                      },
+                    ]}
+                    height={220}
+                    slots={{ legend: () => null }}
+                  />
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", textAlign: "center", mt: 1 }}
+                  >
+                    Total: ${totalDonations.toLocaleString()}
+                  </Typography>
+                  <Divider sx={{ my: 1.5 }} />
+                  <Stack spacing={0.75}>
+                    {donations.map((d) => (
+                      <Stack
+                        key={d.id}
+                        direction="row"
+                        sx={{ justifyContent: "space-between" }}
                       >
-                        {d.label}
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        ${d.value.toLocaleString()}
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-              </CardContent>
-            </Card>
-
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "text.secondary" }}
+                        >
+                          {d.label}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          ${d.value.toLocaleString()}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grow>
             {/* Top sponsor categories */}
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                  Top sponsor categories
-                </Typography>
-                <List disablePadding>
-                  {topSponsorCategories.map((cat, index) => (
-                    <ListItem
-                      key={cat.name}
-                      disablePadding
-                      sx={{
-                        py: 0.75,
-                        justifyContent: "space-between",
-                        borderBottom:
-                          index < topSponsorCategories.length - 1
-                            ? "1px solid"
-                            : "none",
-                        borderColor: "divider",
-                      }}
-                    >
-                      <Typography variant="body2">{cat.name}</Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "text.secondary" }}
+            <Grow
+              in={show}
+              timeout={LOADING_ANIMATION_DURATION}
+              style={{ transitionDelay: LOADING_DELAY_2 }}
+            >
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Top sponsor categories
+                  </Typography>
+                  <List disablePadding>
+                    {topSponsorCategories.map((cat, index) => (
+                      <ListItem
+                        key={cat.name}
+                        disablePadding
+                        sx={{
+                          py: 0.75,
+                          justifyContent: "space-between",
+                          borderBottom:
+                            index < topSponsorCategories.length - 1
+                              ? "1px solid"
+                              : "none",
+                          borderColor: "divider",
+                        }}
                       >
-                        {cat.amount}
-                      </Typography>
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
+                        <Typography variant="body2">{cat.name}</Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "text.secondary" }}
+                        >
+                          {cat.amount}
+                        </Typography>
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </Card>
+            </Grow>
           </Stack>
         </Grid>
       </Grid>
