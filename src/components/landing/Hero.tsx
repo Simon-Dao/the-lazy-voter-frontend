@@ -297,12 +297,12 @@ function PartyBadge({
 }
 
 function ElectionDashboard() {
-  const [loading, setLoading] = React.useState(true);
+  const [loadingPage, setPageLoading] = React.useState(true);
   const [chamber, setChamber] = React.useState<ChamberKey>("senate");
   const countdown = useCountdown(ELECTION_DATE);
 
   React.useEffect(() => {
-    const id = setTimeout(() => setLoading(false), 1300);
+    const id = setTimeout(() => setPageLoading(false), 1300);
     return () => clearTimeout(id);
   }, []);
 
@@ -321,7 +321,7 @@ function ElectionDashboard() {
       }}
     >
       {/* Loading state */}
-      <Fade in={loading} unmountOnExit timeout={{ exit: 400 }}>
+      <Fade in={loadingPage} unmountOnExit timeout={{ exit: 400 }}>
         <Stack
           spacing={2}
           sx={{
@@ -356,7 +356,7 @@ function ElectionDashboard() {
       </Fade>
 
       {/* Loaded dashboard */}
-      <Grow in={!loading} timeout={500} mountOnEnter unmountOnExit>
+      <Grow in={!loadingPage} timeout={500} mountOnEnter unmountOnExit>
         <Stack
           spacing={2}
           sx={{

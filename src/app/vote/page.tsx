@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
@@ -8,6 +9,8 @@ import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Link from "@mui/material/Link";
+import Fade from "@mui/material/Fade";
+import Grow from "@mui/material/Grow";
 import AppAppBar from "../../components/landing/AppAppBar";
 import Footer from "../../components/landing/Footer";
 
@@ -38,7 +41,34 @@ const steps = [
   },
 ];
 
+// Animation timings
+const HEADER_FADE_DURATION = 500;
+const CARD_GROW_DURATION = 400;
+const CARD_STAGGER_STEP = 50; // ms added per card index
+const CARD_STAGGER_START = 50; // ms delay before the first card starts
+
 export default function Page(props: { disableCustomTheme?: boolean }) {
+  const [show, setShow] = useState(false);
+  const [cardsShown, setCardsShown] = useState<boolean[]>(
+    () => steps.map(() => false),
+  );
+
+  useEffect(() => {
+    setShow(true);
+
+    const timers = steps.map((_, i) =>
+      setTimeout(() => {
+        setCardsShown((prev) => {
+          const next = [...prev];
+          next[i] = true;
+          return next;
+        });
+      }, CARD_STAGGER_START + i * CARD_STAGGER_STEP),
+    );
+
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
   return (
     <Stack direction="column" sx={{ minHeight: "100vh" }}>
       <AppAppBar />
@@ -63,33 +93,36 @@ export default function Page(props: { disableCustomTheme?: boolean }) {
             pb: { xs: 8, sm: 12 },
           }}
         >
-
-          <Stack spacing={2} sx={{ alignItems: "center", textAlign: "center", mb: 6 }}>
-            <Typography variant="h2" sx={{ fontWeight: 600 }}>
-              How to vote in federal elections
-            </Typography>
-            <Typography variant="h6" sx={{ color:"text.secondary", maxWidth: 640 }}>
-              Federal elections happen every two years, with a general election on the first
-              Tuesday after the first Monday in November. Here's what to do before you vote.
-            </Typography>
-          </Stack>
+          <Fade in={show} timeout={HEADER_FADE_DURATION}>
+            <Stack spacing={2} sx={{ alignItems: "center", textAlign: "center", mb: 6 }}>
+              <Typography variant="h2" sx={{ fontWeight: 600 }}>
+                How to vote in federal elections
+              </Typography>
+              <Typography variant="h6" sx={{ color:"text.secondary", maxWidth: 640 }}>
+                Federal elections happen every two years, with a general election on the first
+                Tuesday after the first Monday in November. Here's what to do before you vote.
+              </Typography>
+            </Stack>
+          </Fade>
 
           <Grid container spacing={3}>
-            {steps.map((step) => (
+            {steps.map((step, i) => (
               <Grid key={step.title} size={{ xs: 12, sm: 6 }}>
-                <Card variant="outlined" sx={{ height: "100%" }}>
-                  <CardContent>
-                    <Typography variant="h6" sx={{ fontWeight: 500, mb: 1 }}>
-                      {step.title}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color:"text.secondary",mb: 2 }}>
-                      {step.body}
-                    </Typography>
-                    <Link href={step.link} sx={{color:"info.main"}} target="_blank" rel="noopener" variant="body2">
-                      {step.linkText}
-                    </Link>
-                  </CardContent>
-                </Card>
+                <Grow in={cardsShown[i]} timeout={CARD_GROW_DURATION}>
+                  <Card variant="outlined" sx={{ height: "100%" }}>
+                    <CardContent>
+                      <Typography variant="h6" sx={{ fontWeight: 500, mb: 1 }}>
+                        {step.title}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color:"text.secondary",mb: 2 }}>
+                        {step.body}
+                      </Typography>
+                      <Link href={step.link} sx={{color:"info.main"}} target="_blank" rel="noopener" variant="body2">
+                        {step.linkText}
+                      </Link>
+                    </CardContent>
+                  </Card>
+                </Grow>
               </Grid>
             ))}
           </Grid>
