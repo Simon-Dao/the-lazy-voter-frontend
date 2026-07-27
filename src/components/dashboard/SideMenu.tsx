@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Dispatch, SetStateAction } from "react";
+import { useState, useRef, useEffect, Dispatch, SetStateAction } from "react";
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
@@ -12,13 +12,16 @@ import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import CloseIcon from "@mui/icons-material/Close";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
-import SearchBar from "../common/SearchBar";
+import SearchBar from "#/components/dashboard/SearchBar";
 import { tabs } from "#/util/Constants";
-import ChatBot from "#/components/dashboard/ChatBot";
-
-const DRAWER_WIDTH = 240;
+import { PoliticianBasicInfo } from "#/util/State";
+import { useAtom } from 'jotai';
+import { isPoliticianSelectedAtom } from '#/util/State';
+const DRAWER_WIDTH = 300;
 const TOP_OFFSET = 100;
 const REOPEN_BUTTON_DELAY = 80;
 
@@ -28,6 +31,8 @@ type SideMenuProps = {
   children?: React.ReactNode;
 };
 
+type SelectedPolitician = string | false;
+
 export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -35,6 +40,96 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
   const [open, setOpen] = useState(true);
   const [showReopenButton, setShowReopenButton] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [isPoliticianSelected, setIsPoliticianSelected] = useAtom(isPoliticianSelectedAtom);
+
+  const [politicians, setPoliticians] = useState<PoliticianBasicInfo[]>([
+    {
+      u_id: "12345",
+      name: "s3imon",
+      latestYear: 2026,
+      role: "Sen",
+      party: "D",
+      state: "FL",
+    },
+    {
+      u_id: "123456",
+      name: "s3imon1",
+      latestYear: 2026,
+      role: "Sen",
+      party: "D",
+      state: "FL",
+    },
+    {
+      u_id: "123457",
+      name: "s3imon2",
+      latestYear: 2026,
+      role: "Sen",
+      party: "D",
+      state: "FL",
+    },
+    {
+      u_id: "123458",
+      name: "s3imon3",
+      latestYear: 2026,
+      role: "Sen",
+      party: "D",
+      state: "FL",
+    },
+    {
+      u_id: "1243459",
+      name: "s3imon4",
+      latestYear: 2026,
+      role: "Sen",
+      party: "D",
+      state: "FL",
+    },
+    {
+      u_id: "1233459",
+      name: "s3imon4",
+      latestYear: 2026,
+      role: "Sen",
+      party: "D",
+      state: "FL",
+    },
+    {
+      u_id: "1234539",
+      name: "s3imon4",
+      latestYear: 2026,
+      role: "Sen",
+      party: "D",
+      state: "FL",
+    },
+    {
+      u_id: "1223459",
+      name: "s3imon4",
+      latestYear: 2026,
+      role: "Sen",
+      party: "D",
+      state: "FL",
+    },
+    {
+      u_id: "1234519",
+      name: "s3imon4",
+      latestYear: 2026,
+      role: "Sen",
+      party: "D",
+      state: "FL",
+    },
+    {
+      u_id: "12324519",
+      name: "s3imon4",
+      latestYear: 2026,
+      role: "Sen",
+      party: "D",
+      state: "FL",
+    },
+  ]);
+
+  // Only one politician can be selected at a time. `false` = none selected.
+  const [selectedPoliticianId, setSelectedPoliticianId] =
+    useState<SelectedPolitician>(politicians[0]?.u_id ?? false);
+
+  const dragItemIndex = useRef<number | null>(null);
 
   useEffect(() => {
     setOpen(!isSmallScreen);
@@ -56,12 +151,11 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
     setTab(newValue);
   };
 
-  const [value, setValue] = useState<string>();
-  const onSearchBarChange = (e: any) => {
-    setValue(e.target.value);
-  };
-  const onSubmit = () => {
-    alert("submitted");
+  const handlePoliticianChange = (
+    event: React.SyntheticEvent,
+    newValue: string,
+  ) => {
+    setSelectedPoliticianId(newValue);
   };
 
   const toggleDrawer = (newOpen: boolean) => () => {
@@ -70,6 +164,49 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
 
   const toggleChat = (newOpen: boolean) => () => {
     setChatOpen(newOpen);
+  };
+
+  // Called by SearchBar when the user picks a politician from search results.
+  const addPolitician = (politician: PoliticianBasicInfo) => {
+    setPoliticians((prev) => {
+      if (prev.some((p) => p.u_id === politician.u_id)) return prev;
+      return [...prev, politician];
+    });
+    setSelectedPoliticianId(politician.u_id);
+  };
+
+  const removePolitician = (u_id: string) => {
+    setPoliticians((prev) => {
+      const updated = prev.filter((p) => p.u_id !== u_id);
+
+      // If we removed the selected politician, fall back to the next one.
+      setSelectedPoliticianId((current: SelectedPolitician) =>
+        current === u_id ? (updated[0]?.u_id ?? false) : current,
+      );
+
+      return updated;
+    });
+  };
+
+  const handleDragStart = (index: number) => {
+    dragItemIndex.current = index;
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+  };
+
+  const handleDrop = (index: number) => {
+    const fromIndex = dragItemIndex.current;
+    if (fromIndex === null || fromIndex === index) return;
+
+    setPoliticians((prev) => {
+      const updated = [...prev];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(index, 0, moved);
+      return updated;
+    });
+    dragItemIndex.current = null;
   };
 
   const DrawerList = (
@@ -92,18 +229,27 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
       </Box>
 
       <Box sx={{ px: 1.5, pb: 1.5 }}>
-        <SearchBar
-          value={value}
-          onChange={onSearchBarChange}
-          onSubmit={onSubmit}
-          placeholder="Search politicians..."
-          fullWidth
-        />
+        <SearchBar onSelectPolitician={addPolitician} />
       </Box>
 
       <Divider />
 
-      <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
+      {/*
+        This wrapper must be a flex column with a bounded height (flexGrow: 1
+        from the parent, minHeight: 0 here) so its children can size against
+        it. Without minHeight: 0, flex items default to min-height: auto and
+        refuse to shrink below their content size, which silently breaks
+        scrolling on the politician list below.
+      */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+        }}
+      >
         <Tabs
           orientation="vertical"
           variant="scrollable"
@@ -116,6 +262,7 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
             },
           }}
           sx={{
+            flexShrink: 0,
             "& .MuiTab-root": {
               alignItems: "flex-start",
               textAlign: "left",
@@ -149,6 +296,154 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
             />
           ))}
         </Tabs>
+
+        <Divider sx={{ my: 1, flexShrink: 0 }} />
+
+        {/*
+          flex: 1 lets this section claim whatever space is left after the
+          main Tabs above it — that's what gives it a bounded height to
+          scroll against. minHeight: 0 again overrides the flex default so
+          it can actually shrink and scroll instead of growing to fit all
+          the politician tabs.
+        */}
+        <Box
+          sx={{
+            px: 1.5,
+            pt: 1,
+            pb: 0.5,
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            sx={{
+              fontWeight: 600,
+              color: "text.secondary",
+              px: 0.5,
+              flexShrink: 0,
+            }}
+          >
+            Selected Politician
+          </Typography>
+
+          {politicians.length === 0 ? (
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.disabled",
+                fontStyle: "italic",
+                px: 2,
+                pb: 1,
+              }}
+            >
+              Use search above to add a politician
+            </Typography>
+          ) : (
+            <Tabs
+              orientation="vertical"
+              value={selectedPoliticianId}
+              onChange={handlePoliticianChange}
+              aria-label="Selected politician tabs"
+              slotProps={{
+                indicator: {
+                  sx: { left: 0, width: 3, borderRadius: 1 },
+                },
+              }}              
+              sx={{
+                "& .MuiTab-root": {
+                  alignItems: "flex-start",
+                  textAlign: "left",
+                  textTransform: "none",
+                  minHeight: 44,
+                  px: 2,
+                  py: 0.75,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: "text.secondary",
+                  borderRadius: 1,
+                  mx: 1,
+                  my: 0.25,
+                  transition: "background-color 0.15s ease",
+                  "&:hover": {
+                    bgcolor: "action.hover",
+                  },
+                  "&.Mui-selected": {
+                    color: "primary.main",
+                    bgcolor: "action.selected",
+                  },
+                },
+              }}
+            >
+              {politicians.map((politician, index) => (
+                <Tab
+                  onClick={() => setIsPoliticianSelected(true)}  
+                  key={politician.u_id}
+                  value={politician.u_id}
+                  id={`politician-tab-${politician.u_id}`}
+                  aria-controls={`politician-tabpanel-${politician.u_id}`}
+                  disableRipple
+                  draggable
+                  onDragStart={() => handleDragStart(index)}
+                  onDragOver={handleDragOver}
+                  onDrop={() => handleDrop(index)}
+                  sx={{ cursor: "grab" }}
+                  label={
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        width: "100%",
+                      }}
+                    >
+                      <DragIndicatorIcon
+                        fontSize="small"
+                        sx={{ color: "text.disabled" }}
+                      />
+
+                      <Box
+                        sx={{ flexGrow: 1, minWidth: 0, textAlign: "left" }}
+                      >
+                        <Typography
+                          variant="body2"
+                          noWrap
+                          sx={{ fontWeight: 500, lineHeight: 1.2 }}
+                        >
+                          {politician.name}
+                        </Typography>
+                        {politician.party && (
+                          <Typography
+                            variant="caption"
+                            sx={{ color: "text.secondary", lineHeight: 1 }}
+                            noWrap
+                          >
+                            {politician.party} | {politician.role} |{" "}
+                            {politician.state}
+                          </Typography>
+                        )}
+                      </Box>
+
+                      <IconButton
+                        size="small"
+                        component="span"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removePolitician(politician.u_id);
+                        }}
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  }
+                />
+              ))}
+            </Tabs>
+          )}
+        </Box>
       </Box>
 
       <Divider />
@@ -206,7 +501,6 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
             }),
           "& .MuiDrawer-paper": {
             width: DRAWER_WIDTH,
-            maxWidth: "85vw",
             boxSizing: "border-box",
             borderRight: "1px solid",
             borderColor: "divider",
@@ -255,8 +549,6 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
           <MenuIcon fontSize="small" />
         </IconButton>
       )}
-
-      {/* <ChatBot chatOpen={chatOpen} setChatOpen={setChatOpen} /> */}
     </Box>
   );
 }

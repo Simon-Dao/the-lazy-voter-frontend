@@ -5,7 +5,6 @@ export const tabAtom = atom("Summary")
 
 // Congress Dashboard
 
-
 // Summary
 export type DonationSlice = {
   id: number;
@@ -17,6 +16,15 @@ export type TimelineEvent = {
   year: string;
   label: string;
   type: "term" | "campaign";
+};
+
+export type PoliticianBasicInfo = {
+  u_id: string;
+  name: string;
+  latestYear: number;
+  role: string;
+  party: string;
+  state: string;
 };
 
 export type NewsArticle = {
@@ -31,4 +39,11 @@ export type SponsorCategory = {
   amount: string;
 };
 
-export const personAtom = atom()
+export type PoliticianBasicInfoAtom = PoliticianBasicInfo | null;
+
+export const selectedPoliticianAtom = atom<PoliticianBasicInfoAtom>(null);
+export const selectedPoliticiansAtom = atom([]);
+export const isPoliticianSelectedAtom = atom(false);
+
+// SearchBar
+export const peopleSearchResults = atom([]);

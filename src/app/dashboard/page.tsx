@@ -1,24 +1,23 @@
-"use client"
+"use client";
 
-import { alpha } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import SideMenu from '../../components/dashboard/SideMenu';
-import AppTheme from '../../shared-theme/AppTheme';
-import AppAppBar from '../../components/landing/AppAppBar';
-import {tabs} from '#/util/Constants';
-import Summary from '#/app/dashboard/Summary'
-import Legislation from '#/app/dashboard/Legislation'
-import News from '#/app/dashboard/News'
-import Finances from '#/app/dashboard/Finances'
-import {useState} from "react";
+import { alpha } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import SideMenu from "../../components/dashboard/SideMenu";
+import AppTheme from "../../shared-theme/AppTheme";
+import AppAppBar from "../../components/landing/AppAppBar";
+import Summary from "#/app/dashboard/Summary";
+import Legislation from "#/app/dashboard/Legislation";
+import News from "#/app/dashboard/News";
+import Finances from "#/app/dashboard/Finances";
+import { useState, useEffect } from "react";
 
 import {
   chartsCustomizations,
   datePickersCustomizations,
   treeViewCustomizations,
-} from '../../theme/customizations';
+} from "../../theme/customizations";
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -27,21 +26,17 @@ const xThemeComponents = {
 };
 
 export default function Dashboard(props: { disableCustomTheme?: boolean }) {
-
   const [tab, setTab] = useState(0);
 
-  const tabs = [
-    (<Summary />),
-    (<Legislation />),
-    (<Finances />),
-    (<News />),
-  ]
+  const tabs = [<Summary />, <Legislation />, <Finances />, <News />];
+
+  useEffect(() => {}, []);
 
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
-      <AppAppBar/>
-      <Box sx={{ display: 'flex' }}>
+      <AppAppBar />
+      <Box sx={{ display: "flex" }}>
         <SideMenu tab={tab} setTab={setTab} />
         {/* Main content */}
         <Box
@@ -51,19 +46,19 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
             backgroundColor: theme.vars
               ? `rgba(${theme.vars.palette.background.defaultChannel} / 1)`
               : alpha(theme.palette.background.default, 1),
-            overflow: 'auto',
+            overflow: "auto",
           })}
         >
           <Stack
             spacing={2}
             sx={{
-              alignItems: 'center',
+              alignItems: "center",
               mx: 3,
               pb: 5,
               mt: { xs: 8, md: 0 },
             }}
           >
-          {tabs[tab]}
+            {tabs[tab]}
           </Stack>
         </Box>
       </Box>

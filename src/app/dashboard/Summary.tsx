@@ -19,8 +19,11 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { useAtom } from "jotai";
+import SummaryEmptyState from '#/components/dashboard/SummaryEmptyState';
+
 import {
-  personAtom,
+  selectedPoliticianAtom,
+  isPoliticianSelectedAtom,
   DonationSlice,
   TimelineEvent,
   NewsArticle,
@@ -123,13 +126,13 @@ const LOADING_ANIMATION_DURATION = 500;
 const LOADING_DELAY_0 = "0ms";
 const LOADING_DELAY_1 = "100ms";
 const LOADING_DELAY_2 = "200ms";
-const LOADING_DELAY_3 = "300ms";
 
 
 // ---- Component ----
 
 export default function Summary() {
   const [year, setYear] = useState<string>("all");
+  const [personSelected, setPersonSelectedAtom] = useAtom(isPoliticianSelectedAtom);  
 
   const [show, setShow] = useState(false);
   useEffect(() => setShow(true), []);
@@ -141,6 +144,8 @@ export default function Summary() {
   );
 
   return (
+    <>
+    {personSelected ?
     <Box
       sx={{
         width: "100%",
@@ -443,5 +448,11 @@ export default function Summary() {
         </Grid>
       </Grid>
     </Box>
+      
+      :
+      <SummaryEmptyState/>
+      }
+    </>
+    
   );
 }
