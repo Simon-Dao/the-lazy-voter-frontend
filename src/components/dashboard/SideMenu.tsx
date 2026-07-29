@@ -18,10 +18,17 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import SearchBar from "#/components/dashboard/SearchBar";
 import { tabs } from "#/util/Constants";
-import { PoliticianBasicInfo } from "#/util/State";
 import { useAtom } from "jotai";
-import { isPoliticianSelectedAtom } from "#/util/State";
-import { DashboardSideMenuTabAtom } from "#/util/State";
+import {
+  PoliticianBasicInfo,
+  IsPoliticianSelectedAtom,
+  DashboardSideMenuTabAtom,
+  PoliticiansDetailedAtom,
+  PoliticianUIDType,
+  PoliticianDetailed,
+  SelectedPoliticianDetailedAtom,
+  SelectedPoliticianUIDAtom,
+} from "#/util/State";
 
 const DRAWER_WIDTH = 300;
 const TOP_OFFSET = 100;
@@ -30,8 +37,6 @@ const REOPEN_BUTTON_DELAY = 80;
 type SideMenuProps = {
   children?: React.ReactNode;
 };
-
-type SelectedPolitician = string | false;
 
 export default function SideMenu({ children }: SideMenuProps) {
   const theme = useTheme();
@@ -45,101 +50,34 @@ export default function SideMenu({ children }: SideMenuProps) {
   const [showReopenButton, setShowReopenButton] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [isPoliticianSelected, setIsPoliticianSelected] = useAtom(
-    isPoliticianSelectedAtom,
+    IsPoliticianSelectedAtom,
+  );
+  const [politiciansDetailed, setPoliticiansDetailed] = useAtom(
+    PoliticiansDetailedAtom,
   );
 
-  const [politicians, setPoliticians] = useState<PoliticianBasicInfo[]>([
-    {
-      u_id: "12345",
-      name: "s3imon",
-      latestYear: 2026,
-      role: "Sen",
-      party: "D",
-      state: "FL",
-    },
-    {
-      u_id: "123456",
-      name: "s3imon1",
-      latestYear: 2026,
-      role: "Sen",
-      party: "D",
-      state: "FL",
-    },
-    {
-      u_id: "123457",
-      name: "s3imon2",
-      latestYear: 2026,
-      role: "Sen",
-      party: "D",
-      state: "FL",
-    },
-    {
-      u_id: "123458",
-      name: "s3imon3",
-      latestYear: 2026,
-      role: "Sen",
-      party: "D",
-      state: "FL",
-    },
-    {
-      u_id: "1243459",
-      name: "s3imon4",
-      latestYear: 2026,
-      role: "Sen",
-      party: "D",
-      state: "FL",
-    },
-    {
-      u_id: "1233459",
-      name: "s3imon4",
-      latestYear: 2026,
-      role: "Sen",
-      party: "D",
-      state: "FL",
-    },
-    {
-      u_id: "1234539",
-      name: "s3imon4",
-      latestYear: 2026,
-      role: "Sen",
-      party: "D",
-      state: "FL",
-    },
-    {
-      u_id: "1223459",
-      name: "s3imon4",
-      latestYear: 2026,
-      role: "Sen",
-      party: "D",
-      state: "FL",
-    },
-    {
-      u_id: "1234519",
-      name: "s3imon4",
-      latestYear: 2026,
-      role: "Sen",
-      party: "D",
-      state: "FL",
-    },
-    {
-      u_id: "12324519",
-      name: "s3imon4",
-      latestYear: 2026,
-      role: "Sen",
-      party: "D",
-      state: "FL",
-    },
-  ]);
-
+  const [politicianBasicInfos, setPoliticianBasicInfos] = useState<
+    PoliticianBasicInfo[]
+  >([]);
+  const [selectedPoliticianDetailed, setSelectedPoliticianDetailed] = useAtom(
+    SelectedPoliticianDetailedAtom,
+  );
   // Only one politician can be selected at a time. `false` = none selected.
-  const [selectedPoliticianId, setSelectedPoliticianId] =
-    useState<SelectedPolitician>(politicians[0]?.u_id ?? false);
+  const [selectedPoliticianId, setSelectedPoliticianId] = useAtom(
+    SelectedPoliticianUIDAtom,
+  );
 
   const dragItemIndex = useRef<number | null>(null);
 
   useEffect(() => {
     setOpen(!isSmallScreen);
   }, [isSmallScreen]);
+
+  useEffect(() => {
+    setSelectedPoliticianDetailed(
+      politiciansDetailed.find((p) => p.u_id === selectedPoliticianId),
+    );
+  }, [selectedPoliticianId, politiciansDetailed]);
 
   useEffect(() => {
     if (open) {
@@ -159,9 +97,9 @@ export default function SideMenu({ children }: SideMenuProps) {
 
   const handlePoliticianChange = (
     event: React.SyntheticEvent,
-    newValue: string,
+    u_id: string,
   ) => {
-    setSelectedPoliticianId(newValue);
+    setSelectedPoliticianId(u_id);
   };
 
   const toggleDrawer = (newOpen: boolean) => () => {
@@ -174,20 +112,29 @@ export default function SideMenu({ children }: SideMenuProps) {
 
   // Called by SearchBar when the user picks a politician from search results.
   const addPolitician = (politician: PoliticianBasicInfo) => {
-    setPoliticians((prev) => {
+    setPoliticianBasicInfos((prev) => {
       if (prev.some((p) => p.u_id === politician.u_id)) return prev;
       return [...prev, politician];
     });
     setSelectedPoliticianId(politician.u_id);
+
+    setPoliticiansDetailed((prev) => [
+      ...prev,
+      { u_id: politician.u_id, name: politician.name },
+    ]);
   };
 
   const removePolitician = (u_id: string) => {
-    setPoliticians((prev) => {
+    setPoliticianBasicInfos((prev) => {
       const updated = prev.filter((p) => p.u_id !== u_id);
 
       // If we removed the selected politician, fall back to the next one.
-      setSelectedPoliticianId((current: SelectedPolitician) =>
+      setSelectedPoliticianId((current: PoliticianUIDType) =>
         current === u_id ? (updated[0]?.u_id ?? false) : current,
+      );
+
+      setPoliticiansDetailed((current: PoliticianDetailed[]) =>
+        current.filter((p) => p.u_id !== u_id),
       );
 
       return updated;
@@ -206,7 +153,7 @@ export default function SideMenu({ children }: SideMenuProps) {
     const fromIndex = dragItemIndex.current;
     if (fromIndex === null || fromIndex === index) return;
 
-    setPoliticians((prev) => {
+    setPoliticianBasicInfos((prev) => {
       const updated = [...prev];
       const [moved] = updated.splice(fromIndex, 1);
       updated.splice(index, 0, moved);
@@ -336,7 +283,7 @@ export default function SideMenu({ children }: SideMenuProps) {
             Selected Politician
           </Typography>
 
-          {politicians.length === 0 ? (
+          {politicianBasicInfos.length === 0 ? (
             <Typography
               variant="body2"
               sx={{
@@ -382,7 +329,7 @@ export default function SideMenu({ children }: SideMenuProps) {
                 },
               }}
             >
-              {politicians.map((politician, index) => (
+              {politicianBasicInfos.map((politician, index) => (
                 <Tab
                   onClick={() => setIsPoliticianSelected(true)}
                   key={politician.u_id}
@@ -394,7 +341,7 @@ export default function SideMenu({ children }: SideMenuProps) {
                   onDragStart={() => handleDragStart(index)}
                   onDragOver={handleDragOver}
                   onDrop={() => handleDrop(index)}
-                  sx={{ cursor: "grab", padding: '5px !important' }}
+                  sx={{ cursor: "grab", padding: "5px !important" }}
                   label={
                     <Box
                       sx={{
@@ -415,7 +362,9 @@ export default function SideMenu({ children }: SideMenuProps) {
                           noWrap
                           sx={{ fontWeight: 500, lineHeight: 1.2 }}
                         >
-                          {politician.name.length >= 25 ? politician.name.substring(25) + "..." : politician.name}
+                          {politician.name.length >= 25
+                            ? politician.name.substring(0, 25) + "..."
+                            : politician.name}
                         </Typography>
                         {politician.party && (
                           <Typography
@@ -423,8 +372,12 @@ export default function SideMenu({ children }: SideMenuProps) {
                             sx={{ color: "text.secondary", lineHeight: 1 }}
                             noWrap
                           >
-                            {politician.party.charAt(0).toUpperCase() == "R" ? "Rep" : politician.party.charAt(0).toUpperCase() == "D" ? "Dem" : "Ind" } | {politician.role} |{" "}
-                            {politician.state}
+                            {politician.party.charAt(0).toUpperCase() == "R"
+                              ? "Rep"
+                              : politician.party.charAt(0).toUpperCase() == "D"
+                                ? "Dem"
+                                : "Ind"}{" "}
+                            | {politician.role} | {politician.state}
                           </Typography>
                         )}
                       </Box>

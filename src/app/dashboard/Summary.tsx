@@ -10,7 +10,6 @@ import {
   Card,
   CardContent,
   Grow,
-  Fade,
   Avatar,
   Chip,
   Divider,
@@ -28,10 +27,14 @@ import { DashboardSideMenuTabAtom } from "#/util/State";
 import ArrowOutwardOutlinedIcon from "@mui/icons-material/ArrowOutwardOutlined";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import SmartToyIcon from '@mui/icons-material/SmartToy';
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import {
+  PoliticiansDetailedAtom,
+  SelectedPoliticianDetailedAtom,
+} from "#/util/State";
 
 import {
-  isPoliticianSelectedAtom,
+  IsPoliticianSelectedAtom,
   DonationSlice,
   TimelineEvent,
   NewsArticle,
@@ -39,13 +42,13 @@ import {
 } from "#/util/State";
 
 // ---- Template data ----
-const candidate = {
-  name: "Jordan Ellisaaaaaaaaaaaaaaaaaaaaa",
-  photo: "/candidates/jordan-ellis.jpg",
-  standing: "U.S. Senator for Washington",
-  party: "Democrat",
-  since: "In office since 2019",
-};
+// const candidate = {
+//   name: "Jordan Ellisaaaaaaaaaaaaaaaaaaaaa",
+//   photo: "/candidates/jordan-ellis.jpg",
+//   standing: "U.S. Senator for Washington",
+//   party: "Democrat",
+//   since: "In office since 2019",
+// };
 
 const timeline: TimelineEvent[] = [
   { year: "2024", label: "Re-elected to U.S. Senate", type: "term" },
@@ -239,11 +242,20 @@ export default function Summary() {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isPortrait = useMediaQuery("(orientation: portrait)");
-  const candidateSummary = "this candidate is good"
+  const candidateSummary = "this candidate is good";
   const [year, setYear] = useState<string>("all");
   const [personSelected, setPersonSelectedAtom] = useAtom(
-    isPoliticianSelectedAtom,
+    IsPoliticianSelectedAtom,
   );
+  // Only one politician can be selected at a time. `false` = none selected.
+  const [selectedPoliticianId, setSelectedPoliticianId] = useAtom(
+    SelectedPoliticianDetailedAtom,
+  );
+
+  const [politicianDetailed, setPoliticianDetailed] = useAtom(
+    PoliticiansDetailedAtom,
+  );
+
   const [tab, setTab] = useAtom(DashboardSideMenuTabAtom);
 
   const [show, setShow] = useState(false);
@@ -255,6 +267,10 @@ export default function Summary() {
   const totalDonations = donations.reduce(
     (sum: number, d: DonationSlice) => sum + d.value,
     0,
+  );
+
+  const [candidate, setSelectedPoliticianDetailed] = useAtom(
+    SelectedPoliticianDetailedAtom,
   );
 
   return (
@@ -296,7 +312,7 @@ export default function Summary() {
                     spacing={3}
                     sx={{ alignItems: "center" }}
                   >
-                    <Avatar
+                    {/* <Avatar
                       src={candidate.photo}
                       alt={candidate.name}
                       sx={{
@@ -306,31 +322,31 @@ export default function Summary() {
                         borderColor: getPartyColor(theme, candidate.party),
                         boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                       }}
-                    />
+                    /> */}
                     <Stack spacing={0.5}>
                       <Typography
                         variant="h5"
                         sx={{ fontWeight: 700, whiteSpace: "nowrap" }}
                       >
-                        {candidate.name}
+                        {candidate?.name}
                       </Typography>
                       <Typography
                         variant="body1"
                         sx={{ color: "text.secondary", whiteSpace: "nowrap" }}
                       >
-                        {candidate.standing}
+                        {/* {candidate?.standing} */}
                       </Typography>
                       <Stack direction="row" spacing={1}>
                         <Chip
-                          label={candidate.party}
+                          label={candidate?.party}
                           size="small"
-                          color={getChipPartyColor(candidate.party)}
+                          // color={getChipPartyColor(candidate?.party)}
                         />
-                        <Chip
+                        {/* <Chip
                           label={candidate.since}
                           size="small"
                           variant="outlined"
-                        />
+                        /> */}
                       </Stack>
                     </Stack>
                   </Stack>
@@ -347,14 +363,26 @@ export default function Summary() {
                 variant="outlined"
                 sx={{ flexGrow: 1, minWidth: 0, overflow: "hidden" }}
               >
-                <Typography variant="h6" sx={{ fontWeight: 600, px: 2, display:"flex", alignItems:"center" }}>
-                  <SmartToyIcon/>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    px: 2,
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <SmartToyIcon />
                   AI Summary
                 </Typography>
                 <CardContent sx={{ overflowX: "auto", ...customScrollbarSx }}>
-                  <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 600, mb: 2, px: 2 }}>
-                  {candidateSummary}
-                </Typography>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    sx={{ fontWeight: 600, mb: 2, px: 2 }}
+                  >
+                    {candidateSummary}
+                  </Typography>
                 </CardContent>
               </Card>
             </Grow>

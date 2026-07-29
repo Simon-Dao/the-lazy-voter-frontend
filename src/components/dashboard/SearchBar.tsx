@@ -13,7 +13,7 @@ import {
 import { POLITICIANS_SEARCH_API_URL } from "#/util/Constants";
 import { PoliticianBasicInfo } from "#/util/State";
 import { useAtom } from 'jotai';
-import { isPoliticianSelectedAtom } from '#/util/State';
+import { IsPoliticianSelectedAtom } from '#/util/State';
 
 type SearchBarProps = {
   onSelectPolitician: (politician: PoliticianBasicInfo) => void;
@@ -40,7 +40,7 @@ function getInitials(name: string) {
 
 export default function SearchBar({ onSelectPolitician }: SearchBarProps) {
 
-  const [isPoliticianSelected, setIsPoliticianSelected] = useAtom(isPoliticianSelectedAtom);
+  const [isPoliticianSelected, setIsPoliticianSelected] = useAtom(IsPoliticianSelectedAtom);
   const [inputValue, setInputValue] = useState<string>("");
   const [options, setOptions] = useState<PoliticianBasicInfo[]>([]);
   const [loading, setLoading] = useState(false);

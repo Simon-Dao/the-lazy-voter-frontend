@@ -1,7 +1,10 @@
 import { atom } from 'jotai';
 
-// Tab State for Dashboard Side Menu
+// Dashboard Side Menu
 export const DashboardSideMenuTabAtom = atom(0);
+
+// SearchBar
+export const peopleSearchResults = atom([]);
 
 // Summary
 export type DonationSlice = {
@@ -37,29 +40,26 @@ export type SponsorCategory = {
   amount: string;
 };
 
-export type PoliticianBasicInfoAtom = PoliticianBasicInfo | null;
+export const IsPoliticianSelectedAtom = atom(false);
 
-export const selectedPoliticianUIDAtom = atom<string | null>(null);
-export const selectedPoliticiansAtom = atom([]);
-export const isPoliticianSelectedAtom = atom(false);
-
-// SearchBar
-export const peopleSearchResults = atom([]);
-
-//Dashboard
-
+// Politicians Dashboard
 export type PoliticianDetailed = {
   u_id: string;
   name: string;
-  latestYear: number;
-  role: string;
-  party: string;
-  state: string;
-  legislativeFocus: string[];
-  news: NewsArticle[];
-  timeline: TimelineEvent[];
-  billCategoriesByYear: Record<string, DonationSlice[]>;
-  donationsByYear: Record<string, DonationSlice[]>;
+  latestYear?: number;
+  role?: string;
+  party?: string;
+  state?: string;
+  legislativeFocus?: string[];
+  newsArticles?: NewsArticle[];
+  timeline?: TimelineEvent[];
+  billCategoriesByYear?: Record<string, DonationSlice[]>;
+  topSponsorCategoriesByYear?: Record<string, SponsorCategory[]>;
+  donationsByYear?: Record<string, DonationSlice[]>;
+  
 };
 
-export let StagedPoliticians: PoliticianDetailed[] = [];
+export const PoliticiansDetailedAtom = atom<PoliticianDetailed[]>([]);
+export const SelectedPoliticianDetailedAtom = atom<PoliticianDetailed | null>();
+export type PoliticianUIDType = string | null; 
+export const SelectedPoliticianUIDAtom = atom<PoliticianUIDType>(null);
