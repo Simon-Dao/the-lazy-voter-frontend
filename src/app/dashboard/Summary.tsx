@@ -28,6 +28,7 @@ import { DashboardSideMenuTabAtom } from "#/util/State";
 import ArrowOutwardOutlinedIcon from "@mui/icons-material/ArrowOutwardOutlined";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 import {
   isPoliticianSelectedAtom,
@@ -39,7 +40,7 @@ import {
 
 // ---- Template data ----
 const candidate = {
-  name: "Jordan Ellis",
+  name: "Jordan Ellisaaaaaaaaaaaaaaaaaaaaa",
   photo: "/candidates/jordan-ellis.jpg",
   standing: "U.S. Senator for Washington",
   party: "Democrat",
@@ -72,16 +73,6 @@ const timeline: TimelineEvent[] = [
   { year: "2012", label: "Elected to U.S. House", type: "campaign" },
   { year: "2012", label: "Elected to U.S. House", type: "campaign" },
 ];
-
-const focusAreas = [
-  "Healthcare",
-  "Climate policy",
-  "Veterans affairs",
-  "Tax reform",
-];
-
-const billsSummary =
-  "Sponsored 42 bills this term, concentrated in healthcare access and climate infrastructure. Co-sponsored the Rural Broadband Expansion Act and the Veterans Mental Health Funding Act.";
 
 const donationsByYear: Record<string, DonationSlice[]> = {
   all: [
@@ -248,7 +239,7 @@ export default function Summary() {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isPortrait = useMediaQuery("(orientation: portrait)");
-
+  const candidateSummary = "this candidate is good"
   const [year, setYear] = useState<string>("all");
   const [personSelected, setPersonSelectedAtom] = useAtom(
     isPoliticianSelectedAtom,
@@ -329,7 +320,7 @@ export default function Summary() {
                       >
                         {candidate.standing}
                       </Typography>
-                      <Stack direction="row" spacing={1} >
+                      <Stack direction="row" spacing={1}>
                         <Chip
                           label={candidate.party}
                           size="small"
@@ -346,8 +337,7 @@ export default function Summary() {
                 </CardContent>
               </Card>
             </Grow>
-
-            {/* Timeline */}
+            {/* Summary */}
             <Grow
               in={show}
               timeout={LOADING_ANIMATION_DURATION}
@@ -357,80 +347,99 @@ export default function Summary() {
                 variant="outlined"
                 sx={{ flexGrow: 1, minWidth: 0, overflow: "hidden" }}
               >
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 600, mb: 2, px: 2 }}
-                >
-                  Campaign and office timeline
+                <Typography variant="h6" sx={{ fontWeight: 600, px: 2, display:"flex", alignItems:"center" }}>
+                  <SmartToyIcon/>
+                  AI Summary
                 </Typography>
                 <CardContent sx={{ overflowX: "auto", ...customScrollbarSx }}>
-                  <Stack
-                    direction="row"
-                    spacing={0}
-                    sx={{ width: "max-content", minWidth: "100%" }}
-                  >
-                    {timeline.map((event, index) => (
-                      <Stack
-                        key={index}
-                        sx={{ width: 140, flexShrink: 0, alignItems: "center" }}
-                      >
-                        <Stack
-                          direction="row"
-                          sx={{ width: "100%", alignItems: "center" }}
-                        >
-                          <Box
-                            sx={{
-                              flexGrow: 1,
-                              height: "1px",
-                              bgcolor: index > 0 ? "divider" : "transparent",
-                            }}
-                          />
-                          <Box
-                            sx={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: "50%",
-                              flexShrink: 0,
-                              bgcolor:
-                                event.type === "term"
-                                  ? "primary.main"
-                                  : "text.disabled",
-                            }}
-                          />
-                          <Box
-                            sx={{
-                              flexGrow: 1,
-                              height: "1px",
-                              bgcolor:
-                                index < timeline.length - 1
-                                  ? "divider"
-                                  : "transparent",
-                            }}
-                          />
-                        </Stack>
-                        <Stack sx={{ alignItems: "center", px: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {event.year}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "text.secondary",
-                              textAlign: "center",
-                              whiteSpace: "normal",
-                              wordBreak: "break-word",
-                            }}
-                          >
-                            {event.label}
-                          </Typography>
-                        </Stack>
-                      </Stack>
-                    ))}
-                  </Stack>
+                  <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 600, mb: 2, px: 2 }}>
+                  {candidateSummary}
+                </Typography>
                 </CardContent>
               </Card>
             </Grow>
           </Stack>
+
+          {/* Timeline */}
+          <Grow
+            in={show}
+            timeout={LOADING_ANIMATION_DURATION}
+            style={{ transitionDelay: LOADING_DELAY_1 }}
+          >
+            <Card
+              variant="outlined"
+              sx={{ flexGrow: 1, minWidth: 0, overflow: "hidden" }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, px: 2 }}>
+                Campaign and office timeline
+              </Typography>
+              <CardContent sx={{ overflowX: "auto", ...customScrollbarSx }}>
+                <Stack
+                  direction="row"
+                  spacing={0}
+                  sx={{ width: "max-content", minWidth: "100%" }}
+                >
+                  {timeline.map((event, index) => (
+                    <Stack
+                      key={index}
+                      sx={{ width: 140, flexShrink: 0, alignItems: "center" }}
+                    >
+                      <Stack
+                        direction="row"
+                        sx={{ width: "100%", alignItems: "center" }}
+                      >
+                        <Box
+                          sx={{
+                            flexGrow: 1,
+                            height: "1px",
+                            bgcolor: index > 0 ? "divider" : "transparent",
+                          }}
+                        />
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            flexShrink: 0,
+                            bgcolor:
+                              event.type === "term"
+                                ? "primary.main"
+                                : "text.disabled",
+                          }}
+                        />
+                        <Box
+                          sx={{
+                            flexGrow: 1,
+                            height: "1px",
+                            bgcolor:
+                              index < timeline.length - 1
+                                ? "divider"
+                                : "transparent",
+                          }}
+                        />
+                      </Stack>
+                      <Stack sx={{ alignItems: "center", px: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {event.year}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "text.secondary",
+                            textAlign: "center",
+                            whiteSpace: "normal",
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {event.label}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                  ))}
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grow>
 
           <Grid container spacing={2} columns={12}>
             {/* Left column */}

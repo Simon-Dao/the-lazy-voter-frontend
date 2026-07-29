@@ -39,7 +39,7 @@ export type SponsorCategory = {
 
 export type PoliticianBasicInfoAtom = PoliticianBasicInfo | null;
 
-export const selectedPoliticianAtom = atom<PoliticianBasicInfoAtom>(null);
+export const selectedPoliticianUIDAtom = atom<string | null>(null);
 export const selectedPoliticiansAtom = atom([]);
 export const isPoliticianSelectedAtom = atom(false);
 
@@ -56,8 +56,10 @@ export type PoliticianDetailed = {
   party: string;
   state: string;
   legislativeFocus: string[];
+  news: NewsArticle[];
+  timeline: TimelineEvent[];
+  billCategoriesByYear: Record<string, DonationSlice[]>;
+  donationsByYear: Record<string, DonationSlice[]>;
 };
 
-export type SelectedPoliticians = {
-
-};
+export let StagedPoliticians: PoliticianDetailed[] = [];

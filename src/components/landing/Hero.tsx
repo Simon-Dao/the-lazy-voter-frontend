@@ -525,7 +525,7 @@ export default function Hero() {
                 width: "100%",
               }}
             >
-              FEDERAL CIVIC DATA, MADE SIMPLE
+              CONGRESSIONAL CIVIC DATA, MADE SIMPLE
             </Typography>
 
             <Button
