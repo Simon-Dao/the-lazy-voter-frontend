@@ -229,10 +229,7 @@ function getChipPartyColor(party: string): "primary" | "error" | "default" {
   }
 }
 
-function getPartyColor(
-  theme: any,
-  party: string,
-): string {
+function getPartyColor(theme: any, party: string): string {
   switch (party.charAt(0).toUpperCase()) {
     case "D":
       return theme.palette.primary.main;
@@ -296,7 +293,6 @@ export default function Summary() {
               >
                 <CardContent
                   sx={{
-                    pt: 0,
                     height: "100%",
                     width: "100%",
                     display: "flex",
@@ -333,7 +329,7 @@ export default function Summary() {
                       >
                         {candidate.standing}
                       </Typography>
-                      <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
+                      <Stack direction="row" spacing={1} >
                         <Chip
                           label={candidate.party}
                           size="small"
@@ -363,7 +359,7 @@ export default function Summary() {
               >
                 <Typography
                   variant="h6"
-                  sx={{ fontWeight: 600, mb: 2, px: 2, pt: 2 }}
+                  sx={{ fontWeight: 600, mb: 2, px: 2 }}
                 >
                   Campaign and office timeline
                 </Typography>
@@ -412,7 +408,7 @@ export default function Summary() {
                             }}
                           />
                         </Stack>
-                        <Stack sx={{ alignItems: "center", pt: 1, px: 1 }}>
+                        <Stack sx={{ alignItems: "center", px: 1 }}>
                           <Typography variant="body2" sx={{ fontWeight: 500 }}>
                             {event.year}
                           </Typography>
@@ -438,7 +434,6 @@ export default function Summary() {
 
           <Grid container spacing={2} columns={12}>
             {/* Left column */}
-
             <Grid size={{ xs: 12, lg: 6 }}>
               <Stack spacing={2}>
                 {/* Bills / focus summary */}
@@ -529,50 +524,6 @@ export default function Summary() {
                           </Stack>
                         ))}
                       </Stack>
-                    </CardContent>
-                  </Card>
-                </Grow>
-
-                {/* News */}
-                <Grow
-                  in={show}
-                  timeout={LOADING_ANIMATION_DURATION}
-                  style={{ transitionDelay: LOADING_DELAY_2 }}
-                >
-                  <Card variant="outlined">
-                    <CardContent>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                        Related news
-                      </Typography>
-                      <List disablePadding>
-                        {newsArticles.map((article, index) => (
-                          <ListItem
-                            key={index}
-                            disablePadding
-                            sx={{
-                              py: 1,
-                              borderBottom:
-                                index < newsArticles.length - 1
-                                  ? "1px solid"
-                                  : "none",
-                              borderColor: "divider",
-                            }}
-                          >
-                            <ListItemText
-                              primary={
-                                <Link
-                                  href={article.href}
-                                  variant="body2"
-                                  sx={{ fontWeight: 500 }}
-                                >
-                                  {article.title}
-                                </Link>
-                              }
-                              secondary={`${article.source} · ${article.date}`}
-                            />
-                          </ListItem>
-                        ))}
-                      </List>
                     </CardContent>
                   </Card>
                 </Grow>
@@ -677,6 +628,50 @@ export default function Summary() {
                             >
                               {cat.amount}
                             </Typography>
+                          </ListItem>
+                        ))}
+                      </List>
+                    </CardContent>
+                  </Card>
+                </Grow>
+
+                {/* News */}
+                <Grow
+                  in={show}
+                  timeout={LOADING_ANIMATION_DURATION}
+                  style={{ transitionDelay: LOADING_DELAY_2 }}
+                >
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                        Related news
+                      </Typography>
+                      <List disablePadding>
+                        {newsArticles.map((article, index) => (
+                          <ListItem
+                            key={index}
+                            disablePadding
+                            sx={{
+                              py: 1,
+                              borderBottom:
+                                index < newsArticles.length - 1
+                                  ? "1px solid"
+                                  : "none",
+                              borderColor: "divider",
+                            }}
+                          >
+                            <ListItemText
+                              primary={
+                                <Link
+                                  href={article.href}
+                                  variant="body2"
+                                  sx={{ fontWeight: 500 }}
+                                >
+                                  {article.title}
+                                </Link>
+                              }
+                              secondary={`${article.source} · ${article.date}`}
+                            />
                           </ListItem>
                         ))}
                       </List>

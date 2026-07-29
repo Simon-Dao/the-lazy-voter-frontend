@@ -19,9 +19,9 @@ import { useTheme } from "@mui/material/styles";
 import SearchBar from "#/components/dashboard/SearchBar";
 import { tabs } from "#/util/Constants";
 import { PoliticianBasicInfo } from "#/util/State";
-import { useAtom } from 'jotai';
-import { isPoliticianSelectedAtom } from '#/util/State';
-import { DashboardSideMenuTabAtom } from '#/util/State'
+import { useAtom } from "jotai";
+import { isPoliticianSelectedAtom } from "#/util/State";
+import { DashboardSideMenuTabAtom } from "#/util/State";
 
 const DRAWER_WIDTH = 300;
 const TOP_OFFSET = 100;
@@ -40,11 +40,13 @@ export default function SideMenu({ children }: SideMenuProps) {
 
   const topOffset = isPortrait ? 0 : TOP_OFFSET;
 
-  const [tab,setTab] = useAtom(DashboardSideMenuTabAtom);
+  const [tab, setTab] = useAtom(DashboardSideMenuTabAtom);
   const [open, setOpen] = useState(true);
   const [showReopenButton, setShowReopenButton] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
-  const [isPoliticianSelected, setIsPoliticianSelected] = useAtom(isPoliticianSelectedAtom);
+  const [isPoliticianSelected, setIsPoliticianSelected] = useAtom(
+    isPoliticianSelectedAtom,
+  );
 
   const [politicians, setPoliticians] = useState<PoliticianBasicInfo[]>([
     {
@@ -356,20 +358,18 @@ export default function SideMenu({ children }: SideMenuProps) {
                 indicator: {
                   sx: { left: 0, width: 3, borderRadius: 1 },
                 },
-              }}              
+              }}
               sx={{
                 "& .MuiTab-root": {
                   alignItems: "flex-start",
                   textAlign: "left",
                   textTransform: "none",
                   minHeight: 44,
-                  px: 2,
                   py: 0.75,
                   fontSize: 14,
                   fontWeight: 500,
                   color: "text.secondary",
                   borderRadius: 1,
-                  mx: 1,
                   my: 0.25,
                   transition: "background-color 0.15s ease",
                   "&:hover": {
@@ -384,7 +384,7 @@ export default function SideMenu({ children }: SideMenuProps) {
             >
               {politicians.map((politician, index) => (
                 <Tab
-                  onClick={() => setIsPoliticianSelected(true)}  
+                  onClick={() => setIsPoliticianSelected(true)}
                   key={politician.u_id}
                   value={politician.u_id}
                   id={`politician-tab-${politician.u_id}`}
@@ -394,7 +394,7 @@ export default function SideMenu({ children }: SideMenuProps) {
                   onDragStart={() => handleDragStart(index)}
                   onDragOver={handleDragOver}
                   onDrop={() => handleDrop(index)}
-                  sx={{ cursor: "grab" }}
+                  sx={{ cursor: "grab", padding: '5px !important' }}
                   label={
                     <Box
                       sx={{
@@ -409,15 +409,13 @@ export default function SideMenu({ children }: SideMenuProps) {
                         sx={{ color: "text.disabled" }}
                       />
 
-                      <Box
-                        sx={{ flexGrow: 1, minWidth: 0, textAlign: "left" }}
-                      >
+                      <Box sx={{ flexGrow: 1, minWidth: 0, textAlign: "left" }}>
                         <Typography
                           variant="body2"
                           noWrap
                           sx={{ fontWeight: 500, lineHeight: 1.2 }}
                         >
-                          {politician.name}
+                          {politician.name.length >= 25 ? politician.name.substring(0,25) + "..." : politician.name}
                         </Typography>
                         {politician.party && (
                           <Typography
@@ -425,7 +423,7 @@ export default function SideMenu({ children }: SideMenuProps) {
                             sx={{ color: "text.secondary", lineHeight: 1 }}
                             noWrap
                           >
-                            {politician.party} | {politician.role} |{" "}
+                            {politician.party.charAt(0).toUpperCase() == "R" ? "Rep" : politician.party.charAt(0).toUpperCase() == "D" ? "Dem" : "Ind" } | {politician.role} |{" "}
                             {politician.state}
                           </Typography>
                         )}
