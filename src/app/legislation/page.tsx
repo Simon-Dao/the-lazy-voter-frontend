@@ -8,12 +8,12 @@ import SideMenu from "../../components/dashboard/SideMenu";
 import AppTheme from "../../shared-theme/AppTheme";
 import AppAppBar from "../../components/landing/AppAppBar";
 import Summary from "#/app/dashboard/Summary";
-import Legislation from "#/app/dashboard/Legislation";
 import News from "#/app/dashboard/News";
 import Finances from "#/app/dashboard/Finances";
 import { useState, useEffect } from "react";
 import { useAtom } from 'jotai'
 import { DashboardSideMenuTabAtom } from '#/util/State'
+import Legislation from '#/components/legislation/Legislation'
 
 import {
   chartsCustomizations,
@@ -28,39 +28,13 @@ const xThemeComponents = {
 };
 
 export default function Dashboard(props: { disableCustomTheme?: boolean }) {
-  const [tab, setTab] = useAtom(DashboardSideMenuTabAtom);
-
-  const tabs = [<Summary />, <Legislation />, <Finances />, <News />];
 
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
       <AppAppBar />
-      <Box sx={{ display: "flex" }}>
-        <SideMenu/>
-        {/* Main content */}
-        <Box
-          component="main"
-          sx={(theme) => ({
-            flexGrow: 1,
-            backgroundColor: theme.vars
-              ? `rgba(${theme.vars.palette.background.defaultChannel} / 1)`
-              : alpha(theme.palette.background.default, 1),
-            overflow: "auto",
-          })}
-        >
-          <Stack
-            spacing={2}
-            sx={{
-              alignItems: "center",
-              mx: 3,
-              pb: 5,
-              mt: { xs: 8, md: 0 },
-            }}
-          >
-            {tabs[tab]}
-          </Stack>
-        </Box>
+      <Box sx={{justifyItems:'center'}}>
+      <Legislation />
       </Box>
     </AppTheme>
   );

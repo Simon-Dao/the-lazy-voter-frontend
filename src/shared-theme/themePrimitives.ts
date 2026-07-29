@@ -1,6 +1,7 @@
 "use client"
 
 import { createTheme, alpha, PaletteMode, Shadows } from '@mui/material/styles';
+import { useTheme } from "@mui/material/styles";
 
 declare module '@mui/material/Paper' {
   interface PaperPropsVariantOverrides {

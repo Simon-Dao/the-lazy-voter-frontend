@@ -1,9 +1,7 @@
 import { atom } from 'jotai';
 
 // Tab State for Dashboard Side Menu
-export const tabAtom = atom("Summary")
-
-// Congress Dashboard
+export const DashboardSideMenuTabAtom = atom(0);
 
 // Summary
 export type DonationSlice = {
@@ -47,3 +45,19 @@ export const isPoliticianSelectedAtom = atom(false);
 
 // SearchBar
 export const peopleSearchResults = atom([]);
+
+//Dashboard
+
+export type PoliticianDetailed = {
+  u_id: string;
+  name: string;
+  latestYear: number;
+  role: string;
+  party: string;
+  state: string;
+  legislativeFocus: string[];
+};
+
+export type SelectedPoliticians = {
+
+};

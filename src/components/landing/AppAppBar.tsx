@@ -37,7 +37,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Politicians", href: "/dashboard" },
-  { label: "Legislation", href: "/about" },
+  { label: "Legislation", href: "/legislation" },
   { label: "Vote", href: "/vote" },
   { label: "About", href: "/about" },
   // { label: "Donate", href: "/donate" },

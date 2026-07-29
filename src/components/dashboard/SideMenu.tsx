@@ -21,22 +21,26 @@ import { tabs } from "#/util/Constants";
 import { PoliticianBasicInfo } from "#/util/State";
 import { useAtom } from 'jotai';
 import { isPoliticianSelectedAtom } from '#/util/State';
+import { DashboardSideMenuTabAtom } from '#/util/State'
+
 const DRAWER_WIDTH = 300;
 const TOP_OFFSET = 100;
 const REOPEN_BUTTON_DELAY = 80;
 
 type SideMenuProps = {
-  tab: number;
-  setTab: Dispatch<SetStateAction<number>>;
   children?: React.ReactNode;
 };
 
 type SelectedPolitician = string | false;
 
-export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
+export default function SideMenu({ children }: SideMenuProps) {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isPortrait = useMediaQuery("(orientation: portrait)");
 
+  const topOffset = isPortrait ? 0 : TOP_OFFSET;
+
+  const [tab,setTab] = useAtom(DashboardSideMenuTabAtom);
   const [open, setOpen] = useState(true);
   const [showReopenButton, setShowReopenButton] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
@@ -479,7 +483,7 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100%", pt: `${TOP_OFFSET}px` }}>
+    <Box sx={{ display: "flex", minHeight: "100%", pt: `${topOffset}px` }}>
       <Drawer
         variant={isSmallScreen ? "temporary" : "persistent"}
         anchor="left"
@@ -504,8 +508,8 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
             boxSizing: "border-box",
             borderRight: "1px solid",
             borderColor: "divider",
-            top: TOP_OFFSET,
-            height: `calc(100% - ${TOP_OFFSET}px)`,
+            top: topOffset,
+            height: `calc(100% - ${topOffset}px)`,
           },
         }}
       >
@@ -537,7 +541,7 @@ export default function SideMenu({ tab, setTab, children }: SideMenuProps) {
           size="small"
           sx={{
             position: "fixed",
-            top: TOP_OFFSET + 8,
+            top: topOffset + 8,
             left: 8,
             zIndex: (theme) => theme.zIndex.drawer + 1,
             border: "1px solid",

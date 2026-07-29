@@ -2,4 +2,31 @@
 
 * {
   user-select: none;
+
+  /* Custom scrollbar - matches theme gray palette */
+  scrollbar-color: hsl(220, 20%, 35%) transparent; /* gray[600] thumb, transparent track */
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: hsl(220, 20%, 35%); /* gray[600] */
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(220, 20%, 42%); /* gray[500] */
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
