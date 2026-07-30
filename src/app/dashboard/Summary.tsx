@@ -41,41 +41,7 @@ import {
   SponsorCategory,
 } from "#/util/State";
 
-// ---- Template data ----
-// const candidate = {
-//   name: "Jordan Ellisaaaaaaaaaaaaaaaaaaaaa",
-//   photo: "/candidates/jordan-ellis.jpg",
-//   standing: "U.S. Senator for Washington",
-//   party: "Democrat",
-//   since: "In office since 2019",
-// };
-
-const timeline: TimelineEvent[] = [
-  { year: "2024", label: "Re-elected to U.S. Senate", type: "term" },
-  { year: "2019–2024", label: "First term, U.S. Senate", type: "term" },
-  {
-    year: "2018",
-    label: "Won special election for U.S. Senate",
-    type: "campaign",
-  },
-  {
-    year: "2014–2018",
-    label: "U.S. House of Representatives, WA-7",
-    type: "term",
-  },
-  { year: "2012", label: "Elected to U.S. House", type: "campaign" },
-  { year: "2012", label: "Elected to U.S. House", type: "campaign" },
-  { year: "2012", label: "Elected to U.S. House", type: "campaign" },
-  { year: "2012", label: "Elected to U.S. House", type: "campaign" },
-  { year: "2012", label: "Elected to U.S. House", type: "campaign" },
-  { year: "2012", label: "Elected to U.S. House", type: "campaign" },
-  { year: "2012", label: "Elected to U.S. House", type: "campaign" },
-  { year: "2012", label: "Elected to U.S. House", type: "campaign" },
-  { year: "2012", label: "Elected to U.S. House", type: "campaign" },
-  { year: "2012", label: "Elected to U.S. House", type: "campaign" },
-  { year: "2012", label: "Elected to U.S. House", type: "campaign" },
-  { year: "2012", label: "Elected to U.S. House", type: "campaign" },
-];
+const timeline: TimelineEvent[] = [];
 
 const donationsByYear: Record<string, DonationSlice[]> = {
   all: [
@@ -212,7 +178,13 @@ const customScrollbarSx = {
 } as const;
 
 // ---- Helpers ----
-function getChipPartyColor(party: string): "primary" | "error" | "default" {
+function getChipPartyColor(
+  party: string | undefined,
+): "primary" | "error" | "default" {
+  if (!party) {
+    return "default";
+  }
+
   switch (party.charAt(0).toUpperCase()) {
     case "D":
       return "primary";
@@ -223,7 +195,11 @@ function getChipPartyColor(party: string): "primary" | "error" | "default" {
   }
 }
 
-function getPartyColor(theme: any, party: string): string {
+function getPartyColor(theme: any, party: string | undefined): string {
+  if (!party) {
+    return theme.palette.grey[400];
+  }
+
   switch (party.charAt(0).toUpperCase()) {
     case "D":
       return theme.palette.primary.main;
@@ -247,6 +223,7 @@ export default function Summary() {
   const [personSelected, setPersonSelectedAtom] = useAtom(
     IsPoliticianSelectedAtom,
   );
+
   // Only one politician can be selected at a time. `false` = none selected.
   const [selectedPoliticianId, setSelectedPoliticianId] = useAtom(
     SelectedPoliticianDetailedAtom,
@@ -312,17 +289,17 @@ export default function Summary() {
                     spacing={3}
                     sx={{ alignItems: "center" }}
                   >
-                    {/* <Avatar
-                      src={candidate.photo}
-                      alt={candidate.name}
+                    <Avatar
+                      src={candidate?.photoSrc}
+                      alt={candidate?.name}
                       sx={{
                         width: 96,
                         height: 96,
                         border: "3px solid",
-                        borderColor: getPartyColor(theme, candidate.party),
+                        borderColor: getPartyColor(theme, candidate?.party),
                         boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                       }}
-                    /> */}
+                    />
                     <Stack spacing={0.5}>
                       <Typography
                         variant="h5"
@@ -334,19 +311,19 @@ export default function Summary() {
                         variant="body1"
                         sx={{ color: "text.secondary", whiteSpace: "nowrap" }}
                       >
-                        {/* {candidate?.standing} */}
+                        {candidate?.status}
                       </Typography>
                       <Stack direction="row" spacing={1}>
                         <Chip
                           label={candidate?.party}
                           size="small"
-                          // color={getChipPartyColor(candidate?.party)}
+                          color={getChipPartyColor(candidate?.party)}
                         />
-                        {/* <Chip
-                          label={candidate.since}
+                        <Chip
+                          label={candidate?.latestYear}
                           size="small"
                           variant="outlined"
-                        /> */}
+                        />
                       </Stack>
                     </Stack>
                   </Stack>
@@ -396,12 +373,17 @@ export default function Summary() {
           >
             <Card
               variant="outlined"
-              sx={{ flexGrow: 1, minWidth: 0, overflow: "hidden" }}
+              sx={{
+                flexGrow: 1,
+                minWidth: 0,
+                overflow: "hidden",
+                marginBottom: 2,
+              }}
             >
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, px: 2 }}>
                 Campaign and office timeline
               </Typography>
-              <CardContent sx={{ overflowX: "auto", ...customScrollbarSx }}>
+              <CardContent sx={{ overflowX: "scroll", ...customScrollbarSx }}>
                 <Stack
                   direction="row"
                   spacing={0}

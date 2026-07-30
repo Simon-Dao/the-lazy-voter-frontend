@@ -1,4 +1,4 @@
-const { Client } = require('pg');
+const { Client } = require("pg");
 
 async function getClient() {
   const client = new Client({
@@ -15,8 +15,11 @@ async function getClient() {
 
 exports.handler = async (event) => {
   const q = event.queryStringParameters?.q;
+  const CURRENT_YEAR = new Date().getFullYear();
+  const CURRENT_ELECTION_YEAR =
+    CURRENT_YEAR % 2 == 1 ? CURRENT_YEAR - 1 : CURRENT_YEAR;
 
-  if (!q || typeof q !== 'string' || q.trim().length === 0) {
+  if (!q || typeof q !== "string" || q.trim().length === 0) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Missing search query parameter "q"' }),
@@ -31,8 +34,6 @@ exports.handler = async (event) => {
       [`%${q}%`],
     );
 
-    // Map each legiscan_id / fec_id back to the person it belongs to,
-    // so we can attribute term/election rows to the right person later.
     const idToPerson = new Map();
     people.rows.forEach((person) => {
       (person.legiscan_ids ?? []).forEach((id) => {
@@ -53,7 +54,7 @@ exports.handler = async (event) => {
 
     const legiscanTerms = legiscanIds.length
       ? await client.query(
-          `SELECT h.people_id, MAX(h.term_end_date) AS term_end_date,
+          `SELECT * AS term_end_date,
                   lp.role, lp.district, lp.party
            FROM the_lazy_voter_serving.legiscan_term_history h
            JOIN the_lazy_voter_serving.legiscan_people lp
@@ -66,7 +67,7 @@ exports.handler = async (event) => {
 
     const fecTerms = fecIds.length
       ? await client.query(
-          `SELECT fec_id, office_full AS role, party_full AS party, state,
+          `SELECT fec_id, office_full AS role, party_full AS party, state, incumbent_challenge, district_number as district,
                   election_years -> (jsonb_array_length(election_years) - 1) AS latest_election_year
            FROM the_lazy_voter_serving.fec_candidate
            WHERE fec_id = ANY($1)`,
@@ -74,67 +75,98 @@ exports.handler = async (event) => {
         )
       : { rows: [] };
 
-    // legiscan_people.district is packed as "XX-SS-DD" — chamber code,
-    // two-letter state, and district number, e.g. "HCA-12" or "S-NY-00".
-    // Split on "-" and pull the middle segment out as the state.
     function parseLegiscanDistrict(district) {
       if (!district) return { state: null, districtNumber: null };
-      const parts = district.split('-');
+      const parts = district.split("-");
       return {
         state: parts[1] ?? null,
         districtNumber: parts[2] ?? null,
       };
     }
 
-    // Track the latest date, plus the role/district/party/state associated
-    // with that date, per person
-    const personLatestInfo = new Map();
+    function formatOffice(state, district, role) {
+      return [state, district, role].filter(Boolean).join(" ");
+    }
 
-    function updateLatest(person, date, info) {
+    // Two separate "latest" trackers. FEC always wins over legiscan for a
+    // given person, regardless of which has the more recent date — we only
+    // use date comparison to pick among multiple rows *within* the same source.
+    const legiscanLatestInfo = new Map();
+    const fecLatestInfo = new Map();
+
+    function updateLatest(map, person, date, info) {
       if (!person || !date || isNaN(date.getTime())) return;
-      const existing = personLatestInfo.get(person);
-      if (!existing || date > existing.date) {
-        personLatestInfo.set(person, { date, ...info });
+      const existing = map.get(person);
+      if (!existing || date >= existing.date) {
+        map.set(person, { date, ...info });
       }
     }
 
     legiscanTerms.rows.forEach((row) => {
       const person = idToPerson.get(row.people_id);
-      if (row.term_end_date) {
-        const endDate = new Date(row.term_end_date);
-        let electionYear = endDate.getFullYear();
-        // Terms end in January of the year AFTER the election (e.g. a term
-        // ending Jan 2027 was decided by the Nov 2026 election). Elections
-        // only happen in even years, so if the end-date year is odd, the
-        // actual election year is one less.
-        if (electionYear % 2 !== 0) {
-          electionYear -= 1;
-        }
-        const { state, districtNumber } = parseLegiscanDistrict(row.district);
-        updateLatest(
-          person,
-          new Date(`${electionYear}-01-01`),
-          { role: row.role, district: districtNumber, party: row.party, state },
-        );
+      if (!person || !row.term_end_date) return;
+
+      const endDate = new Date(row.term_end_date);
+      let electionYear = endDate.getFullYear();
+      if (electionYear % 2 !== 0) {
+        electionYear -= 1;
       }
+      const { state, districtNumber } = parseLegiscanDistrict(row.district);
+      const role = row.role === "Rep" ? "House" : "Senate";
+      const officeLabel = formatOffice(state, districtNumber, role);
+      const isCurrentTerm = endDate.getTime() > Date.now();
+      const status = isCurrentTerm
+        ? `Serving as ${officeLabel}`
+        : `Served as ${officeLabel} (term ended ${endDate.getFullYear()})`;
+
+      updateLatest(legiscanLatestInfo, person, new Date(`${electionYear}-01-01`), {
+        role,
+        district: districtNumber,
+        party: row.party == "I" ? "Independent" : row.party == "R" ? "Republican" : "Democrat",
+        state,
+        status,
+      });
     });
 
     fecTerms.rows.forEach((row) => {
       const person = idToPerson.get(row.fec_id);
-      if (row.latest_election_year) {
-        updateLatest(
-          person,
-          new Date(`${row.latest_election_year}-01-01`),
-          { role: row.role, party: row.party, state: row.state },
-        );
+      if (!person || !row.latest_election_year) return;
+
+      const IS_ELECTION_YEAR = CURRENT_YEAR === CURRENT_ELECTION_YEAR;
+      const officeLabel = formatOffice(row.state, row.district, row.role);
+      let status;
+
+      if (IS_ELECTION_YEAR && row.latest_election_year === CURRENT_ELECTION_YEAR) {
+        switch (row.incumbent_challenge) {
+          case "I":
+            status = `Running for ${officeLabel} re-election`;
+            break;
+          case "C":
+            status = `Running for ${officeLabel}`;
+            break;
+          case "O":
+            status = `Retiring from ${officeLabel} (open seat)`;
+            break;
+          default:
+            status = `Running for ${officeLabel}`;
+        }
+      } else {
+        status = `Ran for ${officeLabel} in ${row.latest_election_year}`;
       }
+
+      updateLatest(fecLatestInfo, person, new Date(`${row.latest_election_year}-01-02`), {
+        role: row.role,
+        district: row.district,
+        party: row.party,
+        state: row.state,
+        status,
+      });
     });
 
-    // Attach latestYear, role, district, party, and state onto each person.
-    // party/state fall back to the person's own general record if the
-    // latest term/candidacy row didn't carry them.
     const result = people.rows.map((person) => {
-      const latestInfo = personLatestInfo.get(person);
+      // FEC data overrides legiscan term data whenever present, regardless
+      // of date recency.
+      const latestInfo = fecLatestInfo.get(person) ?? legiscanLatestInfo.get(person);
       return {
         u_id: person.u_id,
         name: person.name,
@@ -142,6 +174,7 @@ exports.handler = async (event) => {
         role: latestInfo?.role ?? null,
         party: latestInfo?.party ?? person.party ?? null,
         state: latestInfo?.state ?? person.state ?? null,
+        status: latestInfo?.status ?? null,
       };
     });
 
@@ -153,7 +186,7 @@ exports.handler = async (event) => {
     console.error(error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: 'Search failed' }),
+      body: JSON.stringify({ message: "Search failed" }),
     };
   } finally {
     await client.end();

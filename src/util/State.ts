@@ -26,6 +26,7 @@ export type PoliticianBasicInfo = {
   role: string;
   party: string;
   state: string;
+  status: string;
 };
 
 export type NewsArticle = {
@@ -50,13 +51,15 @@ export type PoliticianDetailed = {
   role?: string;
   party?: string;
   state?: string;
+  status?: string;
   legislativeFocus?: string[];
   newsArticles?: NewsArticle[];
   timeline?: TimelineEvent[];
   billCategoriesByYear?: Record<string, DonationSlice[]>;
   topSponsorCategoriesByYear?: Record<string, SponsorCategory[]>;
   donationsByYear?: Record<string, DonationSlice[]>;
-  
+  ballotpedia?: string;
+  photoSrc?:string;
 };
 
 export const PoliticiansDetailedAtom = atom<PoliticianDetailed[]>([]);

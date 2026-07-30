@@ -70,6 +70,12 @@ export default function SideMenu({ children }: SideMenuProps) {
   const dragItemIndex = useRef<number | null>(null);
 
   useEffect(() => {
+    if (politicianBasicInfos.length == 0) {
+      setIsPoliticianSelected(false);
+    }
+  }, [politicianBasicInfos]);
+
+  useEffect(() => {
     setOpen(!isSmallScreen);
   }, [isSmallScreen]);
 
@@ -118,10 +124,29 @@ export default function SideMenu({ children }: SideMenuProps) {
     });
     setSelectedPoliticianId(politician.u_id);
 
-    setPoliticiansDetailed((prev) => [
+    // add new user to the system  
+    // legislativeFocus?: string[];
+    // newsArticles?: NewsArticle[];
+    // timeline?: TimelineEvent[];
+    // billCategoriesByYear?: Record<string, DonationSlice[]>;
+    // topSponsorCategoriesByYear?: Record<string, SponsorCategory[]>;
+    // donationsByYear?: Record<string, DonationSlice[]>;
+    let politicianObject = {
+        u_id: politician.u_id,
+        name: politician.name,
+        status: politician.status,
+        latestYear: politician.latestYear,
+        party: politician.party,
+        state: politician.state
+    }
+
+    setPoliticiansDetailed((prev : any) => [
       ...prev,
-      { u_id: politician.u_id, name: politician.name },
+      politicianObject
     ]);
+
+
+
   };
 
   const removePolitician = (u_id: string) => {

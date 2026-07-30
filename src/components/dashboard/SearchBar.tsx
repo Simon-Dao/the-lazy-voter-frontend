@@ -114,6 +114,7 @@ export default function SearchBar({ onSelectPolitician }: SearchBarProps) {
       role: selected.role,
       party: selected.party,
       state: selected.state,
+      status: selected.status
     });
 
     // Reset after adding so the field is ready for the next search.
