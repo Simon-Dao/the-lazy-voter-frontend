@@ -146,7 +146,7 @@ export default function SideMenu({ children }: SideMenuProps) {
         `https://thelazyvoter.org/api/politicians/${politician.u_id}/timeline`,
       );
       if (!res.ok) {
-        throw new Error(`Timeline fetch failed: ${res.error}`);
+        throw new Error(`Timeline fetch failed: ${res.status}`);
       }
       const data = await res.json();
       politicianObject = {
