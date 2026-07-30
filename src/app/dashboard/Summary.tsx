@@ -41,7 +41,14 @@ import {
   SponsorCategory,
 } from "#/util/State";
 
-const timeline: TimelineEvent[] = [];
+const timeline: TimelineEvent[] = [
+  { "year": "2010", "label": "Ran for House (TN-3)", "type": "campaign" },
+    { "year": "2011", "label": "Began term as House (TN-3)", "type": "term" },
+    { "year": "2012", "label": "Ran for House (TN-3)", "type": "campaign" },
+    { "year": "2013", "label": "Began term as House (TN-3)", "type": "term" },
+    { "year": "2024", "label": "Ran for re-election to House (TN-3)", "type": "campaign" },
+    { "year": "2025", "label": "Began term as House (TN-3)", "type": "term" }
+];
 
 const donationsByYear: Record<string, DonationSlice[]> = {
   all: [
@@ -70,7 +77,7 @@ const donationsByYear: Record<string, DonationSlice[]> = {
   ],
 };
 
-const billCategoriesByYear: Record<string, DonationSlice[]> = {
+const topBillCategoriesByYear: Record<string, DonationSlice[]> = {
   all: [
     { id: 0, label: "Isreal", value: 15 },
     { id: 1, label: "Big Pharma", value: 2 },
@@ -219,7 +226,8 @@ export default function Summary() {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isPortrait = useMediaQuery("(orientation: portrait)");
   const candidateSummary = "this candidate is good";
-  const [year, setYear] = useState<string>("all");
+  const [electionYear, setElectionYear] = useState<string>("all");
+  const [termYear, setTermYear] = useState<string>("all");
   const [personSelected, setPersonSelectedAtom] = useAtom(
     IsPoliticianSelectedAtom,
   );
@@ -238,9 +246,14 @@ export default function Summary() {
   const [show, setShow] = useState(false);
   useEffect(() => setShow(true), []);
 
-  const donations = donationsByYear[year];
-  const billCategories = billCategoriesByYear[year];
-  const topSponsorCategories = topSponsorCategoriesByYear[year];
+  const topBillCategories = topBillCategoriesByYear[termYear];
+  const totalSponsored = topBillCategories.reduce(
+    (sum: number, d: DonationSlice) => sum + d.value,
+    0,
+  );
+  
+  const donations = donationsByYear[electionYear];
+  const topDonationCategories = topSponsorCategoriesByYear[termYear];
   const totalDonations = donations.reduce(
     (sum: number, d: DonationSlice) => sum + d.value,
     0,
@@ -389,7 +402,7 @@ export default function Summary() {
                   spacing={0}
                   sx={{ width: "max-content", minWidth: "100%" }}
                 >
-                  {timeline.map((event, index) => (
+                  {candidate?.timeline && candidate.timeline.map((event, index) => (
                     <Stack
                       key={index}
                       sx={{ width: 140, flexShrink: 0, alignItems: "center" }}
@@ -401,7 +414,7 @@ export default function Summary() {
                         <Box
                           sx={{
                             flexGrow: 1,
-                            height: "1px",
+                            height: "2px",
                             bgcolor: index > 0 ? "divider" : "transparent",
                           }}
                         />
@@ -420,9 +433,9 @@ export default function Summary() {
                         <Box
                           sx={{
                             flexGrow: 1,
-                            height: "1px",
+                            height: "2px",
                             bgcolor:
-                              index < timeline.length - 1
+                              index < (candidate?.timeline?.length ?? 0) - 1
                                 ? "divider"
                                 : "transparent",
                           }}
@@ -475,8 +488,8 @@ export default function Summary() {
                         </Button>
                       </Typography>
                       <Tabs
-                        value={year}
-                        onChange={(_, value: string) => setYear(value)}
+                        value={termYear}
+                        onChange={(_, value: string) => setTermYear(value)}
                         variant="scrollable"
                         scrollButtons={false}
                         sx={{ minHeight: 32, mb: 1 }}
@@ -493,7 +506,7 @@ export default function Summary() {
                       <PieChart
                         series={[
                           {
-                            data: billCategories,
+                            data: topBillCategories,
                             innerRadius: 40,
                             paddingAngle: 1,
                             cornerRadius: 2,
@@ -518,31 +531,40 @@ export default function Summary() {
                           mt: 1,
                         }}
                       >
-                        Total: ${totalDonations.toLocaleString()}
+                        Bills Sponsored: {totalSponsored.toLocaleString()}
                       </Typography>
                       <Divider sx={{ my: 1.5 }} />
-                      <Stack spacing={0.75}>
-                        {donations.map((d) => (
-                          <Stack
-                            key={d.id}
-                            direction="row"
-                            sx={{ justifyContent: "space-between" }}
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ fontWeight: 600, mb: 0.5 }}
+                      >
+                        Top legislation categories
+                      </Typography>
+                      <List disablePadding>
+                        {topDonationCategories.map((cat, index) => (
+                          <ListItem
+                            key={cat.name}
+                            disablePadding
+                            sx={{
+                              py: 0.75,
+                              justifyContent: "space-between",
+                              borderBottom:
+                                index < topDonationCategories.length - 1
+                                  ? "1px solid"
+                                  : "none",
+                              borderColor: "divider",
+                            }}
                           >
+                            <Typography variant="body2">{cat.name}</Typography>
                             <Typography
                               variant="body2"
                               sx={{ color: "text.secondary" }}
                             >
-                              {d.label}
+                              {cat.amount}
                             </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{ fontWeight: 500 }}
-                            >
-                              ${d.value.toLocaleString()}
-                            </Typography>
-                          </Stack>
+                          </ListItem>
                         ))}
-                      </Stack>
+                      </List>
                     </CardContent>
                   </Card>
                 </Grow>
@@ -572,8 +594,8 @@ export default function Summary() {
                         </Button>
                       </Typography>
                       <Tabs
-                        value={year}
-                        onChange={(_, value: string) => setYear(value)}
+                        value={electionYear}
+                        onChange={(_, value: string) => setElectionYear(value)}
                         variant="scrollable"
                         scrollButtons={false}
                         sx={{ minHeight: 32, mb: 1 }}
@@ -623,10 +645,10 @@ export default function Summary() {
                         variant="subtitle2"
                         sx={{ fontWeight: 600, mb: 0.5 }}
                       >
-                        Top sponsor categories
+                        Top donation categories
                       </Typography>
                       <List disablePadding>
-                        {topSponsorCategories.map((cat, index) => (
+                        {topDonationCategories.map((cat, index) => (
                           <ListItem
                             key={cat.name}
                             disablePadding
@@ -634,7 +656,7 @@ export default function Summary() {
                               py: 0.75,
                               justifyContent: "space-between",
                               borderBottom:
-                                index < topSponsorCategories.length - 1
+                                index < topDonationCategories.length - 1
                                   ? "1px solid"
                                   : "none",
                               borderColor: "divider",
