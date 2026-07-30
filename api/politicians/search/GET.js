@@ -54,7 +54,7 @@ exports.handler = async (event) => {
 
     const legiscanTerms = legiscanIds.length
       ? await client.query(
-          `SELECT * AS term_end_date,
+          `SELECT h.people_id, MAX(h.term_end_date) AS term_end_date,
                   lp.role, lp.district, lp.party
            FROM the_lazy_voter_serving.legiscan_term_history h
            JOIN the_lazy_voter_serving.legiscan_people lp

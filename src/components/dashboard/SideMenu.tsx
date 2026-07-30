@@ -117,7 +117,7 @@ export default function SideMenu({ children }: SideMenuProps) {
   };
 
   // Called by SearchBar when the user picks a politician from search results.
-  const addPolitician = (politician: PoliticianBasicInfo) => {
+  const addPolitician = async (politician: PoliticianBasicInfo) => {
     setPoliticianBasicInfos((prev) => {
       if (prev.some((p) => p.u_id === politician.u_id)) return prev;
       return [...prev, politician];
@@ -137,16 +137,30 @@ export default function SideMenu({ children }: SideMenuProps) {
         status: politician.status,
         latestYear: politician.latestYear,
         party: politician.party,
-        state: politician.state
+        state: politician.state,
+        timeline: null
+    }
+
+    try {
+      const res = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/timeline`,
+      );
+      if (!res.ok) {
+        throw new Error(`Timeline fetch failed: ${res.error}`);
+      }
+      const data = await res.json();
+      politicianObject = {
+        ...politicianObject,
+        timeline: data.timeline,
+      };
+    } catch (error) {
+      console.error("Failed to fetch timeline for", politician.u_id, error);
     }
 
     setPoliticiansDetailed((prev : any) => [
       ...prev,
       politicianObject
     ]);
-
-
-
   };
 
   const removePolitician = (u_id: string) => {

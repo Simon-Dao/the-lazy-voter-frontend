@@ -1,0 +1,23 @@
+[
+  { year: "2010", label: "Ran for House (TN-3)", type: "campaign" },
+  { year: "2011", label: "Began term as House (TN-3)", type: "term" },
+  { year: "2012", label: "Ran for House (TN-3)", type: "campaign" },
+  { year: "2013", label: "Began term as House (TN-3)", type: "term" },
+  { year: "2014", label: "Ran for House (TN-3)", type: "campaign" },
+  { year: "2015", label: "Began term as House (TN-3)", type: "term" },
+  { year: "2016", label: "Ran for House (TN-3)", type: "campaign" },
+  { year: "2017", label: "Began term as House (TN-3)", type: "term" },
+  { year: "2018", label: "Ran for House (TN-3)", type: "campaign" },
+  { year: "2019", label: "Began term as House (TN-3)", type: "term" },
+  { year: "2020", label: "Ran for House (TN-3)", type: "campaign" },
+  { year: "2021", label: "Began term as House (TN-3)", type: "term" },
+  { year: "2022", label: "Ran for House (TN-3)", type: "campaign" },
+  { year: "2023", label: "Began term as House (TN-3)", type: "term" },
+  { year: "2024", label: "Ran for House (TN-3)", type: "campaign" },
+  { year: "2025", label: "Began term as House (TN-3)", type: "term" },
+  {
+    year: "2026",
+    label: "Ran for re-election to House (TN-3)",
+    type: "campaign",
+  },
+];
