@@ -9,7 +9,7 @@ export const peopleSearchResults = atom([]);
 // Summary
 export type DonationSlice = {
   id: number;
-  label: string;
+  name: string;
   value: number;
 };
 
@@ -36,9 +36,9 @@ export type NewsArticle = {
   href: string;
 };
 
-export type SponsorCategory = {
+export type BillCategory = {
   name: string;
-  amount: string;
+  value: number;
 };
 
 export const IsPoliticianSelectedAtom = atom(false);
@@ -56,7 +56,7 @@ export type PoliticianDetailed = {
   newsArticles?: NewsArticle[];
   timeline?: TimelineEvent[];
   billCategoriesByYear?: Record<string, DonationSlice[]>;
-  topSponsorCategoriesByYear?: Record<string, SponsorCategory[]>;
+  topSponsorCategoriesByYear?: Record<string, BillCategory[]>;
   donationsByYear?: Record<string, DonationSlice[]>;
   ballotpedia?: string;
   photoSrc?:string;

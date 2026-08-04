@@ -19,11 +19,13 @@ import {
   List,
   ListItem,
   ListItemText,
+  CircularProgress,
+  Skeleton,
+  LinearProgress,
 } from "@mui/material";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { useAtom } from "jotai";
 import SummaryEmptyState from "#/components/dashboard/SummaryEmptyState";
-import { DashboardSideMenuTabAtom } from "#/util/State";
 import ArrowOutwardOutlinedIcon from "@mui/icons-material/ArrowOutwardOutlined";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -38,97 +40,75 @@ import {
   DonationSlice,
   TimelineEvent,
   NewsArticle,
-  SponsorCategory,
+  BillCategory, 
+  DashboardSideMenuTabAtom
 } from "#/util/State";
 
 const timeline: TimelineEvent[] = [
-  { "year": "2010", "label": "Ran for House (TN-3)", "type": "campaign" },
-    { "year": "2011", "label": "Began term as House (TN-3)", "type": "term" },
-    { "year": "2012", "label": "Ran for House (TN-3)", "type": "campaign" },
-    { "year": "2013", "label": "Began term as House (TN-3)", "type": "term" },
-    { "year": "2024", "label": "Ran for re-election to House (TN-3)", "type": "campaign" },
-    { "year": "2025", "label": "Began term as House (TN-3)", "type": "term" }
+  { year: "2010", label: "Ran for House (TN-3)", type: "campaign" },
+  { year: "2011", label: "Began term as House (TN-3)", type: "term" },
+  { year: "2012", label: "Ran for House (TN-3)", type: "campaign" },
+  { year: "2013", label: "Began term as House (TN-3)", type: "term" },
+  {
+    year: "2024",
+    label: "Ran for re-election to House (TN-3)",
+    type: "campaign",
+  },
+  { year: "2025", label: "Began term as House (TN-3)", type: "term" },
 ];
 
-const donationsByYear: Record<string, DonationSlice[]> = {
-  all: [
-    { id: 0, label: "Individual donors", value: 1250000 },
-    { id: 1, label: "PACs", value: 480000 },
-    { id: 2, label: "Party committee", value: 210000 },
-    { id: 3, label: "Self-funded", value: 30000 },
-  ],
-  "2024": [
-    { id: 0, label: "Individual donors", value: 520000 },
-    { id: 1, label: "PACs", value: 190000 },
-    { id: 2, label: "Party committee", value: 90000 },
-    { id: 3, label: "Self-funded", value: 10000 },
-  ],
-  "2023": [
-    { id: 0, label: "Individual donors", value: 410000 },
-    { id: 1, label: "PACs", value: 160000 },
-    { id: 2, label: "Party committee", value: 70000 },
-    { id: 3, label: "Self-funded", value: 15000 },
-  ],
-  "2022": [
-    { id: 0, label: "Individual donors", value: 320000 },
-    { id: 1, label: "PACs", value: 130000 },
-    { id: 2, label: "Party committee", value: 50000 },
-    { id: 3, label: "Self-funded", value: 5000 },
-  ],
-};
-
-const topBillCategoriesByYear: Record<string, DonationSlice[]> = {
-  all: [
-    { id: 0, label: "Isreal", value: 15 },
-    { id: 1, label: "Big Pharma", value: 2 },
-    { id: 2, label: "Killing Kids", value: 1 },
-    { id: 3, label: "Epstein", value: 14 },
-  ],
-  "2024": [
-    { id: 0, label: "Isreal", value: 5 },
-    { id: 1, label: "Big Pharma", value: 1 },
-    { id: 2, label: "Killing Kids", value: 1 },
-    { id: 3, label: "Epstein", value: 7 },
-  ],
-  "2023": [
-    { id: 0, label: "Isreal", value: 3 },
-    { id: 1, label: "Big Pharma", value: 1 },
-    { id: 2, label: "Killing Kids", value: 0 },
-    { id: 3, label: "Epstein", value: 7 },
-  ],
-  "2022": [
-    { id: 0, label: "Isreal", value: 7 },
-    { id: 1, label: "Big Pharma", value: 0 },
-    { id: 2, label: "Killing Kids", value: 0 },
-    { id: 3, label: "Epstein", value: 0 },
-  ],
-};
-
 // Top sponsor categories now vary by year, matching the donations tab structure
-const topSponsorCategoriesByYear: Record<string, SponsorCategory[]> = {
+const topDonationCategoriesByYear: Record<string, DonationSlice[]> = {
   all: [
-    { name: "Healthcare", amount: "$410,000" },
-    { name: "Technology", amount: "$275,000" },
-    { name: "Energy", amount: "$190,000" },
-    { name: "Finance", amount: "$140,000" },
+    { id: 1,name: "Healthcare", value: 410000 },
+    { id: 1,name: "Technology", value: 275000 },
+    { id: 1,name: "Energy", value: 190000 },
+    { id: 1,name: "Finance", value: 140000 },
   ],
   "2024": [
-    { name: "Healthcare", amount: "$170,000" },
-    { name: "Technology", amount: "$120,000" },
-    { name: "Energy", amount: "$80,000" },
-    { name: "Finance", amount: "$60,000" },
+    { id: 1,name: "Healthcare", value: 170000 },
+    { id: 1,name: "Technology", value: 120000 },
+    { id: 1,name: "Energy", value: 80000 },
+    { id: 1,name: "Finance", value: 60000 },
   ],
   "2023": [
-    { name: "Healthcare", amount: "$140,000" },
-    { name: "Technology", amount: "$95,000" },
-    { name: "Energy", amount: "$65,000" },
-    { name: "Finance", amount: "$45,000" },
+    { id: 1,name: "Healthcare", value: 140000 },
+    { id: 1,name: "Technology", value: 95000 },
+    { id: 1,name: "Energy", value: 65000 },
+    { id: 1,name: "Finance", value: 45000 },
   ],
   "2022": [
-    { name: "Healthcare", amount: "$100,000" },
-    { name: "Technology", amount: "$60,000" },
-    { name: "Energy", amount: "$45,000" },
-    { name: "Finance", amount: "$35,000" },
+    { id: 1,name: "Healthcare", value: 100000 },
+    { id: 1,name: "Technology", value: 60000 },
+    { id: 1,name: "Energy", value: 45000 },
+    { id: 1,name: "Finance", value: 35000 },
+  ],
+};
+
+const topBillCategoriesByYear: Record<string, BillCategory[]> = {
+  all: [
+    { name: "Isreal", value: 15 },
+    { name: "Big Pharma", value: 2 },
+    { name: "Killing Kids", value: 1 },
+    { name: "Epstein", value: 14 },
+  ],
+  "2024": [
+    { name: "Isreal", value: 5 },
+    { name: "Big Pharma", value: 1 },
+    { name: "Killing Kids", value: 1 },
+    { name: "Epstein", value: 7 },
+  ],
+  "2023": [
+    { name: "Isreal", value: 3 },
+    { name: "Big Pharma", value: 1 },
+    { name: "Killing Kids", value: 0 },
+    { name: "Epstein", value: 7 },
+  ],
+  "2022": [
+    { name: "Isreal", value: 7 },
+    { name: "Big Pharma", value: 0 },
+    { name: "Killing Kids", value: 0 },
+    { name: "Epstein", value: 0 },
   ],
 };
 
@@ -225,7 +205,7 @@ export default function Summary() {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isPortrait = useMediaQuery("(orientation: portrait)");
-  const candidateSummary = "this candidate is good";
+  const candidateSummary = null;
   const [electionYear, setElectionYear] = useState<string>("all");
   const [termYear, setTermYear] = useState<string>("all");
   const [personSelected, setPersonSelectedAtom] = useAtom(
@@ -248,20 +228,22 @@ export default function Summary() {
 
   const topBillCategories = topBillCategoriesByYear[termYear];
   const totalSponsored = topBillCategories.reduce(
-    (sum: number, d: DonationSlice) => sum + d.value,
+    (sum, d) => sum + d.value,
     0,
   );
-  
-  const donations = donationsByYear[electionYear];
-  const topDonationCategories = topSponsorCategoriesByYear[termYear];
-  const totalDonations = donations.reduce(
-    (sum: number, d: DonationSlice) => sum + d.value,
-    0,
-  );
+
+  const donations = topDonationCategoriesByYear[electionYear];
+  const topDonationCategories = topDonationCategoriesByYear[electionYear];
+  const totalDonations = donations.reduce((sum, d) => sum + d.value, 0);
 
   const [candidate, setSelectedPoliticianDetailed] = useAtom(
     SelectedPoliticianDetailedAtom,
   );
+
+  // A single readiness flag drives every skeleton/loading state below.
+  // Once the candidate record has come back from the API, everything
+  // derived from it (timeline, charts, lists, news) can render for real.
+  const isLoading = !candidate?.name;
 
   return (
     <>
@@ -302,41 +284,79 @@ export default function Summary() {
                     spacing={3}
                     sx={{ alignItems: "center" }}
                   >
-                    <Avatar
-                      src={candidate?.photoSrc}
-                      alt={candidate?.name}
-                      sx={{
-                        width: 96,
-                        height: 96,
-                        border: "3px solid",
-                        borderColor: getPartyColor(theme, candidate?.party),
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                      }}
-                    />
+                    {candidate?.photoSrc ? (
+                      <Avatar
+                        src={candidate?.photoSrc}
+                        alt={candidate?.name}
+                        sx={{
+                          width: 96,
+                          height: 96,
+                          border: "3px solid",
+                          borderColor: getPartyColor(theme, candidate?.party),
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                        }}
+                      />
+                    ) : (
+                      <Skeleton variant="circular">
+                        <Avatar
+                          sx={{
+                            width: 96,
+                            height: 96,
+                            border: "3px solid",
+                            borderColor: getPartyColor(theme, candidate?.party),
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                          }}
+                        />
+                      </Skeleton>
+                    )}
+
                     <Stack spacing={0.5}>
-                      <Typography
-                        variant="h5"
-                        sx={{ fontWeight: 700, whiteSpace: "nowrap" }}
-                      >
-                        {candidate?.name}
-                      </Typography>
-                      <Typography
-                        variant="body1"
-                        sx={{ color: "text.secondary", whiteSpace: "nowrap" }}
-                      >
-                        {candidate?.status}
-                      </Typography>
+                      {candidate?.name ? (
+                        <Typography
+                          variant="h5"
+                          sx={{ fontWeight: 700, whiteSpace: "nowrap" }}
+                        >
+                          {candidate?.name}
+                        </Typography>
+                      ) : (
+                        <Skeleton width="140px">
+                          <Typography variant="h5">.</Typography>
+                        </Skeleton>
+                      )}
+
+                      {candidate?.status ? (
+                        <Typography
+                          variant="body1"
+                          sx={{ color: "text.secondary", whiteSpace: "nowrap" }}
+                        >
+                          {candidate?.status}
+                        </Typography>
+                      ) : (
+                        <Skeleton width="110px">
+                          <Typography variant="body1">.</Typography>
+                        </Skeleton>
+                      )}
+
                       <Stack direction="row" spacing={1}>
-                        <Chip
-                          label={candidate?.party}
-                          size="small"
-                          color={getChipPartyColor(candidate?.party)}
-                        />
-                        <Chip
-                          label={candidate?.latestYear}
-                          size="small"
-                          variant="outlined"
-                        />
+                        {candidate?.status ? (
+                          <>
+                            <Chip
+                              label={candidate?.party}
+                              size="small"
+                              color={getChipPartyColor(candidate?.party)}
+                            />
+                            <Chip
+                              label={candidate?.latestYear}
+                              size="small"
+                              variant="outlined"
+                            />
+                          </>
+                        ) : (
+                          <>
+                            <Skeleton variant="rounded" width={60} height={24} />
+                            <Skeleton variant="rounded" width={60} height={24} />
+                          </>
+                        )}
                       </Stack>
                     </Stack>
                   </Stack>
@@ -353,6 +373,7 @@ export default function Summary() {
                 variant="outlined"
                 sx={{ flexGrow: 1, minWidth: 0, overflow: "hidden" }}
               >
+                {}
                 <Typography
                   variant="h6"
                   sx={{
@@ -371,7 +392,21 @@ export default function Summary() {
                     color="textSecondary"
                     sx={{ fontWeight: 600, mb: 2, px: 2 }}
                   >
-                    {candidateSummary}
+                    {candidateSummary ? (
+                      candidateSummary
+                    ) : (
+                      <Stack spacing={1} sx={{ width: "100%", py: 1 }}>
+                        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                          <CircularProgress size="1.1rem" aria-label="Loading…" />
+                          <Typography variant="caption" color="text.secondary">
+                            Generating summary…
+                          </Typography>
+                        </Stack>
+                        <Skeleton variant="text" width="95%" />
+                        <Skeleton variant="text" width="88%" />
+                        <Skeleton variant="text" width="70%" />
+                      </Stack>
+                    )}
                   </Typography>
                 </CardContent>
               </Card>
@@ -391,6 +426,8 @@ export default function Summary() {
                 minWidth: 0,
                 overflow: "hidden",
                 marginBottom: 2,
+                minHeight: "100px",
+                transition: "200ms",
               }}
             >
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, px: 2 }}>
@@ -402,63 +439,80 @@ export default function Summary() {
                   spacing={0}
                   sx={{ width: "max-content", minWidth: "100%" }}
                 >
-                  {candidate?.timeline && candidate.timeline.map((event, index) => (
-                    <Stack
-                      key={index}
-                      sx={{ width: 140, flexShrink: 0, alignItems: "center" }}
-                    >
+                  {candidate?.timeline ? (
+                    candidate.timeline.map((event, index) => (
                       <Stack
-                        direction="row"
-                        sx={{ width: "100%", alignItems: "center" }}
+                        key={index}
+                        sx={{ width: 140, flexShrink: 0, alignItems: "center" }}
                       >
-                        <Box
-                          sx={{
-                            flexGrow: 1,
-                            height: "2px",
-                            bgcolor: index > 0 ? "divider" : "transparent",
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            flexShrink: 0,
-                            bgcolor:
-                              event.type === "term"
-                                ? "primary.main"
-                                : "text.disabled",
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            flexGrow: 1,
-                            height: "2px",
-                            bgcolor:
-                              index < (candidate?.timeline?.length ?? 0) - 1
-                                ? "divider"
-                                : "transparent",
-                          }}
-                        />
-                      </Stack>
-                      <Stack sx={{ alignItems: "center", px: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {event.year}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: "text.secondary",
-                            textAlign: "center",
-                            whiteSpace: "normal",
-                            wordBreak: "break-word",
-                          }}
+                        <Stack
+                          direction="row"
+                          sx={{ width: "100%", alignItems: "center" }}
                         >
-                          {event.label}
-                        </Typography>
+                          <Box
+                            sx={{
+                              flexGrow: 1,
+                              height: "2px",
+                              bgcolor: index > 0 ? "divider" : "transparent",
+                            }}
+                          />
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: "50%",
+                              flexShrink: 0,
+                              bgcolor:
+                                event.type === "term"
+                                  ? "primary.main"
+                                  : "text.disabled",
+                            }}
+                          />
+                          <Box
+                            sx={{
+                              flexGrow: 1,
+                              height: "2px",
+                              bgcolor:
+                                index < (candidate?.timeline?.length ?? 0) - 1
+                                  ? "divider"
+                                  : "transparent",
+                            }}
+                          />
+                        </Stack>
+                        <Stack sx={{ alignItems: "center", px: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {event.year}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: "text.secondary",
+                              textAlign: "center",
+                              whiteSpace: "normal",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {event.label}
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                    ))
+                  ) : (
+                    <Stack sx={{ width: "100%", my: 1 }} spacing={1}>
+                      <Box sx={{ width: "100%" }}>
+                        <LinearProgress aria-label="Loading…" />
+                      </Box>
+                      <Stack direction="row" spacing={4} sx={{ px: 1 }}>
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <Stack key={i} sx={{ alignItems: "center", width: 140 }}>
+                            <Skeleton variant="circular" width={10} height={10} />
+                            <Skeleton width={50} sx={{ mt: 0.5 }} />
+                            <Skeleton width={100} />
+                          </Stack>
+                        ))}
                       </Stack>
                     </Stack>
-                  ))}
+                  )}
                 </Stack>
               </CardContent>
             </Card>
@@ -477,62 +531,84 @@ export default function Summary() {
                   <Card variant="outlined">
                     <CardContent>
                       <Typography sx={{ fontWeight: 600, mb: 1 }}>
-                        <Button
-                          variant="contained"
-                          endIcon={<ArrowOutwardOutlinedIcon />}
-                          onClick={() => {
-                            setTab(1);
+                        {isLoading ? (
+                          <Skeleton variant="rounded" width={260} height={36} />
+                        ) : (
+                          <Button
+                            variant="contained"
+                            endIcon={<ArrowOutwardOutlinedIcon />}
+                            onClick={() => {
+                              setTab(1);
+                            }}
+                          >
+                            Bills Sponsored / Co-sponsored
+                          </Button>
+                        )}
+                      </Typography>
+                      {isLoading ? (
+                        <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <Skeleton key={i} width={60} height={32} />
+                          ))}
+                        </Stack>
+                      ) : (
+                        <Tabs
+                          value={termYear}
+                          onChange={(_, value: string) => setTermYear(value)}
+                          variant="scrollable"
+                          scrollButtons={false}
+                          sx={{ minHeight: 32, mb: 1 }}
+                        >
+                          <Tab
+                            label="All years"
+                            value="all"
+                            sx={{ minHeight: 32 }}
+                          />
+                          <Tab label="2024" value="2024" sx={{ minHeight: 32 }} />
+                          <Tab label="2023" value="2023" sx={{ minHeight: 32 }} />
+                          <Tab label="2022" value="2022" sx={{ minHeight: 32 }} />
+                        </Tabs>
+                      )}
+                      {isLoading ? (
+                        <Stack sx={{ alignItems: "center", py: 2 }}>
+                          <Skeleton variant="circular" width={180} height={180} />
+                        </Stack>
+                      ) : (
+                        <PieChart
+                          series={[
+                            {
+                              data: topBillCategories,
+                              innerRadius: 40,
+                              paddingAngle: 1,
+                              cornerRadius: 2,
+                            },
+                          ]}
+                          height={260}
+                          slotProps={{
+                            legend: {
+                              direction: "horizontal",
+                              position: {
+                                vertical: "bottom",
+                                horizontal: "center",
+                              },
+                            },
+                          }}
+                        />
+                      )}
+                      {isLoading ? (
+                        <Skeleton width="50%" sx={{ mx: "auto", mt: 1 }} />
+                      ) : (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "text.secondary",
+                            textAlign: "center",
+                            mt: 1,
                           }}
                         >
-                          Bills Sponsored / Co-sponsored
-                        </Button>
-                      </Typography>
-                      <Tabs
-                        value={termYear}
-                        onChange={(_, value: string) => setTermYear(value)}
-                        variant="scrollable"
-                        scrollButtons={false}
-                        sx={{ minHeight: 32, mb: 1 }}
-                      >
-                        <Tab
-                          label="All years"
-                          value="all"
-                          sx={{ minHeight: 32 }}
-                        />
-                        <Tab label="2024" value="2024" sx={{ minHeight: 32 }} />
-                        <Tab label="2023" value="2023" sx={{ minHeight: 32 }} />
-                        <Tab label="2022" value="2022" sx={{ minHeight: 32 }} />
-                      </Tabs>
-                      <PieChart
-                        series={[
-                          {
-                            data: topBillCategories,
-                            innerRadius: 40,
-                            paddingAngle: 1,
-                            cornerRadius: 2,
-                          },
-                        ]}
-                        height={260}
-                        slotProps={{
-                          legend: {
-                            direction: "horizontal",
-                            position: {
-                              vertical: "bottom",
-                              horizontal: "center",
-                            },
-                          },
-                        }}
-                      />
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                          textAlign: "center",
-                          mt: 1,
-                        }}
-                      >
-                        Bills Sponsored: {totalSponsored.toLocaleString()}
-                      </Typography>
+                          Bills Sponsored: {totalSponsored.toLocaleString()}
+                        </Typography>
+                      )}
                       <Divider sx={{ my: 1.5 }} />
                       <Typography
                         variant="subtitle2"
@@ -541,29 +617,45 @@ export default function Summary() {
                         Top legislation categories
                       </Typography>
                       <List disablePadding>
-                        {topDonationCategories.map((cat, index) => (
-                          <ListItem
-                            key={cat.name}
-                            disablePadding
-                            sx={{
-                              py: 0.75,
-                              justifyContent: "space-between",
-                              borderBottom:
-                                index < topDonationCategories.length - 1
-                                  ? "1px solid"
-                                  : "none",
-                              borderColor: "divider",
-                            }}
-                          >
-                            <Typography variant="body2">{cat.name}</Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{ color: "text.secondary" }}
-                            >
-                              {cat.amount}
-                            </Typography>
-                          </ListItem>
-                        ))}
+                        {isLoading
+                          ? Array.from({ length: 4 }).map((_, index) => (
+                              <ListItem
+                                key={index}
+                                disablePadding
+                                sx={{
+                                  py: 0.75,
+                                  justifyContent: "space-between",
+                                  borderBottom: index < 3 ? "1px solid" : "none",
+                                  borderColor: "divider",
+                                }}
+                              >
+                                <Skeleton width="45%" />
+                                <Skeleton width="20%" />
+                              </ListItem>
+                            ))
+                          : topBillCategories.map((cat, index) => (
+                              <ListItem
+                                key={cat.name}
+                                disablePadding
+                                sx={{
+                                  py: 0.75,
+                                  justifyContent: "space-between",
+                                  borderBottom:
+                                    index < topBillCategories.length - 1
+                                      ? "1px solid"
+                                      : "none",
+                                  borderColor: "divider",
+                                }}
+                              >
+                                <Typography variant="body2">{cat.name}</Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ color: "text.secondary" }}
+                                >
+                                  {cat.value}
+                                </Typography>
+                              </ListItem>
+                            ))}
                       </List>
                     </CardContent>
                   </Card>
@@ -583,62 +675,84 @@ export default function Summary() {
                   <Card variant="outlined">
                     <CardContent>
                       <Typography sx={{ fontWeight: 600, mb: 1 }}>
-                        <Button
-                          variant="contained"
-                          endIcon={<ArrowOutwardOutlinedIcon />}
-                          onClick={() => {
-                            setTab(2);
+                        {isLoading ? (
+                          <Skeleton variant="rounded" width={220} height={36} />
+                        ) : (
+                          <Button
+                            variant="contained"
+                            endIcon={<ArrowOutwardOutlinedIcon />}
+                            onClick={() => {
+                              setTab(2);
+                            }}
+                          >
+                            Campaign Donations
+                          </Button>
+                        )}
+                      </Typography>
+                      {isLoading ? (
+                        <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <Skeleton key={i} width={60} height={32} />
+                          ))}
+                        </Stack>
+                      ) : (
+                        <Tabs
+                          value={electionYear}
+                          onChange={(_, value: string) => setElectionYear(value)}
+                          variant="scrollable"
+                          scrollButtons={false}
+                          sx={{ minHeight: 32, mb: 1 }}
+                        >
+                          <Tab
+                            label="All years"
+                            value="all"
+                            sx={{ minHeight: 32 }}
+                          />
+                          <Tab label="2024" value="2024" sx={{ minHeight: 32 }} />
+                          <Tab label="2023" value="2023" sx={{ minHeight: 32 }} />
+                          <Tab label="2022" value="2022" sx={{ minHeight: 32 }} />
+                        </Tabs>
+                      )}
+                      {isLoading ? (
+                        <Stack sx={{ alignItems: "center", py: 2 }}>
+                          <Skeleton variant="circular" width={180} height={180} />
+                        </Stack>
+                      ) : (
+                        <PieChart
+                          series={[
+                            {
+                              data: donations,
+                              innerRadius: 40,
+                              paddingAngle: 1,
+                              cornerRadius: 2,
+                            },
+                          ]}
+                          height={260}
+                          slotProps={{
+                            legend: {
+                              direction: "horizontal",
+                              position: {
+                                vertical: "bottom",
+                                horizontal: "center",
+                              },
+                            },
+                          }}
+                        />
+                      )}
+                      {isLoading ? (
+                        <Skeleton width="40%" sx={{ mx: "auto", mt: 1 }} />
+                      ) : (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "text.secondary",
+                            textAlign: "center",
+                            mt: 1,
                           }}
                         >
-                          Campaign Donations
-                        </Button>
-                      </Typography>
-                      <Tabs
-                        value={electionYear}
-                        onChange={(_, value: string) => setElectionYear(value)}
-                        variant="scrollable"
-                        scrollButtons={false}
-                        sx={{ minHeight: 32, mb: 1 }}
-                      >
-                        <Tab
-                          label="All years"
-                          value="all"
-                          sx={{ minHeight: 32 }}
-                        />
-                        <Tab label="2024" value="2024" sx={{ minHeight: 32 }} />
-                        <Tab label="2023" value="2023" sx={{ minHeight: 32 }} />
-                        <Tab label="2022" value="2022" sx={{ minHeight: 32 }} />
-                      </Tabs>
-                      <PieChart
-                        series={[
-                          {
-                            data: donations,
-                            innerRadius: 40,
-                            paddingAngle: 1,
-                            cornerRadius: 2,
-                          },
-                        ]}
-                        height={260}
-                        slotProps={{
-                          legend: {
-                            direction: "horizontal",
-                            position: {
-                              vertical: "bottom",
-                              horizontal: "center",
-                            },
-                          },
-                        }}
-                      />
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                          textAlign: "center",
-                          mt: 1,
-                        }}
-                      >
-                        Total: ${totalDonations.toLocaleString()}
-                      </Typography>
+                          Total: ${totalDonations.toLocaleString()}
+                        </Typography>
+                      )}
 
                       <Divider sx={{ my: 1.5 }} />
                       <Typography
@@ -648,29 +762,45 @@ export default function Summary() {
                         Top donation categories
                       </Typography>
                       <List disablePadding>
-                        {topDonationCategories.map((cat, index) => (
-                          <ListItem
-                            key={cat.name}
-                            disablePadding
-                            sx={{
-                              py: 0.75,
-                              justifyContent: "space-between",
-                              borderBottom:
-                                index < topDonationCategories.length - 1
-                                  ? "1px solid"
-                                  : "none",
-                              borderColor: "divider",
-                            }}
-                          >
-                            <Typography variant="body2">{cat.name}</Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{ color: "text.secondary" }}
-                            >
-                              {cat.amount}
-                            </Typography>
-                          </ListItem>
-                        ))}
+                        {isLoading
+                          ? Array.from({ length: 4 }).map((_, index) => (
+                              <ListItem
+                                key={index}
+                                disablePadding
+                                sx={{
+                                  py: 0.75,
+                                  justifyContent: "space-between",
+                                  borderBottom: index < 3 ? "1px solid" : "none",
+                                  borderColor: "divider",
+                                }}
+                              >
+                                <Skeleton width="45%" />
+                                <Skeleton width="20%" />
+                              </ListItem>
+                            ))
+                          : topDonationCategories.map((cat, index) => (
+                              <ListItem
+                                key={cat.name}
+                                disablePadding
+                                sx={{
+                                  py: 0.75,
+                                  justifyContent: "space-between",
+                                  borderBottom:
+                                    index < topDonationCategories.length - 1
+                                      ? "1px solid"
+                                      : "none",
+                                  borderColor: "divider",
+                                }}
+                              >
+                                <Typography variant="body2">{cat.name}</Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ color: "text.secondary" }}
+                                >
+                                  {cat.value}
+                                </Typography>
+                              </ListItem>
+                            ))}
                       </List>
                     </CardContent>
                   </Card>
@@ -688,33 +818,50 @@ export default function Summary() {
                         Related news
                       </Typography>
                       <List disablePadding>
-                        {newsArticles.map((article, index) => (
-                          <ListItem
-                            key={index}
-                            disablePadding
-                            sx={{
-                              py: 1,
-                              borderBottom:
-                                index < newsArticles.length - 1
-                                  ? "1px solid"
-                                  : "none",
-                              borderColor: "divider",
-                            }}
-                          >
-                            <ListItemText
-                              primary={
-                                <Link
-                                  href={article.href}
-                                  variant="body2"
-                                  sx={{ fontWeight: 500 }}
-                                >
-                                  {article.title}
-                                </Link>
-                              }
-                              secondary={`${article.source} · ${article.date}`}
-                            />
-                          </ListItem>
-                        ))}
+                        {isLoading
+                          ? Array.from({ length: 3 }).map((_, index) => (
+                              <ListItem
+                                key={index}
+                                disablePadding
+                                sx={{
+                                  py: 1,
+                                  borderBottom: index < 2 ? "1px solid" : "none",
+                                  borderColor: "divider",
+                                }}
+                              >
+                                <ListItemText
+                                  primary={<Skeleton width="80%" />}
+                                  secondary={<Skeleton width="40%" />}
+                                />
+                              </ListItem>
+                            ))
+                          : newsArticles.map((article, index) => (
+                              <ListItem
+                                key={index}
+                                disablePadding
+                                sx={{
+                                  py: 1,
+                                  borderBottom:
+                                    index < newsArticles.length - 1
+                                      ? "1px solid"
+                                      : "none",
+                                  borderColor: "divider",
+                                }}
+                              >
+                                <ListItemText
+                                  primary={
+                                    <Link
+                                      href={article.href}
+                                      variant="body2"
+                                      sx={{ fontWeight: 500 }}
+                                    >
+                                      {article.title}
+                                    </Link>
+                                  }
+                                  secondary={`${article.source} · ${article.date}`}
+                                />
+                              </ListItem>
+                            ))}
                       </List>
                     </CardContent>
                   </Card>

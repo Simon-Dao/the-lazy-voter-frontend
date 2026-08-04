@@ -125,10 +125,10 @@ export default function SideMenu({ children }: SideMenuProps) {
     setSelectedPoliticianId(politician.u_id);
 
     // add new user to the system  
-    // legislativeFocus?: string[];
-    // newsArticles?: NewsArticle[];
     // timeline?: TimelineEvent[];
+    // legislativeFocus?: string[];
     // billCategoriesByYear?: Record<string, DonationSlice[]>;
+    // newsArticles?: NewsArticle[];
     // topSponsorCategoriesByYear?: Record<string, SponsorCategory[]>;
     // donationsByYear?: Record<string, DonationSlice[]>;
     let politicianObject = {
@@ -141,6 +141,7 @@ export default function SideMenu({ children }: SideMenuProps) {
         timeline: null
     }
 
+    // Fetch Timeline
     try {
       const res = await fetch(
         `https://thelazyvoter.org/api/politicians/${politician.u_id}/timeline`,
@@ -161,6 +162,28 @@ export default function SideMenu({ children }: SideMenuProps) {
       ...prev,
       politicianObject
     ]);
+
+    // // Fetch Bill Categories By Year
+    //     try {
+    //   const res = await fetch(
+    //     `https://thelazyvoter.org/api/politicians/${politician.u_id}/timeline`,
+    //   );
+    //   if (!res.ok) {
+    //     throw new Error(`Timeline fetch failed: ${res.status}`);
+    //   }
+    //   const data = await res.json();
+    //   politicianObject = {
+    //     ...politicianObject,
+    //     timeline: data.timeline,
+    //   };
+    // } catch (error) {
+    //   console.error("Failed to fetch timeline for", politician.u_id, error);
+    // }
+
+    // setPoliticiansDetailed((prev : any) => [
+    //   ...prev,
+    //   politicianObject
+    // ]);
   };
 
   const removePolitician = (u_id: string) => {
