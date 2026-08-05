@@ -5,6 +5,13 @@ resource "aws_cloudfront_origin_access_control" "site" {
   signing_protocol                  = "sigv4"
 }
 
+resource "aws_cloudfront_origin_access_control" "images" {
+  name                              = "${aws_s3_bucket.images.id}-oac"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
 resource "aws_cloudfront_function" "url_rewrite" {
   name    = "url-rewrite"
   runtime = "cloudfront-js-2.0"
@@ -38,6 +45,12 @@ resource "aws_cloudfront_distribution" "site" {
       origin_protocol_policy = "https-only"
       origin_ssl_protocols   = ["TLSv1.2"]
     }
+  }
+
+  origin {
+    domain_name              = aws_s3_bucket.images.bucket_regional_domain_name
+    origin_id                = "s3-images-origin"
+    origin_access_control_id = aws_cloudfront_origin_access_control.images.id
   }
 
   default_cache_behavior {
@@ -82,6 +95,21 @@ resource "aws_cloudfront_distribution" "site" {
     min_ttl     = 0
     default_ttl = 0
     max_ttl     = 0
+  }
+
+  ordered_cache_behavior {
+    path_pattern           = "/avatars/*"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods          = ["GET", "HEAD"]
+    target_origin_id        = "s3-images-origin"
+    viewer_protocol_policy   = "redirect-to-https"
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
   }
 
   # S3 with OAC returns 403 (not 404) for missing keys, since it's a private

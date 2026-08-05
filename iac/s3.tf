@@ -44,3 +44,54 @@ resource "aws_s3_bucket_policy" "site" {
   bucket = aws_s3_bucket.site.id
   policy = data.aws_iam_policy_document.site_policy.json
 }
+
+# ---------------------------------------------------------------------------
+# Images bucket
+# ---------------------------------------------------------------------------
+
+resource "aws_s3_bucket" "images" {
+  bucket = "the-lazy-voter-resources"
+}
+
+# Fully private - CloudFront OAC will be the only thing allowed to read it
+resource "aws_s3_bucket_public_access_block" "images" {
+  bucket = aws_s3_bucket.images.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_ownership_controls" "images" {
+  bucket = aws_s3_bucket.images.id
+  rule {
+    object_ownership = "BucketOwnerEnforced" # disables ACLs entirely
+  }
+}
+
+# Bucket policy: only allow reads from this specific CloudFront distribution
+data "aws_iam_policy_document" "images_policy" {
+  statement {
+    sid     = "AllowCloudFrontOAC"
+    effect  = "Allow"
+    actions = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.images.arn}/*"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [aws_cloudfront_distribution.site.arn]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "images" {
+  bucket = aws_s3_bucket.images.id
+  policy = data.aws_iam_policy_document.images_policy.json
+}
