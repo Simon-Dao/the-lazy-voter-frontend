@@ -14,7 +14,7 @@ async function getClient() {
 }
 
 function groupByDate(rows) {
-  return rows.reduce((acc, row) => {
+  const grouped = rows.reduce((acc, row) => {
     const { term_start_date, category_name, value } = row;
 
     if (!acc[term_start_date]) {
@@ -28,6 +28,20 @@ function groupByDate(rows) {
 
     return acc;
   }, {});
+
+  // Build an "all" bucket by summing values per category across every year
+  const allTotals = rows.reduce((acc, row) => {
+    const { category_name, value } = row;
+    acc[category_name] = (acc[category_name] ?? 0) + Number(value);
+    return acc;
+  }, {});
+
+  grouped["all"] = Object.entries(allTotals).map(([name, value]) => ({
+    name,
+    value,
+  }));
+
+  return grouped;
 }
 
 exports.handler = async (event) => {
