@@ -704,8 +704,6 @@ export default function Summary() {
                           </Button>
                         )}
                       </Typography>
-                      {JSON.stringify(candidate?.donationsByYear)}
-
                       {isLoading ? (
                         <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                           {Array.from({ length: 4 }).map((_, i) => (
@@ -750,7 +748,10 @@ export default function Summary() {
                         <PieChart
                           series={[
                             {
-                              data: topDonationCategories,
+                              data: topDonationCategories.map((d) => ({
+                                ...d,
+                                label: d.name,
+                              })),
                               innerRadius: 40,
                               paddingAngle: 1,
                               cornerRadius: 2,

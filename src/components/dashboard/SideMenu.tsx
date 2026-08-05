@@ -192,7 +192,7 @@ export default function SideMenu({ children }: SideMenuProps) {
     // Fetch Donation Totals By Year
     try {
       const res = await fetch(
-        `https://thelazyvoter.org/api/politicians/${politician.u_id}/finances/totals`,
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/totals`,
       );
       if (!res.ok) {
         throw new Error(`Bill Category fetch failed: ${res.status}`);

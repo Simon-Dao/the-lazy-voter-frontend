@@ -31,8 +31,8 @@ function groupByDate(rows) {
 
   // Build an "all" bucket by summing values per category across every year
   const allTotals = rows.reduce((acc, row) => {
-    const { category_name, value } = row;
-    acc[category_name] = (acc[category_name] ?? 0) + Number(value);
+    const { industry_category, value } = row;
+    acc[industry_category] = (acc[industry_category] ?? 0) + Number(value);
     return acc;
   }, {});
 
