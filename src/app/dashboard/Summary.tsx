@@ -85,33 +85,6 @@ const topDonationCategoriesByYear: Record<string, DonationSlice[]> = {
   ],
 };
 
-const topBillCategoriesByYear: Record<string, BillCategory[]> = {
-  all: [
-    { name: "Isreal", value: 15 },
-    { name: "Big Pharma", value: 2 },
-    { name: "Killing Kids", value: 1 },
-    { name: "Epstein", value: 14 },
-  ],
-  "2024": [
-    { name: "Isreal", value: 5 },
-    { name: "Big Pharma", value: 1 },
-    { name: "Killing Kids", value: 1 },
-    { name: "Epstein", value: 7 },
-  ],
-  "2023": [
-    { name: "Isreal", value: 3 },
-    { name: "Big Pharma", value: 1 },
-    { name: "Killing Kids", value: 0 },
-    { name: "Epstein", value: 7 },
-  ],
-  "2022": [
-    { name: "Isreal", value: 7 },
-    { name: "Big Pharma", value: 0 },
-    { name: "Killing Kids", value: 0 },
-    { name: "Epstein", value: 0 },
-  ],
-};
-
 const newsArticles: NewsArticle[] = [
   {
     title: "Senator Ellis introduces rural broadband bill",
@@ -226,20 +199,20 @@ export default function Summary() {
   const [show, setShow] = useState(false);
   useEffect(() => setShow(true), []);
 
-  const topBillCategories = topBillCategoriesByYear[termYear];
+  
+  const donations = topDonationCategoriesByYear[electionYear];
+  const topDonationCategories = topDonationCategoriesByYear[electionYear];
+  const totalDonations = donations.reduce((sum, d) => sum + d.value, 0);
+  
+  const [candidate, setSelectedPoliticianDetailed] = useAtom(
+    SelectedPoliticianDetailedAtom,
+  );
+  
+  const topBillCategories = candidate?.topSponsorCategoriesByYear?.[termYear] ?? [];
   const totalSponsored = topBillCategories.reduce(
     (sum, d) => sum + d.value,
     0,
   );
-
-  const donations = topDonationCategoriesByYear[electionYear];
-  const topDonationCategories = topDonationCategoriesByYear[electionYear];
-  const totalDonations = donations.reduce((sum, d) => sum + d.value, 0);
-
-  const [candidate, setSelectedPoliticianDetailed] = useAtom(
-    SelectedPoliticianDetailedAtom,
-  );
-
   // A single readiness flag drives every skeleton/loading state below.
   // Once the candidate record has come back from the API, everything
   // derived from it (timeline, charts, lists, news) can render for real.
@@ -521,8 +494,8 @@ export default function Summary() {
           <Grid container spacing={2} columns={12}>
             {/* Left column */}
             <Grid size={{ xs: 12, lg: 6 }}>
+              {/* Bills / focus summary */}
               <Stack spacing={2}>
-                {/* Bills / focus summary */}
                 <Grow
                   in={show}
                   timeout={LOADING_ANIMATION_DURATION}

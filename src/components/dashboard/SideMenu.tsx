@@ -124,7 +124,7 @@ export default function SideMenu({ children }: SideMenuProps) {
     });
     setSelectedPoliticianId(politician.u_id);
 
-    // add new user to the system  
+    // add new user to the system
     // timeline?: TimelineEvent[];
     // legislativeFocus?: string[];
     // billCategoriesByYear?: Record<string, DonationSlice[]>;
@@ -132,14 +132,14 @@ export default function SideMenu({ children }: SideMenuProps) {
     // topSponsorCategoriesByYear?: Record<string, SponsorCategory[]>;
     // donationsByYear?: Record<string, DonationSlice[]>;
     let politicianObject = {
-        u_id: politician.u_id,
-        name: politician.name,
-        status: politician.status,
-        latestYear: politician.latestYear,
-        party: politician.party,
-        state: politician.state,
-        timeline: null
-    }
+      u_id: politician.u_id,
+      name: politician.name,
+      status: politician.status,
+      latestYear: politician.latestYear,
+      party: politician.party,
+      state: politician.state,
+      timeline: null,
+    };
 
     // Fetch Timeline
     try {
@@ -158,32 +158,26 @@ export default function SideMenu({ children }: SideMenuProps) {
       console.error("Failed to fetch timeline for", politician.u_id, error);
     }
 
-    setPoliticiansDetailed((prev : any) => [
-      ...prev,
-      politicianObject
-    ]);
+    setPoliticiansDetailed((prev: any) => [...prev, politicianObject]);
 
     // // Fetch Bill Categories By Year
-    //     try {
-    //   const res = await fetch(
-    //     `https://thelazyvoter.org/api/politicians/${politician.u_id}/timeline`,
-    //   );
-    //   if (!res.ok) {
-    //     throw new Error(`Timeline fetch failed: ${res.status}`);
-    //   }
-    //   const data = await res.json();
-    //   politicianObject = {
-    //     ...politicianObject,
-    //     timeline: data.timeline,
-    //   };
-    // } catch (error) {
-    //   console.error("Failed to fetch timeline for", politician.u_id, error);
-    // }
+    try {
+      const res = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/timeline`,
+      );
+      if (!res.ok) {
+        throw new Error(`Timeline fetch failed: ${res.status}`);
+      }
+      const data = await res.json();
+      politicianObject = {
+        ...politicianObject,
+        timeline: data.timeline,
+      };
+    } catch (error) {
+      console.error("Failed to fetch timeline for", politician.u_id, error);
+    }
 
-    // setPoliticiansDetailed((prev : any) => [
-    //   ...prev,
-    //   politicianObject
-    // ]);
+    setPoliticiansDetailed((prev: any) => [...prev, politicianObject]);
   };
 
   const removePolitician = (u_id: string) => {
