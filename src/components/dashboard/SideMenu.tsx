@@ -124,13 +124,6 @@ export default function SideMenu({ children }: SideMenuProps) {
     });
     setSelectedPoliticianId(politician.u_id);
 
-    // add new user to the system
-    // timeline?: TimelineEvent[];
-    // legislativeFocus?: string[];
-    // billCategoriesByYear?: Record<string, DonationSlice[]>;
-    // newsArticles?: NewsArticle[];
-    // topSponsorCategoriesByYear?: Record<string, SponsorCategory[]>;
-    // donationsByYear?: Record<string, DonationSlice[]>;
     let politicianObject = {
       u_id: politician.u_id,
       name: politician.name,
@@ -139,7 +132,11 @@ export default function SideMenu({ children }: SideMenuProps) {
       party: politician.party,
       state: politician.state,
       timeline: null,
+      billCategoriesByYear: null,
     };
+
+    // Add a placeholder entry immediately so the UI has something to render
+    setPoliticiansDetailed((prev: any) => [...prev, politicianObject]);
 
     // Fetch Timeline
     try {
@@ -154,30 +151,41 @@ export default function SideMenu({ children }: SideMenuProps) {
         ...politicianObject,
         timeline: data.timeline,
       };
+      setPoliticiansDetailed((prev: any) =>
+        prev.map((p: PoliticianDetailed) =>
+          p.u_id === politician.u_id ? politicianObject : p,
+        ),
+      );
     } catch (error) {
       console.error("Failed to fetch timeline for", politician.u_id, error);
     }
 
-    setPoliticiansDetailed((prev: any) => [...prev, politicianObject]);
-
-    // // Fetch Bill Categories By Year
+    // Fetch Bill Categories By Year
     try {
       const res = await fetch(
-        `https://thelazyvoter.org/api/politicians/${politician.u_id}/timeline`,
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/legislation/totals`,
       );
       if (!res.ok) {
-        throw new Error(`Timeline fetch failed: ${res.status}`);
+        throw new Error(`Bill Category fetch failed: ${res.status}`);
       }
       const data = await res.json();
+
       politicianObject = {
         ...politicianObject,
-        timeline: data.timeline,
+        billCategoriesByYear: data,
       };
+      setPoliticiansDetailed((prev: any) =>
+        prev.map((p: PoliticianDetailed) =>
+          p.u_id === politician.u_id ? politicianObject : p,
+        ),
+      );
     } catch (error) {
-      console.error("Failed to fetch timeline for", politician.u_id, error);
+      console.error(
+        "Failed to fetch Bill Category for",
+        politician.u_id,
+        error,
+      );
     }
-
-    setPoliticiansDetailed((prev: any) => [...prev, politicianObject]);
   };
 
   const removePolitician = (u_id: string) => {

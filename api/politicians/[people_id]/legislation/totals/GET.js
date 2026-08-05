@@ -13,6 +13,23 @@ async function getClient() {
   return client;
 }
 
+function groupByDate(rows) {
+  return rows.reduce((acc, row) => {
+    const { term_start_date, category_name, value } = row;
+
+    if (!acc[term_start_date]) {
+      acc[term_start_date] = [];
+    }
+
+    acc[term_start_date].push({
+      name: category_name,
+      value: Number(value),
+    });
+
+    return acc;
+  }, {});
+}
+
 exports.handler = async (event) => {
   const peopleId = event.pathParameters?.people_id;
 
@@ -39,15 +56,16 @@ exports.handler = async (event) => {
       ON cp.bill_id = b.bill_id
       JOIN the_lazy_voter_serving.legiscan_bill_category c
       ON c.category_id = cp.category_id
-      WHERE p.id = $1
-      ${!election_year ? "" : "AND d.election_year = "+election_year} 
+      WHERE p.u_id = $1
       GROUP BY c.category_name, b.term_start_date
       ORDER BY b.term_start_date
     `, [peopleId]);
-    
+
+    const grouped = groupByDate(billCategories.rows);
+
     return {
       statusCode: 200,
-      body: JSON.stringify({ rows: billCategories.rows }),
+      body: JSON.stringify(grouped),
     };
   } catch(error) {
     return {

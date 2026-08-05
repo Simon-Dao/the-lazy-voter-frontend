@@ -55,8 +55,7 @@ export type PoliticianDetailed = {
   legislativeFocus?: string[];
   newsArticles?: NewsArticle[];
   timeline?: TimelineEvent[];
-  billCategoriesByYear?: Record<string, DonationSlice[]>;
-  topSponsorCategoriesByYear?: Record<string, BillCategory[]>;
+  billCategoriesByYear?: Record<string, BillCategory[]>;
   donationsByYear?: Record<string, DonationSlice[]>;
   ballotpedia?: string;
   photoSrc?:string;

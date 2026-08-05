@@ -40,8 +40,8 @@ import {
   DonationSlice,
   TimelineEvent,
   NewsArticle,
-  BillCategory, 
-  DashboardSideMenuTabAtom
+  BillCategory,
+  DashboardSideMenuTabAtom,
 } from "#/util/State";
 
 const timeline: TimelineEvent[] = [
@@ -60,28 +60,28 @@ const timeline: TimelineEvent[] = [
 // Top sponsor categories now vary by year, matching the donations tab structure
 const topDonationCategoriesByYear: Record<string, DonationSlice[]> = {
   all: [
-    { id: 1,name: "Healthcare", value: 410000 },
-    { id: 1,name: "Technology", value: 275000 },
-    { id: 1,name: "Energy", value: 190000 },
-    { id: 1,name: "Finance", value: 140000 },
+    { id: 1, name: "Healthcare", value: 410000 },
+    { id: 1, name: "Technology", value: 275000 },
+    { id: 1, name: "Energy", value: 190000 },
+    { id: 1, name: "Finance", value: 140000 },
   ],
   "2024": [
-    { id: 1,name: "Healthcare", value: 170000 },
-    { id: 1,name: "Technology", value: 120000 },
-    { id: 1,name: "Energy", value: 80000 },
-    { id: 1,name: "Finance", value: 60000 },
+    { id: 1, name: "Healthcare", value: 170000 },
+    { id: 1, name: "Technology", value: 120000 },
+    { id: 1, name: "Energy", value: 80000 },
+    { id: 1, name: "Finance", value: 60000 },
   ],
   "2023": [
-    { id: 1,name: "Healthcare", value: 140000 },
-    { id: 1,name: "Technology", value: 95000 },
-    { id: 1,name: "Energy", value: 65000 },
-    { id: 1,name: "Finance", value: 45000 },
+    { id: 1, name: "Healthcare", value: 140000 },
+    { id: 1, name: "Technology", value: 95000 },
+    { id: 1, name: "Energy", value: 65000 },
+    { id: 1, name: "Finance", value: 45000 },
   ],
   "2022": [
-    { id: 1,name: "Healthcare", value: 100000 },
-    { id: 1,name: "Technology", value: 60000 },
-    { id: 1,name: "Energy", value: 45000 },
-    { id: 1,name: "Finance", value: 35000 },
+    { id: 1, name: "Healthcare", value: 100000 },
+    { id: 1, name: "Technology", value: 60000 },
+    { id: 1, name: "Energy", value: 45000 },
+    { id: 1, name: "Finance", value: 35000 },
   ],
 };
 
@@ -176,8 +176,6 @@ function getPartyColor(theme: any, party: string | undefined): string {
 
 export default function Summary() {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const isPortrait = useMediaQuery("(orientation: portrait)");
   const candidateSummary = null;
   const [electionYear, setElectionYear] = useState<string>("all");
   const [termYear, setTermYear] = useState<string>("all");
@@ -199,20 +197,16 @@ export default function Summary() {
   const [show, setShow] = useState(false);
   useEffect(() => setShow(true), []);
 
-  
   const donations = topDonationCategoriesByYear[electionYear];
   const topDonationCategories = topDonationCategoriesByYear[electionYear];
   const totalDonations = donations.reduce((sum, d) => sum + d.value, 0);
-  
+
   const [candidate, setSelectedPoliticianDetailed] = useAtom(
     SelectedPoliticianDetailedAtom,
   );
-  
-  const topBillCategories = candidate?.topSponsorCategoriesByYear?.[termYear] ?? [];
-  const totalSponsored = topBillCategories.reduce(
-    (sum, d) => sum + d.value,
-    0,
-  );
+
+  const topBillCategories = candidate?.billCategoriesByYear?.[termYear] ?? [];
+  const totalSponsored = topBillCategories.reduce((sum, d) => sum + d.value, 0);
   // A single readiness flag drives every skeleton/loading state below.
   // Once the candidate record has come back from the API, everything
   // derived from it (timeline, charts, lists, news) can render for real.
@@ -326,8 +320,16 @@ export default function Summary() {
                           </>
                         ) : (
                           <>
-                            <Skeleton variant="rounded" width={60} height={24} />
-                            <Skeleton variant="rounded" width={60} height={24} />
+                            <Skeleton
+                              variant="rounded"
+                              width={60}
+                              height={24}
+                            />
+                            <Skeleton
+                              variant="rounded"
+                              width={60}
+                              height={24}
+                            />
                           </>
                         )}
                       </Stack>
@@ -369,8 +371,15 @@ export default function Summary() {
                       candidateSummary
                     ) : (
                       <Stack spacing={1} sx={{ width: "100%", py: 1 }}>
-                        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                          <CircularProgress size="1.1rem" aria-label="Loading…" />
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          sx={{ alignItems: "center" }}
+                        >
+                          <CircularProgress
+                            size="1.1rem"
+                            aria-label="Loading…"
+                          />
                           <Typography variant="caption" color="text.secondary">
                             Generating summary…
                           </Typography>
@@ -477,8 +486,15 @@ export default function Summary() {
                       </Box>
                       <Stack direction="row" spacing={4} sx={{ px: 1 }}>
                         {Array.from({ length: 4 }).map((_, i) => (
-                          <Stack key={i} sx={{ alignItems: "center", width: 140 }}>
-                            <Skeleton variant="circular" width={10} height={10} />
+                          <Stack
+                            key={i}
+                            sx={{ alignItems: "center", width: 140 }}
+                          >
+                            <Skeleton
+                              variant="circular"
+                              width={10}
+                              height={10}
+                            />
                             <Skeleton width={50} sx={{ mt: 0.5 }} />
                             <Skeleton width={100} />
                           </Stack>
@@ -518,39 +534,50 @@ export default function Summary() {
                           </Button>
                         )}
                       </Typography>
-                      {isLoading ? (
+                      {!candidate?.billCategoriesByYear ? (
                         <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                           {Array.from({ length: 4 }).map((_, i) => (
                             <Skeleton key={i} width={60} height={32} />
                           ))}
+
                         </Stack>
                       ) : (
                         <Tabs
                           value={termYear}
                           onChange={(_, value: string) => setTermYear(value)}
                           variant="scrollable"
-                          scrollButtons={false}
+                          scrollButtons={true}
                           sx={{ minHeight: 32, mb: 1 }}
                         >
-                          <Tab
-                            label="All years"
-                            value="all"
-                            sx={{ minHeight: 32 }}
-                          />
-                          <Tab label="2024" value="2024" sx={{ minHeight: 32 }} />
-                          <Tab label="2023" value="2023" sx={{ minHeight: 32 }} />
-                          <Tab label="2022" value="2022" sx={{ minHeight: 32 }} />
+                          {Object.keys(candidate?.billCategoriesByYear ?? {})
+                            .sort((a, b) => {
+                              if (a === "all") return -1;
+                              if (b === "all") return 1;
+                              return a.localeCompare(b);
+                            })
+                            .map((year) => (
+                              <Tab
+                                key={year}
+                                label={year === "all" ? "All" : year}
+                                value={year}
+                                sx={{ minHeight: 32 }}
+                              />
+                            ))}
                         </Tabs>
                       )}
-                      {isLoading ? (
+                      {!candidate?.billCategoriesByYear ? (
                         <Stack sx={{ alignItems: "center", py: 2 }}>
-                          <Skeleton variant="circular" width={180} height={180} />
+                          <Skeleton
+                            variant="circular"
+                            width={180}
+                            height={180}
+                          />
                         </Stack>
                       ) : (
                         <PieChart
                           series={[
                             {
-                              data: topBillCategories,
+                              data: topBillCategories.map((d) => ({ ...d, label: d.name })),
                               innerRadius: 40,
                               paddingAngle: 1,
                               cornerRadius: 2,
@@ -568,7 +595,7 @@ export default function Summary() {
                           }}
                         />
                       )}
-                      {isLoading ? (
+                      {!candidate?.billCategoriesByYear  ? (
                         <Skeleton width="50%" sx={{ mx: "auto", mt: 1 }} />
                       ) : (
                         <Typography
@@ -590,7 +617,7 @@ export default function Summary() {
                         Top legislation categories
                       </Typography>
                       <List disablePadding>
-                        {isLoading
+                        {!candidate?.billCategoriesByYear 
                           ? Array.from({ length: 4 }).map((_, index) => (
                               <ListItem
                                 key={index}
@@ -598,7 +625,8 @@ export default function Summary() {
                                 sx={{
                                   py: 0.75,
                                   justifyContent: "space-between",
-                                  borderBottom: index < 3 ? "1px solid" : "none",
+                                  borderBottom:
+                                    index < 3 ? "1px solid" : "none",
                                   borderColor: "divider",
                                 }}
                               >
@@ -606,7 +634,8 @@ export default function Summary() {
                                 <Skeleton width="20%" />
                               </ListItem>
                             ))
-                          : topBillCategories.map((cat, index) => (
+                          : topBillCategories.sort((a, b) => b.value - a.value)
+                          .map((cat, index) => (
                               <ListItem
                                 key={cat.name}
                                 disablePadding
@@ -620,7 +649,9 @@ export default function Summary() {
                                   borderColor: "divider",
                                 }}
                               >
-                                <Typography variant="body2">{cat.name}</Typography>
+                                <Typography variant="body2">
+                                  {cat.name}
+                                </Typography>
                                 <Typography
                                   variant="body2"
                                   sx={{ color: "text.secondary" }}
@@ -671,24 +702,37 @@ export default function Summary() {
                       ) : (
                         <Tabs
                           value={electionYear}
-                          onChange={(_, value: string) => setElectionYear(value)}
+                          onChange={(_, value: string) =>
+                            setElectionYear(value)
+                          }
                           variant="scrollable"
                           scrollButtons={false}
                           sx={{ minHeight: 32, mb: 1 }}
                         >
                           <Tab
-                            label="All years"
-                            value="all"
+                            label="2024"
+                            value="2024"
                             sx={{ minHeight: 32 }}
                           />
-                          <Tab label="2024" value="2024" sx={{ minHeight: 32 }} />
-                          <Tab label="2023" value="2023" sx={{ minHeight: 32 }} />
-                          <Tab label="2022" value="2022" sx={{ minHeight: 32 }} />
+                          <Tab
+                            label="2023"
+                            value="2023"
+                            sx={{ minHeight: 32 }}
+                          />
+                          <Tab
+                            label="2022"
+                            value="2022"
+                            sx={{ minHeight: 32 }}
+                          />
                         </Tabs>
                       )}
                       {isLoading ? (
                         <Stack sx={{ alignItems: "center", py: 2 }}>
-                          <Skeleton variant="circular" width={180} height={180} />
+                          <Skeleton
+                            variant="circular"
+                            width={180}
+                            height={180}
+                          />
                         </Stack>
                       ) : (
                         <PieChart
@@ -743,7 +787,8 @@ export default function Summary() {
                                 sx={{
                                   py: 0.75,
                                   justifyContent: "space-between",
-                                  borderBottom: index < 3 ? "1px solid" : "none",
+                                  borderBottom:
+                                    index < 3 ? "1px solid" : "none",
                                   borderColor: "divider",
                                 }}
                               >
@@ -765,7 +810,9 @@ export default function Summary() {
                                   borderColor: "divider",
                                 }}
                               >
-                                <Typography variant="body2">{cat.name}</Typography>
+                                <Typography variant="body2">
+                                  {cat.name}
+                                </Typography>
                                 <Typography
                                   variant="body2"
                                   sx={{ color: "text.secondary" }}
@@ -798,7 +845,8 @@ export default function Summary() {
                                 disablePadding
                                 sx={{
                                   py: 1,
-                                  borderBottom: index < 2 ? "1px solid" : "none",
+                                  borderBottom:
+                                    index < 2 ? "1px solid" : "none",
                                   borderColor: "divider",
                                 }}
                               >
