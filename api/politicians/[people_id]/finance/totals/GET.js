@@ -13,28 +13,45 @@ async function getClient() {
   return client;
 }
 
+function groupByDate(rows) {
+  const grouped = rows.reduce((acc, row) => {
+    const { value, industry_category, election_year } = row;
+
+    if (!acc[election_year]) {
+      acc[election_year] = [];
+    }
+
+    acc[election_year].push({
+      name: industry_category,
+      value,
+    });
+
+    return acc;
+  }, {});
+
+  // Build an "all" bucket by summing values per category across every year
+  const allTotals = rows.reduce((acc, row) => {
+    const { category_name, value } = row;
+    acc[category_name] = (acc[category_name] ?? 0) + Number(value);
+    return acc;
+  }, {});
+
+  grouped["all"] = Object.entries(allTotals).map(([name, value]) => ({
+    name,
+    value,
+  }));
+
+  return grouped;
+}
+
 exports.handler = async (event) => {
   const peopleId = event.pathParameters?.people_id;
-
-  const MAX_PER_PAGE = 100;
-  
-  const page = parseInt(event.queryStringParameters?.page, 10) || 1;
-  const per_page = parseInt(event.queryStringParameters?.per_page, 10) || MAX_PER_PAGE;
-  const election_year = event.queryStringParameters?.election_year;
-
-  // Check if per_page is valid
-  if (per_page > MAX_PER_PAGE || per_page < 1) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: `per_page must be between 1 and ${MAX_PER_PAGE}`}),
-    };
-  }
 
   const client = await getClient();
 
   try {
     // Check if person exists
-    const personCheck = await client.query('SELECT 1 FROM the_lazy_voter_serving.unified_politician_record WHERE id = $1 LIMIT 1', [peopleId]);
+    const personCheck = await client.query('SELECT 1 FROM the_lazy_voter_serving.unified_politician_record WHERE u_id = $1 LIMIT 1', [peopleId]);
     if (personCheck.rows.length === 0) {
       return {
         statusCode: 404,
@@ -43,20 +60,28 @@ exports.handler = async (event) => {
     }
 
     const donations = await client.query(`
-      SELECT d.donation_id, d.source_name, d.fec_id, d.contribution_receipt_date, d.contribution_receipt_amount
+      SELECT SUM(d.contribution_receipt_amount) as value, d.industry_category, d.election_year
       FROM the_lazy_voter_serving.fec_donation d
       JOIN the_lazy_voter_serving.unified_politician_record p 
       ON p.fec_ids @> to_jsonb(d.fec_id::text)
       WHERE p.u_id = $1
-      ${!election_year ? "" : "AND d.election_year = "+election_year} 
-      ORDER BY d.contribution_receipt_date
-      LIMIT $2
-      OFFSET $3
-    `, [peopleId, per_page, per_page * (page - 1)]);
+      GROUP BY d.election_year, d.industry_category
+    `, [peopleId]);
     
+      const total_donations_query = await client.query(`
+      SELECT COUNT(*) as total 
+      FROM the_lazy_voter_serving.fec_donation d
+      JOIN the_lazy_voter_serving.unified_politician_record p 
+      ON p.fec_ids @> to_jsonb(d.fec_id::text)
+      WHERE p.u_id = $1
+    `, [peopleId]);
+    
+    const totals = groupByDate(donations.rows);
+    const total_donations = total_donations_query.rows ? total_donations_query.rows[0].total : 0
+
     return {
       statusCode: 200,
-      body: JSON.stringify({ rows: donations.rows }),
+      body: JSON.stringify({total_donations, totals}),
     };
   } catch(error) {
     return {

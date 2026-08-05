@@ -58,30 +58,30 @@ const timeline: TimelineEvent[] = [
 ];
 
 // Top sponsor categories now vary by year, matching the donations tab structure
-const topDonationCategoriesByYear: Record<string, DonationSlice[]> = {
+const donationsByYear: Record<string, DonationSlice[]> = {
   all: [
-    { id: 1, name: "Healthcare", value: 410000 },
-    { id: 1, name: "Technology", value: 275000 },
-    { id: 1, name: "Energy", value: 190000 },
-    { id: 1, name: "Finance", value: 140000 },
+    { name: "Healthcare", value: 410000 },
+    { name: "Technology", value: 275000 },
+    { name: "Energy", value: 190000 },
+    { name: "Finance", value: 140000 },
   ],
   "2024": [
-    { id: 1, name: "Healthcare", value: 170000 },
-    { id: 1, name: "Technology", value: 120000 },
-    { id: 1, name: "Energy", value: 80000 },
-    { id: 1, name: "Finance", value: 60000 },
+    { name: "Healthcare", value: 170000 },
+    { name: "Technology", value: 120000 },
+    { name: "Energy", value: 80000 },
+    { name: "Finance", value: 60000 },
   ],
   "2023": [
-    { id: 1, name: "Healthcare", value: 140000 },
-    { id: 1, name: "Technology", value: 95000 },
-    { id: 1, name: "Energy", value: 65000 },
-    { id: 1, name: "Finance", value: 45000 },
+    { name: "Healthcare", value: 140000 },
+    { name: "Technology", value: 95000 },
+    { name: "Energy", value: 65000 },
+    { name: "Finance", value: 45000 },
   ],
   "2022": [
-    { id: 1, name: "Healthcare", value: 100000 },
-    { id: 1, name: "Technology", value: 60000 },
-    { id: 1, name: "Energy", value: 45000 },
-    { id: 1, name: "Finance", value: 35000 },
+    { name: "Healthcare", value: 100000 },
+    { name: "Technology", value: 60000 },
+    { name: "Energy", value: 45000 },
+    { name: "Finance", value: 35000 },
   ],
 };
 
@@ -197,16 +197,24 @@ export default function Summary() {
   const [show, setShow] = useState(false);
   useEffect(() => setShow(true), []);
 
-  const donations = topDonationCategoriesByYear[electionYear];
-  const topDonationCategories = topDonationCategoriesByYear[electionYear];
-  const totalDonations = donations.reduce((sum, d) => sum + d.value, 0);
-
   const [candidate, setSelectedPoliticianDetailed] = useAtom(
     SelectedPoliticianDetailedAtom,
   );
+  useEffect(() => {
+    setElectionYear("all");
+    setTermYear("all");
+  }, [candidate?.name]);
 
   const topBillCategories = candidate?.billCategoriesByYear?.[termYear] ?? [];
   const totalSponsored = topBillCategories.reduce((sum, d) => sum + d.value, 0);
+
+  const topDonationCategories =
+    candidate?.donationsByYear?.[electionYear] ?? [];
+  const totalDonations = topDonationCategories.reduce(
+    (sum, d) => sum + d.value,
+    0,
+  );
+
   // A single readiness flag drives every skeleton/loading state below.
   // Once the candidate record has come back from the API, everything
   // derived from it (timeline, charts, lists, news) can render for real.
@@ -539,7 +547,6 @@ export default function Summary() {
                           {Array.from({ length: 4 }).map((_, i) => (
                             <Skeleton key={i} width={60} height={32} />
                           ))}
-
                         </Stack>
                       ) : (
                         <Tabs
@@ -577,7 +584,10 @@ export default function Summary() {
                         <PieChart
                           series={[
                             {
-                              data: topBillCategories.map((d) => ({ ...d, label: d.name })),
+                              data: topBillCategories.map((d) => ({
+                                ...d,
+                                label: d.name,
+                              })),
                               innerRadius: 40,
                               paddingAngle: 1,
                               cornerRadius: 2,
@@ -595,7 +605,7 @@ export default function Summary() {
                           }}
                         />
                       )}
-                      {!candidate?.billCategoriesByYear  ? (
+                      {!candidate?.billCategoriesByYear ? (
                         <Skeleton width="50%" sx={{ mx: "auto", mt: 1 }} />
                       ) : (
                         <Typography
@@ -617,7 +627,7 @@ export default function Summary() {
                         Top legislation categories
                       </Typography>
                       <List disablePadding>
-                        {!candidate?.billCategoriesByYear 
+                        {!candidate?.billCategoriesByYear
                           ? Array.from({ length: 4 }).map((_, index) => (
                               <ListItem
                                 key={index}
@@ -634,32 +644,33 @@ export default function Summary() {
                                 <Skeleton width="20%" />
                               </ListItem>
                             ))
-                          : topBillCategories.sort((a, b) => b.value - a.value)
-                          .map((cat, index) => (
-                              <ListItem
-                                key={cat.name}
-                                disablePadding
-                                sx={{
-                                  py: 0.75,
-                                  justifyContent: "space-between",
-                                  borderBottom:
-                                    index < topBillCategories.length - 1
-                                      ? "1px solid"
-                                      : "none",
-                                  borderColor: "divider",
-                                }}
-                              >
-                                <Typography variant="body2">
-                                  {cat.name}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  sx={{ color: "text.secondary" }}
+                          : topBillCategories
+                              .sort((a, b) => b.value - a.value)
+                              .map((cat, index) => (
+                                <ListItem
+                                  key={cat.name}
+                                  disablePadding
+                                  sx={{
+                                    py: 0.75,
+                                    justifyContent: "space-between",
+                                    borderBottom:
+                                      index < topBillCategories.length - 1
+                                        ? "1px solid"
+                                        : "none",
+                                    borderColor: "divider",
+                                  }}
                                 >
-                                  {cat.value}
-                                </Typography>
-                              </ListItem>
-                            ))}
+                                  <Typography variant="body2">
+                                    {cat.name}
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{ color: "text.secondary" }}
+                                  >
+                                    {cat.value}
+                                  </Typography>
+                                </ListItem>
+                              ))}
                       </List>
                     </CardContent>
                   </Card>
@@ -693,6 +704,8 @@ export default function Summary() {
                           </Button>
                         )}
                       </Typography>
+                      {JSON.stringify(candidate?.donationsByYear)}
+
                       {isLoading ? (
                         <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                           {Array.from({ length: 4 }).map((_, i) => (
@@ -706,24 +719,23 @@ export default function Summary() {
                             setElectionYear(value)
                           }
                           variant="scrollable"
-                          scrollButtons={false}
+                          scrollButtons={true}
                           sx={{ minHeight: 32, mb: 1 }}
                         >
-                          <Tab
-                            label="2024"
-                            value="2024"
-                            sx={{ minHeight: 32 }}
-                          />
-                          <Tab
-                            label="2023"
-                            value="2023"
-                            sx={{ minHeight: 32 }}
-                          />
-                          <Tab
-                            label="2022"
-                            value="2022"
-                            sx={{ minHeight: 32 }}
-                          />
+                          {Object.keys(candidate?.donationsByYear ?? {})
+                            .sort((a, b) => {
+                              if (a === "all") return -1;
+                              if (b === "all") return 1;
+                              return a.localeCompare(b);
+                            })
+                            .map((year) => (
+                              <Tab
+                                key={year}
+                                label={year === "all" ? "All" : year}
+                                value={year}
+                                sx={{ minHeight: 32 }}
+                              />
+                            ))}
                         </Tabs>
                       )}
                       {isLoading ? (
@@ -738,7 +750,7 @@ export default function Summary() {
                         <PieChart
                           series={[
                             {
-                              data: donations,
+                              data: topDonationCategories,
                               innerRadius: 40,
                               paddingAngle: 1,
                               cornerRadius: 2,

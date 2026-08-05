@@ -133,6 +133,8 @@ export default function SideMenu({ children }: SideMenuProps) {
       state: politician.state,
       timeline: null,
       billCategoriesByYear: null,
+      donationsByYear: null,
+      totalDonations: null,
     };
 
     // Add a placeholder entry immediately so the UI has something to render
@@ -174,6 +176,39 @@ export default function SideMenu({ children }: SideMenuProps) {
         ...politicianObject,
         billCategoriesByYear: data,
       };
+      setPoliticiansDetailed((prev: any) =>
+        prev.map((p: PoliticianDetailed) =>
+          p.u_id === politician.u_id ? politicianObject : p,
+        ),
+      );
+    } catch (error) {
+      console.error(
+        "Failed to fetch Bill Category for",
+        politician.u_id,
+        error,
+      );
+    }
+
+    // Fetch Donation Totals By Year
+    try {
+      const res = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/finances/totals`,
+      );
+      if (!res.ok) {
+        throw new Error(`Bill Category fetch failed: ${res.status}`);
+      }
+      const data = await res.json();
+
+      politicianObject = {
+        ...politicianObject,
+        donationsByYear: data.totals,
+      };
+      politicianObject = {
+        ...politicianObject,
+        totalDonations: data.total_donations,
+      };
+console.log(data);
+
       setPoliticiansDetailed((prev: any) =>
         prev.map((p: PoliticianDetailed) =>
           p.u_id === politician.u_id ? politicianObject : p,

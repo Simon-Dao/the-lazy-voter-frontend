@@ -8,7 +8,6 @@ export const peopleSearchResults = atom([]);
 
 // Summary
 export type DonationSlice = {
-  id: number;
   name: string;
   value: number;
 };
@@ -57,6 +56,7 @@ export type PoliticianDetailed = {
   timeline?: TimelineEvent[];
   billCategoriesByYear?: Record<string, BillCategory[]>;
   donationsByYear?: Record<string, DonationSlice[]>;
+  totalDonations? : number;
   ballotpedia?: string;
   photoSrc?:string;
 };
