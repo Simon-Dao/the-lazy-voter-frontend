@@ -639,6 +639,17 @@ export default function Summary() {
                           </Button>
                         )}
                       </Typography>
+
+                       <Typography sx={{ fontWeight: 600, mb: 1 }}>
+                        {isLoading ? (
+                          <Skeleton variant="rounded" width={220} height={36} />
+                        ) : (
+                          <>
+                          Please note that this data comes from the top {candidate?.totalDonations} donations
+                          </>
+                        )}
+                      </Typography>
+
                       {!candidate?.donationsByYear ? (
                         <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                           {Array.from({ length: 4 }).map((_, i) => (
@@ -681,7 +692,8 @@ export default function Summary() {
                         </Stack>
                       ) : (
                         <BarChart
-                          dataset={[...topDonationCategories].sort(
+                          dataset={[...topDonationCategories]
+                            .sort(
                             (a, b) => b.value - a.value,
                           )}
                           yAxis={[
@@ -717,6 +729,99 @@ export default function Summary() {
                         </Typography>
                       )}
                     </CardContent>
+                    <Divider sx={{ my: 2 }} />
+
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 1.5 }}>
+                      Top Donors
+                    </Typography>
+
+                    {!candidate?.topDonorsByYear ? (
+                      <Stack spacing={1.5}>
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Stack
+                            key={i}
+                            direction="row"
+                            spacing={1.5}
+                            sx={{ alignItems: "center" }}
+                          >
+                            <Skeleton
+                              variant="circular"
+                              width={28}
+                              height={28}
+                            />
+                            <Skeleton width="60%" />
+                            <Skeleton width="20%" sx={{ ml: "auto" }} />
+                          </Stack>
+                        ))}
+                      </Stack>
+                    ) : (
+                      <List disablePadding>
+                        {((candidate.topDonorsByYear[electionYear] ?? [])
+                          .sort((a, b) => b.value - a.value))
+                          .slice(0,10)
+                          .map(
+                            (donor, i) => (
+                              <ListItem
+                                key={donor.name}
+                                disablePadding
+                                sx={{
+                                  py: 1,
+                                  justifyContent: "space-between",
+                                  borderBottom:
+                                    i <
+                                    (candidate.topDonorsByYear[electionYear]
+                                      ?.length ?? 0) -
+                                      1
+                                      ? "1px solid"
+                                      : "none",
+                                  borderColor: "divider",
+                                }}
+                              >
+                              <Stack
+                                direction="row"
+                                spacing={1.5}
+                                sx={{ alignItems: "center", minWidth: 0 }}
+                              >
+                                <Box
+                                  sx={{
+                                    width: 26,
+                                    height: 26,
+                                    borderRadius: "50%",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: 12,
+                                    fontWeight: 700,
+                                    flexShrink: 0,
+                                    color: "text.secondary",
+                                  }}
+                                >
+                                  {i + 1}
+                                </Box>
+                                <Typography
+                                  variant="body2"
+                                  noWrap
+                                  sx={{ fontWeight: 500 }}
+                                >
+                                  {donor.name}
+                                </Typography>
+                              </Stack>
+
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: "text.secondary",
+                                  flexShrink: 0,
+                                  fontVariantNumeric: "tabular-nums",
+                                }}
+                              >
+                                ${Number(donor.value).toLocaleString()}
+                              </Typography>
+                            </ListItem>
+                          ),
+                        )}
+                      </List>
+                    )}
                   </Card>
                 </Grow>
 

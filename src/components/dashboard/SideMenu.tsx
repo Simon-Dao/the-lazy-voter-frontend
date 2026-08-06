@@ -134,6 +134,7 @@ export default function SideMenu({ children }: SideMenuProps) {
       timeline: null,
       billCategoriesByYear: null,
       donationsByYear: null,
+      topDonorsByYear: null,
       totalDonations: null,
       photoSrc: "",
     };
@@ -165,7 +166,6 @@ export default function SideMenu({ children }: SideMenuProps) {
 
     // Fetch Bill Categories By Year
     try {
-
       const res = await fetch(
         `https://thelazyvoter.org/api/politicians/${politician.u_id}/legislation/totals`,
       );
@@ -209,7 +209,36 @@ export default function SideMenu({ children }: SideMenuProps) {
         ...politicianObject,
         totalDonations: data.total_donations,
       };
-console.log(data);
+      console.log(data);
+
+      setPoliticiansDetailed((prev: any) =>
+        prev.map((p: PoliticianDetailed) =>
+          p.u_id === politician.u_id ? politicianObject : p,
+        ),
+      );
+    } catch (error) {
+      console.error(
+        "Failed to fetch Bill Category for",
+        politician.u_id,
+        error,
+      );
+    }
+
+    // Fetch Top Donors by Year
+    try {
+      const res = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/donors/top-donors`,
+      );
+      if (!res.ok) {
+        throw new Error(`Bill Category fetch failed: ${res.status}`);
+      }
+      const data = await res.json();
+
+      politicianObject = {
+        ...politicianObject,
+        topDonorsByYear: data,
+      };
+      console.log(data);
 
       setPoliticiansDetailed((prev: any) =>
         prev.map((p: PoliticianDetailed) =>
@@ -226,15 +255,14 @@ console.log(data);
 
     // Fetch Image
     try {
-
       const people_id_req = await fetch(
         `https://thelazyvoter.org/api/politicians/${politician.u_id}`,
       );
       const people_id = await people_id_req.json();
-      
-         politicianObject = {
+
+      politicianObject = {
         ...politicianObject,
-        photoSrc: `https://thelazyvoter.org/avatars/${people_id}.jpg`
+        photoSrc: `https://thelazyvoter.org/avatars/${people_id}.jpg`,
       };
       setPoliticiansDetailed((prev: any) =>
         prev.map((p: PoliticianDetailed) =>

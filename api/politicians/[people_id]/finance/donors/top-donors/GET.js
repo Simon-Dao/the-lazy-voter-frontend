@@ -15,15 +15,15 @@ async function getClient() {
 
 function groupByDate(rows) {
   const grouped = rows.reduce((acc, row) => {
-    const { term_start_date, category_name, value } = row;
+    const { value, contributor_name, election_year } = row;
 
-    if (!acc[term_start_date]) {
-      acc[term_start_date] = [];
+    if (!acc[election_year]) {
+      acc[election_year] = [];
     }
 
-    acc[term_start_date].push({
-      name: category_name,
-      value: Number(value),
+    acc[election_year].push({
+      name: contributor_name,
+      value,
     });
 
     return acc;
@@ -31,13 +31,13 @@ function groupByDate(rows) {
 
   // Build an "all" bucket by summing values per category across every year
   const allTotals = rows.reduce((acc, row) => {
-    const { category_name, value } = row;
-    acc[category_name] = (acc[category_name] ?? 0) + Number(value);
+    const { contributor_name, value } = row;
+    acc[contributor_name] = (acc[contributor_name] ?? 0) + Number(value);
     return acc;
   }, {});
 
-  grouped["all"] = Object.entries(allTotals).map(([name, value]) => ({
-    name,
+  grouped["all"] = Object.entries(allTotals).map(([contributor_name, value]) => ({
+    name: contributor_name,
     value,
   }));
 
@@ -97,7 +97,8 @@ exports.handler = async (event) => {
   `,
       [peopleId, top_n],
     );
-    const grouped = groupByDate(billCategories.rows);
+
+    const grouped = groupByDate(topDonorsPerElection.rows);
 
     return {
       statusCode: 200,

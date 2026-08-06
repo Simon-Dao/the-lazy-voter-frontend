@@ -40,6 +40,11 @@ export type BillCategory = {
   value: number;
 };
 
+export type DonorBasicInfo = {
+  name: string;
+  value: number;
+}
+
 export const IsPoliticianSelectedAtom = atom(false);
 
 // Politicians Dashboard
@@ -57,6 +62,7 @@ export type PoliticianDetailed = {
   billCategoriesByYear?: Record<string, BillCategory[]>;
   donationsByYear?: Record<string, DonationSlice[]>;
   totalDonations? : number;
+  topDonorsByYear: Record<string, DonorBasicInfo[]>
   ballotpedia?: string;
   photoSrc?:string;
 };
