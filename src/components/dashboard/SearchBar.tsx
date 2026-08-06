@@ -9,11 +9,14 @@ import {
   Stack,
   Typography,
   CircularProgress,
+  InputAdornment,
 } from "@mui/material";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import { useTheme, alpha } from "@mui/material/styles";
 import { POLITICIANS_SEARCH_API_URL } from "#/util/Constants";
 import { PoliticianBasicInfo } from "#/util/State";
-import { useAtom } from 'jotai';
-import { IsPoliticianSelectedAtom } from '#/util/State';
+import { useAtom } from "jotai";
+import { IsPoliticianSelectedAtom } from "#/util/State";
 
 type SearchBarProps = {
   onSelectPolitician: (politician: PoliticianBasicInfo) => void;
@@ -39,8 +42,11 @@ function getInitials(name: string) {
 }
 
 export default function SearchBar({ onSelectPolitician }: SearchBarProps) {
+  const theme = useTheme();
 
-  const [isPoliticianSelected, setIsPoliticianSelected] = useAtom(IsPoliticianSelectedAtom);
+  const [isPoliticianSelected, setIsPoliticianSelected] = useAtom(
+    IsPoliticianSelectedAtom,
+  );
   const [inputValue, setInputValue] = useState<string>("");
   const [options, setOptions] = useState<PoliticianBasicInfo[]>([]);
   const [loading, setLoading] = useState(false);
@@ -114,7 +120,7 @@ export default function SearchBar({ onSelectPolitician }: SearchBarProps) {
       role: selected.role,
       party: selected.party,
       state: selected.state,
-      status: selected.status
+      status: selected.status,
     });
 
     // Reset after adding so the field is ready for the next search.
@@ -148,6 +154,32 @@ export default function SearchBar({ onSelectPolitician }: SearchBarProps) {
             onClose={() => setOpen(false)}
             loading={loading}
             filterOptions={(x) => x} // server already filters by prefix
+            slotProps={{
+              paper: {
+                elevation: 0,
+                sx: {
+                  mt: 1,
+                  borderRadius: 2.5,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  boxShadow:
+                    theme.palette.mode === "dark"
+                      ? "0 12px 32px rgba(0,0,0,0.45)"
+                      : "0 12px 32px rgba(15,23,42,0.12)",
+                  overflow: "hidden",
+                },
+              },
+              listbox: {
+                sx: {
+                  p: 0.75,
+                  "& .MuiAutocomplete-option": {
+                    borderRadius: 1.75,
+                    mx: 0,
+                    px: 1.25,
+                  },
+                },
+              },
+            }}
             renderOption={(props, option) => (
               <Box
                 component="li"
@@ -157,32 +189,39 @@ export default function SearchBar({ onSelectPolitician }: SearchBarProps) {
                   display: "flex !important",
                   alignItems: "center",
                   gap: 1.5,
-                  py: 1,
+                  py: "10px !important",
+                  transition: "background-color 120ms ease",
                 }}
               >
                 <Box
                   sx={{
-                    width: 36,
-                    height: 36,
+                    width: 38,
+                    height: 38,
                     borderRadius: "50%",
-                    bgcolor: "action.hover",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: 13,
-                    fontWeight: 500,
-                    color: "text.secondary",
+                    fontWeight: 700,
+                    letterSpacing: 0.2,
+                    color: "background.paper",
                     flexShrink: 0,
+                    bgcolor: PARTY_COLOR[option.party] ?? "text.disabled",
+                    boxShadow: (t) =>
+                      `0 0 0 2px ${alpha(t.palette.background.paper, 1)}, 0 0 0 3px ${alpha(
+                        t.palette.mode === "dark" ? "#fff" : "#000",
+                        0.06,
+                      )}`,
                   }}
                 >
                   {getInitials(option.name)}
                 </Box>
 
-                <Stack spacing={0} sx={{ flexGrow: 1, minWidth: 0 }}>
+                <Stack spacing={0.25} sx={{ flexGrow: 1, minWidth: 0 }}>
                   <Typography
                     variant="body2"
                     noWrap
-                    sx={{ color: "text.primary" }}
+                    sx={{ color: "text.primary", fontWeight: 600 }}
                   >
                     {option.name}
                   </Typography>
@@ -193,14 +232,19 @@ export default function SearchBar({ onSelectPolitician }: SearchBarProps) {
                   >
                     <Box
                       sx={{
-                        width: 7,
-                        height: 7,
+                        width: 6,
+                        height: 6,
                         borderRadius: "50%",
                         bgcolor: PARTY_COLOR[option.party] ?? "text.disabled",
                         flexShrink: 0,
                       }}
                     />
-                    <Typography variant="caption" color="text.secondary" noWrap>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      noWrap
+                      sx={{ fontWeight: 500 }}
+                    >
                       {[option.role, option.party, option.state]
                         .filter(Boolean)
                         .join(" · ")}
@@ -211,7 +255,11 @@ export default function SearchBar({ onSelectPolitician }: SearchBarProps) {
                 <Typography
                   variant="caption"
                   color="text.disabled"
-                  sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
+                  sx={{
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                    fontVariantNumeric: "tabular-nums",
+                  }}
                 >
                   since {option.latestYear}
                 </Typography>
@@ -224,17 +272,55 @@ export default function SearchBar({ onSelectPolitician }: SearchBarProps) {
                 variant="outlined"
                 size="small"
                 sx={{
-                  "& .MuiAutocomplete-popupIndicator": { display: "none" },
                   width: "100%",
+                  "& .MuiAutocomplete-popupIndicator": { display: "none" },
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2.5,
+                    bgcolor: (t) =>
+                      t.palette.mode === "dark"
+                        ? alpha(t.palette.common.white, 0.04)
+                        : alpha(t.palette.common.black, 0.03),
+                    transition:
+                      "background-color 150ms ease, box-shadow 150ms ease",
+                    "& fieldset": {
+                      borderColor: "divider",
+                      transition: "border-color 150ms ease",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "text.secondary",
+                    },
+                    "&.Mui-focused": {
+                      bgcolor: "background.paper",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary.main",
+                      borderWidth: 1.5,
+                    },
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    py: 1.1,
+                  },
                 }}
                 slotProps={{
                   ...params.slotProps,
                   input: {
                     ...params.slotProps?.input,
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ ml: 0.25 }}>
+                        <SearchRoundedIcon
+                          fontSize="small"
+                          sx={{ color: "text.disabled" }}
+                        />
+                      </InputAdornment>
+                    ),
                     endAdornment: (
                       <>
                         {loading ? (
-                          <CircularProgress color="inherit" size={16} />
+                          <CircularProgress
+                            size={15}
+                            thickness={5}
+                            sx={{ color: "text.disabled", mr: 0.5 }}
+                          />
                         ) : null}
                         {params.slotProps?.input?.endAdornment}
                       </>

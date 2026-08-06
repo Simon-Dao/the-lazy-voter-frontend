@@ -721,7 +721,7 @@ export default function Summary() {
                 </Grow>
 
                 {/* News */}
-                <Grow
+                {/* <Grow
                   in={show}
                   timeout={LOADING_ANIMATION_DURATION}
                   style={{ transitionDelay: LOADING_DELAY_2 }}
@@ -780,7 +780,7 @@ export default function Summary() {
                       </List>
                     </CardContent>
                   </Card>
-                </Grow>
+                </Grow> */}
               </Stack>
             </Grid>
           </Grid>
