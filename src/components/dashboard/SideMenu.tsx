@@ -135,6 +135,7 @@ export default function SideMenu({ children }: SideMenuProps) {
       billCategoriesByYear: null,
       donationsByYear: null,
       totalDonations: null,
+      photoSrc: "",
     };
 
     // Add a placeholder entry immediately so the UI has something to render
@@ -165,13 +166,8 @@ export default function SideMenu({ children }: SideMenuProps) {
     // Fetch Bill Categories By Year
     try {
 
-      const people_id_req = await fetch(
-        `https://thelazyvoter.org/api/politicians/${politician.u_id}/`,
-      );
-      const people_id = await people_id_req.json();
-
       const res = await fetch(
-        `https://thelazyvoter.org/api/politicians/${people_id}/legislation/totals`,
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/legislation/totals`,
       );
       if (!res.ok) {
         throw new Error(`Bill Category fetch failed: ${res.status}`);
@@ -230,24 +226,16 @@ console.log(data);
 
     // Fetch Image
     try {
-      const res = await fetch(
-        `https://thelazyvoter.org/avatars/${politician.u_id}.jpg`,
+
+      const people_id_req = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}`,
       );
-      if (!res.ok) {
-        throw new Error(`Bill Category fetch failed: ${res.status}`);
-      }
-      const data = await res.json();
+      const people_id = await people_id_req.json();
 
-      politicianObject = {
+         politicianObject = {
         ...politicianObject,
-        donationsByYear: data.totals,
+        photoSrc: `https://thelazyvoter.org/avatars/${people_id}.jpg`
       };
-      politicianObject = {
-        ...politicianObject,
-        totalDonations: data.total_donations,
-      };
-console.log(data);
-
       setPoliticiansDetailed((prev: any) =>
         prev.map((p: PoliticianDetailed) =>
           p.u_id === politician.u_id ? politicianObject : p,
