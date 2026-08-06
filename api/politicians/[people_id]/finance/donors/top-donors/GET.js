@@ -1,4 +1,4 @@
-const { Client } = require('pg');
+const { Client } = require("pg");
 
 async function getClient() {
   const client = new Client({
@@ -46,12 +46,17 @@ function groupByDate(rows) {
 
 exports.handler = async (event) => {
   const peopleId = event.pathParameters?.people_id;
+  const election_years = event.queryStringParameters?.election_years;
+  const top_n = event.queryStringParameters?.top_n | 5;
 
   const client = await getClient();
 
   try {
     // Check if person exists
-    const personCheck = await client.query('SELECT 1 FROM the_lazy_voter_serving.unified_politician_record WHERE u_id = $1 LIMIT 1', [peopleId]);
+    const personCheck = await client.query(
+      "SELECT 1 FROM the_lazy_voter_serving.unified_politician_record WHERE u_id = $1 LIMIT 1",
+      [peopleId],
+    );
     if (personCheck.rows.length === 0) {
       return {
         statusCode: 404,
@@ -59,29 +64,46 @@ exports.handler = async (event) => {
       };
     }
 
-    const billCategories = await client.query(`
-      SELECT b.term_start_date,c.category_name,COUNT(b.bill_id) as value
-      FROM the_lazy_voter_serving.unified_politician_record p 
-      JOIN the_lazy_voter_serving.legiscan_sponsor s
-      ON p.legiscan_ids @> to_jsonb(s.people_id::text)
-      JOIN the_lazy_voter_serving.legiscan_bill b
-      ON s.bill_id = b.bill_id
-      JOIN the_lazy_voter_serving.legiscan_bill_category_pair cp
-      ON cp.bill_id = b.bill_id
-      JOIN the_lazy_voter_serving.legiscan_bill_category c
-      ON c.category_id = cp.category_id
-      WHERE p.u_id = $1
-      GROUP BY c.category_name, b.term_start_date
-      ORDER BY b.term_start_date
-    `, [peopleId]);
-
+    const topDonorsPerElection = await client.query(
+      `
+      WITH deduped_donors AS (
+        SELECT
+          d.contributor_name,
+          d.election_year,
+          SUM(d.contribution_receipt_amount) AS value
+        FROM 
+          the_lazy_voter_serving.unified_politician_record p 
+        JOIN 
+          the_lazy_voter_serving.fec_donation d
+        ON 
+          p.fec_ids @> to_jsonb(d.fec_id::text)
+        WHERE 
+          p.u_id = $1
+        GROUP BY 
+          d.contributor_name, d.election_year
+      ),
+      ranked_donors AS (
+        SELECT
+            election_year,
+            contributor_name,
+            value,
+            ROW_NUMBER() OVER (
+                PARTITION BY election_year
+                ORDER BY value DESC
+            ) AS rn
+        FROM deduped_donors
+      )
+      SELECT * FROM ranked_donors WHERE rn <= $2
+  `,
+      [peopleId, top_n],
+    );
     const grouped = groupByDate(billCategories.rows);
 
     return {
       statusCode: 200,
       body: JSON.stringify(grouped),
     };
-  } catch(error) {
+  } catch (error) {
     return {
       statusCode: 500,
       body: JSON.stringify({
@@ -89,8 +111,7 @@ exports.handler = async (event) => {
         code: error.code,
       }),
     };
-  } 
-  finally {
+  } finally {
     await client.end();
   }
 };
