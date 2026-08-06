@@ -164,8 +164,14 @@ export default function SideMenu({ children }: SideMenuProps) {
 
     // Fetch Bill Categories By Year
     try {
+
+      const people_id_req = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/`,
+      );
+      const people_id = await people_id_req.json();
+
       const res = await fetch(
-        `https://thelazyvoter.org/api/politicians/${politician.u_id}/legislation/totals`,
+        `https://thelazyvoter.org/api/politicians/${people_id}/legislation/totals`,
       );
       if (!res.ok) {
         throw new Error(`Bill Category fetch failed: ${res.status}`);
@@ -225,7 +231,7 @@ console.log(data);
     // Fetch Image
     try {
       const res = await fetch(
-        `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/totals`,
+        `https://thelazyvoter.org/avatars/${politician.u_id}.jpg`,
       );
       if (!res.ok) {
         throw new Error(`Bill Category fetch failed: ${res.status}`);
