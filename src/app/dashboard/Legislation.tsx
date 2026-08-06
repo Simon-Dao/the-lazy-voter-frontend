@@ -130,7 +130,7 @@ const TITLE_TEMPLATES: Record<PolicyDomain, string[]> = {
   Governance: [
     "{cat} Reform Act",
     "{cat} Transparency Act",
-    "Advancing {cat} Act",
+    "Advancing {cat} Act", 
   ],
 };
 
