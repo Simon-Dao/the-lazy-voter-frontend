@@ -23,12 +23,13 @@ import {
   Skeleton,
   LinearProgress,
 } from "@mui/material";
-import { PieChart } from "@mui/x-charts/PieChart";
+
+import { BarChart } from "@mui/x-charts/BarChart";
+
 import { useAtom } from "jotai";
 import SummaryEmptyState from "#/components/dashboard/SummaryEmptyState";
 import ArrowOutwardOutlinedIcon from "@mui/icons-material/ArrowOutwardOutlined";
 import { useTheme } from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import {
   PoliticiansDetailedAtom,
@@ -40,7 +41,6 @@ import {
   DonationSlice,
   TimelineEvent,
   NewsArticle,
-  BillCategory,
   DashboardSideMenuTabAtom,
 } from "#/util/State";
 
@@ -575,34 +575,22 @@ export default function Summary() {
                       {!candidate?.billCategoriesByYear ? (
                         <Stack sx={{ alignItems: "center", py: 2 }}>
                           <Skeleton
-                            variant="circular"
-                            width={180}
-                            height={180}
+                            variant="rounded"
+                            width="100%"
+                            height={320}
                           />
                         </Stack>
                       ) : (
-                        <PieChart
-                          series={[
-                            {
-                              data: topBillCategories.map((d) => ({
-                                ...d,
-                                label: d.name,
-                              })),
-                              innerRadius: 40,
-                              paddingAngle: 1,
-                              cornerRadius: 2,
-                            },
+                        <BarChart
+                          dataset={[...topBillCategories].sort(
+                            (a, b) => b.value - a.value,
+                          )}
+                          yAxis={[
+                            { scaleType: "band", dataKey: "name", width: 140 },
                           ]}
-                          height={260}
-                          slotProps={{
-                            legend: {
-                              direction: "horizontal",
-                              position: {
-                                vertical: "bottom",
-                                horizontal: "center",
-                              },
-                            },
-                          }}
+                          series={[{ dataKey: "value", label: "Bills" }]}
+                          layout="horizontal"
+                          height={Math.max(280, topBillCategories.length * 28)}
                         />
                       )}
                       {!candidate?.billCategoriesByYear ? (
@@ -626,52 +614,6 @@ export default function Summary() {
                       >
                         Top legislation categories
                       </Typography>
-                      <List disablePadding>
-                        {!candidate?.billCategoriesByYear
-                          ? Array.from({ length: 4 }).map((_, index) => (
-                              <ListItem
-                                key={index}
-                                disablePadding
-                                sx={{
-                                  py: 0.75,
-                                  justifyContent: "space-between",
-                                  borderBottom:
-                                    index < 3 ? "1px solid" : "none",
-                                  borderColor: "divider",
-                                }}
-                              >
-                                <Skeleton width="45%" />
-                                <Skeleton width="20%" />
-                              </ListItem>
-                            ))
-                          : topBillCategories
-                              .sort((a, b) => b.value - a.value)
-                              .map((cat, index) => (
-                                <ListItem
-                                  key={cat.name}
-                                  disablePadding
-                                  sx={{
-                                    py: 0.75,
-                                    justifyContent: "space-between",
-                                    borderBottom:
-                                      index < topBillCategories.length - 1
-                                        ? "1px solid"
-                                        : "none",
-                                    borderColor: "divider",
-                                  }}
-                                >
-                                  <Typography variant="body2">
-                                    {cat.name}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    sx={{ color: "text.secondary" }}
-                                  >
-                                    {cat.value}
-                                  </Typography>
-                                </ListItem>
-                              ))}
-                      </List>
                     </CardContent>
                   </Card>
                 </Grow>
@@ -704,7 +646,7 @@ export default function Summary() {
                           </Button>
                         )}
                       </Typography>
-                      {isLoading ? (
+                      {!candidate?.donationsByYear ? (
                         <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                           {Array.from({ length: 4 }).map((_, i) => (
                             <Skeleton key={i} width={60} height={32} />
@@ -736,40 +678,38 @@ export default function Summary() {
                             ))}
                         </Tabs>
                       )}
-                      {isLoading ? (
+                      {!candidate?.donationsByYear ? (
                         <Stack sx={{ alignItems: "center", py: 2 }}>
                           <Skeleton
-                            variant="circular"
-                            width={180}
-                            height={180}
+                            variant="rounded"
+                            width="100%"
+                            height={320}
                           />
                         </Stack>
                       ) : (
-                        <PieChart
+                        <BarChart
+                          dataset={[...topDonationCategories].sort(
+                            (a, b) => b.value - a.value,
+                          )}
+                          yAxis={[
+                            { scaleType: "band", dataKey: "name", width: 140 },
+                          ]}
                           series={[
                             {
-                              data: topDonationCategories.map((d) => ({
-                                ...d,
-                                label: d.name,
-                              })),
-                              innerRadius: 40,
-                              paddingAngle: 1,
-                              cornerRadius: 2,
+                              dataKey: "value",
+                              label: "Donations",
+                              valueFormatter: (v: number | null) =>
+                                `$${(v ?? 0).toLocaleString()}`,
                             },
                           ]}
-                          height={260}
-                          slotProps={{
-                            legend: {
-                              direction: "horizontal",
-                              position: {
-                                vertical: "bottom",
-                                horizontal: "center",
-                              },
-                            },
-                          }}
+                          layout="horizontal"
+                          height={Math.max(
+                            280,
+                            topDonationCategories.length * 28,
+                          )}
                         />
                       )}
-                      {isLoading ? (
+                      {!candidate?.donationsByYear ? (
                         <Skeleton width="40%" sx={{ mx: "auto", mt: 1 }} />
                       ) : (
                         <Typography
@@ -791,50 +731,6 @@ export default function Summary() {
                       >
                         Top donation categories
                       </Typography>
-                      <List disablePadding>
-                        {isLoading
-                          ? Array.from({ length: 4 }).map((_, index) => (
-                              <ListItem
-                                key={index}
-                                disablePadding
-                                sx={{
-                                  py: 0.75,
-                                  justifyContent: "space-between",
-                                  borderBottom:
-                                    index < 3 ? "1px solid" : "none",
-                                  borderColor: "divider",
-                                }}
-                              >
-                                <Skeleton width="45%" />
-                                <Skeleton width="20%" />
-                              </ListItem>
-                            ))
-                          : topDonationCategories.map((cat, index) => (
-                              <ListItem
-                                key={cat.name}
-                                disablePadding
-                                sx={{
-                                  py: 0.75,
-                                  justifyContent: "space-between",
-                                  borderBottom:
-                                    index < topDonationCategories.length - 1
-                                      ? "1px solid"
-                                      : "none",
-                                  borderColor: "divider",
-                                }}
-                              >
-                                <Typography variant="body2">
-                                  {cat.name}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  sx={{ color: "text.secondary" }}
-                                >
-                                  {cat.value}
-                                </Typography>
-                              </ListItem>
-                            ))}
-                      </List>
                     </CardContent>
                   </Card>
                 </Grow>

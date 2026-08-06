@@ -221,6 +221,39 @@ console.log(data);
         error,
       );
     }
+
+    // Fetch Image
+    try {
+      const res = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/totals`,
+      );
+      if (!res.ok) {
+        throw new Error(`Bill Category fetch failed: ${res.status}`);
+      }
+      const data = await res.json();
+
+      politicianObject = {
+        ...politicianObject,
+        donationsByYear: data.totals,
+      };
+      politicianObject = {
+        ...politicianObject,
+        totalDonations: data.total_donations,
+      };
+console.log(data);
+
+      setPoliticiansDetailed((prev: any) =>
+        prev.map((p: PoliticianDetailed) =>
+          p.u_id === politician.u_id ? politicianObject : p,
+        ),
+      );
+    } catch (error) {
+      console.error(
+        "Failed to fetch Bill Category for",
+        politician.u_id,
+        error,
+      );
+    }
   };
 
   const removePolitician = (u_id: string) => {
