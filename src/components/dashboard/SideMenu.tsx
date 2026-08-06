@@ -231,7 +231,7 @@ console.log(data);
         `https://thelazyvoter.org/api/politicians/${politician.u_id}`,
       );
       const people_id = await people_id_req.json();
-
+      
          politicianObject = {
         ...politicianObject,
         photoSrc: `https://thelazyvoter.org/avatars/${people_id}.jpg`

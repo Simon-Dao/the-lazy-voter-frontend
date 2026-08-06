@@ -15,7 +15,7 @@ async function getClient() {
 
 exports.handler = async (event) => {
   const u_id = event.pathParameters?.people_id;
-  const client = getClient();
+  const client = await getClient();
 
   try {
     // Check if person exists
@@ -32,15 +32,22 @@ exports.handler = async (event) => {
     const people_id = await client.query(
       `
       SELECT legiscan_ids
-      FROM the_lazy_voter_serving.legiscan_people
-      WHERE p.u_id = $1
+      FROM the_lazy_voter_serving.unified_politician_record
+      WHERE u_id = $1
     `,
       [u_id],
     );
 
+    if(!people_id.rows || !people_id.rows[0]["legiscan_ids"]) {
+      return {
+        statusCode: 404,
+        body: "",
+      };
+    }
+
     return {
       statusCode: 200,
-      body: JSON.stringify(people_id),
+      body: JSON.stringify(people_id.rows[0]["legiscan_ids"][0]),
     };
   } catch (error) {
     return {

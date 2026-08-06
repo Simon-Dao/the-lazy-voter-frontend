@@ -19,7 +19,7 @@ export default function ScrollIndicator({ targetId }: { targetId?: string }) {
         display: "flex",
         justifyContent: "center",
         cursor: "pointer",
-        color: "text.secondary",
+        color: "primary.main",
         "& svg": {
           fontSize: 32,
           animation: "bounce 1.8s ease-in-out infinite",
