@@ -241,7 +241,7 @@ export default function SideMenu({ children }: SideMenuProps) {
       console.log(data);
 
       setPoliticiansDetailed((prev: any) =>
-        prev.map((p: PoliticianDetailed) =>
+        prev.map((p: PoliticianDetailed) => 
           p.u_id === politician.u_id ? politicianObject : p,
         ),
       );

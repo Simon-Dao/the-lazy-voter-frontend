@@ -5,7 +5,6 @@ import { useState, useMemo, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import List from "@mui/material/List";
@@ -15,7 +14,6 @@ import InputBase from "@mui/material/InputBase";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import GavelRoundedIcon from "@mui/icons-material/GavelRounded";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { alpha } from "@mui/material/styles";
 import { useAtom } from "jotai";
 import { SelectedPoliticianDetailedAtom } from "#/util/State";
@@ -77,129 +75,6 @@ function formatCategoryName(name: string): string {
     .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
-}
-
-// ---------------------------------------------------------------------------
-// Sample bill generation. There's no bill-level API yet (only category
-// counts), so this fabricates plausible-looking records purely for layout
-// purposes. Clearly labeled as sample data in the UI.
-// ---------------------------------------------------------------------------
-
-type BillStatus =
-  | "Introduced"
-  | "Passed House"
-  | "Passed Senate"
-  | "Signed into Law"
-  | "Vetoed";
-
-type BillRole = "Sponsor" | "Co-sponsor";
-
-type SampleBill = {
-  id: string;
-  billNumber: string;
-  title: string;
-  status: BillStatus;
-  role: BillRole;
-  date: string;
-};
-
-const STATUS_COLOR: Record<BillStatus, string> = {
-  Introduced: "text.disabled",
-  "Passed House": "info.main",
-  "Passed Senate": "info.main",
-  "Signed into Law": "success.main",
-  Vetoed: "error.main",
-};
-
-const TITLE_TEMPLATES: Record<PolicyDomain, string[]> = {
-  Economy: [
-    "{cat} Modernization Act",
-    "Strengthening {cat} Act",
-    "{cat} Investment and Jobs Act",
-  ],
-  Society: [
-    "{cat} Access and Equity Act",
-    "Protecting {cat} Act",
-    "{cat} Improvement Act",
-  ],
-  Security: [
-    "{cat} Safety Act",
-    "Securing {cat} Act",
-    "{cat} Accountability Act",
-  ],
-  Governance: [
-    "{cat} Reform Act",
-    "{cat} Transparency Act",
-    "Advancing {cat} Act", 
-  ],
-};
-
-// Deterministic PRNG so sample data is stable across server/client renders
-// instead of using Math.random() (avoids Next.js hydration mismatches).
-function seededRandom(seed: number) {
-  let t = seed + 0x6d2b79f5;
-  return () => {
-    t += 0x6d2b79f5;
-    let r = Math.imul(t ^ (t >>> 15), 1 | t);
-    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
-    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function hashString(str: string): number {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
-  }
-  return h;
-}
-
-function generateSampleBills(
-  categoryName: string,
-  count: number,
-  year: string,
-): SampleBill[] {
-  const domain = getDomain(categoryName);
-  const rand = seededRandom(hashString(categoryName + year));
-  const yearNum = year === "all" ? 2024 : parseInt(year.slice(0, 4), 10) || 2024;
-  const bills: SampleBill[] = [];
-
-  for (let i = 0; i < count; i++) {
-    const templates = TITLE_TEMPLATES[domain];
-    const title = templates[Math.floor(rand() * templates.length)].replace(
-      "{cat}",
-      formatCategoryName(categoryName),
-    );
-
-    const statusRoll = rand();
-    const status: BillStatus =
-      statusRoll < 0.4
-        ? "Introduced"
-        : statusRoll < 0.65
-          ? "Passed House"
-          : statusRoll < 0.8
-            ? "Passed Senate"
-            : statusRoll < 0.95
-              ? "Signed into Law"
-              : "Vetoed";
-
-    const role: BillRole = rand() < 0.3 ? "Sponsor" : "Co-sponsor";
-    const chamber = rand() < 0.5 ? "H.R." : "S.";
-    const billNum = Math.floor(rand() * 8000) + 100;
-    const month = Math.floor(rand() * 12) + 1;
-    const day = Math.floor(rand() * 27) + 1;
-
-    bills.push({
-      id: `${categoryName}-${i}`,
-      billNumber: `${chamber} ${billNum}`,
-      title,
-      status,
-      role,
-      date: `${yearNum}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
-    });
-  }
-
-  return bills.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
 // ---------------------------------------------------------------------------
@@ -270,15 +145,6 @@ export default function Legislation() {
 
   const activeCategory = visibleTopics.find((c) => c.name === selectedTopic);
 
-  const bills = useMemo(() => {
-    if (!activeCategory) return [];
-    return generateSampleBills(
-      activeCategory.name,
-      Math.min(activeCategory.value, 10),
-      year,
-    );
-  }, [activeCategory, year]);
-
   return (
     <Box
       sx={{
@@ -339,7 +205,7 @@ export default function Legislation() {
         )}
       </Stack>
 
-      {/* Master-detail layout: topic list on the left, bills for the
+      {/* Master-detail layout: topic list on the left, detail for the
           selected topic on the right. Only one topic's detail is visible
           at a time, so nothing reflows or stacks as you browse. */}
       <Stack
@@ -466,7 +332,8 @@ export default function Legislation() {
           </List>
         </Box>
 
-        {/* Detail: bills for the selected topic */}
+        {/* Detail: count summary for the selected topic. No bill-level
+            list is rendered here since there is no bill-level API yet. */}
         <Box
           sx={{
             flexGrow: 1,
@@ -480,19 +347,21 @@ export default function Legislation() {
           {isLoading || !hasCategoryData ? (
             <Stack spacing={1.5}>
               <Skeleton width="40%" height={32} />
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} variant="rounded" height={56} />
-              ))}
+              <Skeleton width="60%" />
             </Stack>
           ) : !activeCategory ? (
             <Box sx={{ py: 10, textAlign: "center" }}>
               <Typography variant="body2" sx={{ color: "text.disabled" }}>
-                Select a topic to see its bills.
+                Select a topic to see its details.
               </Typography>
             </Box>
           ) : (
-            <>
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 0.5 }}>
+            <Box sx={{ py: 4, textAlign: "center" }}>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ alignItems: "center", justifyContent: "center", mb: 0.5 }}
+              >
                 <Box
                   sx={{
                     width: 8,
@@ -506,104 +375,21 @@ export default function Legislation() {
                 </Typography>
               </Stack>
 
-              <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
+              <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
                 {activeCategory.value}{" "}
                 {activeCategory.value === 1 ? "bill" : "bills"} sponsored or
                 co-sponsored
               </Typography>
 
-              <List
-                disablePadding
-                sx={{
-                  overflowY: "auto",
-                  maxHeight: 480,
-                  ...customScrollbarSx,
-                }}
-              >
-                {bills.length === 0 ? (
-                  <Box sx={{ py: 6, textAlign: "center" }}>
-                    <DescriptionRoundedIcon
-                      sx={{ color: "text.disabled", fontSize: 28, mb: 0.5 }}
-                    />
-                    <Typography variant="body2" sx={{ color: "text.disabled" }}>
-                      No bills to show for this topic.
-                    </Typography>
-                  </Box>
-                ) : (
-                  bills.map((bill, index) => (
-                    <Box
-                      key={bill.id}
-                      sx={{
-                        py: 1.25,
-                        borderTop: index === 0 ? "none" : "1px solid",
-                        borderColor: "divider",
-                      }}
-                    >
-                      <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        sx={{
-                          justifyContent: "space-between",
-                          alignItems: { sm: "center" },
-                          gap: 0.5,
-                        }}
-                      >
-                        <Stack spacing={0} sx={{ minWidth: 0 }}>
-                          <Typography
-                            variant="body2"
-                            noWrap
-                            sx={{ fontWeight: 500 }}
-                          >
-                            {bill.title}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            sx={{ color: "text.secondary" }}
-                          >
-                            {bill.billNumber} · {bill.role} · {bill.date}
-                          </Typography>
-                        </Stack>
-
-                        <Chip
-                          label={bill.status}
-                          size="small"
-                          sx={{
-                            alignSelf: { xs: "flex-start", sm: "center" },
-                            flexShrink: 0,
-                            fontWeight: 600,
-                            color: STATUS_COLOR[bill.status],
-                            bgcolor: (t) => alpha(t.palette.text.primary, 0.06),
-                          }}
-                        />
-                      </Stack>
-                    </Box>
-                  ))
-                )}
-              </List>
-            </>
+              <DescriptionRoundedIcon
+                sx={{ color: "text.disabled", fontSize: 28, mb: 0.5 }}
+              />
+              <Typography variant="body2" sx={{ color: "text.disabled" }}>
+                Bill-level detail isn't available yet.
+              </Typography>
+            </Box>
           )}
         </Box>
-      </Stack>
-
-      {/* Sample data notice */}
-      <Stack
-        direction="row"
-        spacing={1}
-        sx={{
-          alignItems: "center",
-          mt: 2,
-          px: 1.25,
-          py: 1,
-          borderRadius: 2,
-          bgcolor: (t) => alpha(t.palette.warning.main, 0.08),
-          border: "1px solid",
-          borderColor: (t) => alpha(t.palette.warning.main, 0.3),
-        }}
-      >
-        <InfoOutlinedIcon fontSize="small" sx={{ color: "warning.main" }} />
-        <Typography variant="caption" sx={{ color: "text.secondary" }}>
-          Bill counts per topic are real. The individual bills listed are
-          sample data for layout purposes only, pending a bill-level API.
-        </Typography>
       </Stack>
     </Box>
   );
