@@ -9,10 +9,10 @@ import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
-import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from "@mui/icons-material/Close";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
@@ -685,7 +685,7 @@ export default function SideMenu({ children }: SideMenuProps) {
             bgcolor: "background.paper",
           }}
         >
-          <MenuIcon fontSize="small" />
+          <SearchIcon fontSize="small" />
         </IconButton>
       )}
     </Box>

@@ -81,10 +81,17 @@ exports.handler = async (event) => {
 
   const client = await getClient();
   try {
+    // Split into tokens and require each one to appear somewhere in the
+    // name, in any order — handles "First Last" vs "Last, First" storage
+    // mismatches without needing an exact substring match.
+    const tokens = q.trim().split(/\s+/).filter(Boolean);
+    const nameConditions = tokens.map((_, i) => `r.name ILIKE $${i + 1}`).join(" AND ");
+    const tokenParams = tokens.map((t) => `%${t}%`);
+
     const people = await client.query(
       `SELECT * FROM the_lazy_voter_serving.unified_politician_record r 
-        WHERE r.name ILIKE $1 LIMIT 5`,
-      [`%${q}%`],
+        WHERE ${nameConditions} LIMIT 5`,
+      tokenParams,
     );
 
     const idToPerson = new Map();
