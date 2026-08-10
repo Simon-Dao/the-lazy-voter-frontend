@@ -12,8 +12,8 @@ import Legislation from "#/app/dashboard/Legislation";
 import News from "#/app/dashboard/News";
 import Finances from "#/app/dashboard/Finances";
 import { useState, useEffect } from "react";
-import { useAtom } from 'jotai'
-import { DashboardSideMenuTabAtom } from '#/util/State'
+import { useAtom } from "jotai";
+import { DashboardSideMenuTabAtom } from "#/util/State";
 
 import {
   chartsCustomizations,
@@ -30,14 +30,14 @@ const xThemeComponents = {
 export default function Dashboard(props: { disableCustomTheme?: boolean }) {
   const [tab, setTab] = useAtom(DashboardSideMenuTabAtom);
 
-  const tabs = [<Summary />, <Legislation />, <Finances />, <News />];
+  const tabs = [<Summary />, <News />, <Legislation />, <Finances />];
 
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
       <AppAppBar />
       <Box sx={{ display: "flex" }}>
-        <SideMenu/>
+        <SideMenu />
         {/* Main content */}
         <Box
           component="main"

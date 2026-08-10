@@ -142,6 +142,30 @@ export default function SideMenu({ children }: SideMenuProps) {
     // Add a placeholder entry immediately so the UI has something to render
     setPoliticiansDetailed((prev: any) => [...prev, politicianObject]);
 
+    // Fetch Image
+    try {
+      const people_id_req = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}`,
+      );
+      const people_id = await people_id_req.json();
+
+      politicianObject = {
+        ...politicianObject,
+        photoSrc: `https://thelazyvoter.org/avatars/${people_id}.jpg`,
+      };
+      setPoliticiansDetailed((prev: any) =>
+        prev.map((p: PoliticianDetailed) =>
+          p.u_id === politician.u_id ? politicianObject : p,
+        ),
+      );
+    } catch (error) {
+      console.error(
+        "Failed to fetch Bill Category for",
+        politician.u_id,
+        error,
+      );
+    }
+
     // Fetch Timeline
     try {
       const res = await fetch(
@@ -241,7 +265,7 @@ export default function SideMenu({ children }: SideMenuProps) {
       console.log(data);
 
       setPoliticiansDetailed((prev: any) =>
-        prev.map((p: PoliticianDetailed) => 
+        prev.map((p: PoliticianDetailed) =>
           p.u_id === politician.u_id ? politicianObject : p,
         ),
       );
@@ -253,17 +277,22 @@ export default function SideMenu({ children }: SideMenuProps) {
       );
     }
 
-    // Fetch Image
+    // Fetch Top Donors by Year
     try {
-      const people_id_req = await fetch(
-        `https://thelazyvoter.org/api/politicians/${politician.u_id}`,
+      const res = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/donors/top-donors`,
       );
-      const people_id = await people_id_req.json();
+      if (!res.ok) {
+        throw new Error(`Bill Category fetch failed: ${res.status}`);
+      }
+      const data = await res.json();
 
       politicianObject = {
         ...politicianObject,
-        photoSrc: `https://thelazyvoter.org/avatars/${people_id}.jpg`,
+        topDonorsByYear: data,
       };
+      console.log(data);
+
       setPoliticiansDetailed((prev: any) =>
         prev.map((p: PoliticianDetailed) =>
           p.u_id === politician.u_id ? politicianObject : p,
@@ -396,10 +425,11 @@ export default function SideMenu({ children }: SideMenuProps) {
           {tabs.map((tabLabel, i) => (
             <Tab
               key={i}
-              label={tabLabel}
+              label={tabLabel + (i != 0 && !isPoliticianSelected ? "🔒" : "")}
               id={`vertical-tab-${i}`}
               aria-controls={`vertical-tabpanel-${i}`}
               disableRipple
+              disabled={i != 0 ? !isPoliticianSelected : false}
             />
           ))}
         </Tabs>

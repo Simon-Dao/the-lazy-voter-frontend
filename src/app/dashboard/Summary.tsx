@@ -514,7 +514,72 @@ export default function Summary() {
               </CardContent>
             </Card>
           </Grow>
-
+          {/* News */}
+          <Grow
+            in={show}
+            timeout={LOADING_ANIMATION_DURATION}
+            style={{ transitionDelay: LOADING_DELAY_2 }}
+          >
+            <Card variant="outlined" sx={{ mb: 2 }}>
+              <CardContent>
+                <Button
+                  variant="contained"
+                  endIcon={<ArrowOutwardOutlinedIcon />}
+                  onClick={() => {
+                    setTab(1);
+                  }}
+                >
+                  News
+                </Button>
+                <List disablePadding>
+                  {isLoading
+                    ? Array.from({ length: 3 }).map((_, index) => (
+                        <ListItem
+                          key={index}
+                          disablePadding
+                          sx={{
+                            py: 1,
+                            borderBottom: index < 2 ? "1px solid" : "none",
+                            borderColor: "divider",
+                          }}
+                        >
+                          <ListItemText
+                            primary={<Skeleton width="80%" />}
+                            secondary={<Skeleton width="40%" />}
+                          />
+                        </ListItem>
+                      ))
+                    : newsArticles.map((article, index) => (
+                        <ListItem
+                          key={index}
+                          disablePadding
+                          sx={{
+                            py: 1,
+                            borderBottom:
+                              index < newsArticles.length - 1
+                                ? "1px solid"
+                                : "none",
+                            borderColor: "divider",
+                          }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Link
+                                href={article.href}
+                                variant="body2"
+                                sx={{ fontWeight: 500 }}
+                              >
+                                {article.title}
+                              </Link>
+                            }
+                            secondary={`${article.source} · ${article.date}`}
+                          />
+                        </ListItem>
+                      ))}
+                </List>
+              </CardContent>
+            </Card>
+          </Grow>
           <Grid container spacing={2} columns={12}>
             {/* Left column */}
             <Grid size={{ xs: 12, lg: 6 }}>
@@ -535,7 +600,7 @@ export default function Summary() {
                             variant="contained"
                             endIcon={<ArrowOutwardOutlinedIcon />}
                             onClick={() => {
-                              setTab(1);
+                              setTab(2);
                             }}
                           >
                             Bills Sponsored / Co-sponsored
@@ -632,7 +697,7 @@ export default function Summary() {
                             variant="contained"
                             endIcon={<ArrowOutwardOutlinedIcon />}
                             onClick={() => {
-                              setTab(2);
+                              setTab(3);
                             }}
                           >
                             Campaign Donations
@@ -640,12 +705,13 @@ export default function Summary() {
                         )}
                       </Typography>
 
-                       <Typography sx={{ fontWeight: 600, mb: 1 }}>
+                      <Typography sx={{ fontWeight: 600, mb: 1 }}>
                         {isLoading ? (
                           <Skeleton variant="rounded" width={220} height={36} />
                         ) : (
                           <>
-                          Please note that this data comes from the top {candidate?.totalDonations} donations
+                            Please note that this data comes from the top{" "}
+                            {candidate?.totalDonations} donations
                           </>
                         )}
                       </Typography>
@@ -692,8 +758,7 @@ export default function Summary() {
                         </Stack>
                       ) : (
                         <BarChart
-                          dataset={[...topDonationCategories]
-                            .sort(
+                          dataset={[...topDonationCategories].sort(
                             (a, b) => b.value - a.value,
                           )}
                           yAxis={[
@@ -756,27 +821,26 @@ export default function Summary() {
                       </Stack>
                     ) : (
                       <List disablePadding>
-                        {((candidate.topDonorsByYear[electionYear] ?? [])
-                          .sort((a, b) => b.value - a.value))
-                          .slice(0,10)
-                          .map(
-                            (donor, i) => (
-                              <ListItem
-                                key={donor.name}
-                                disablePadding
-                                sx={{
-                                  py: 1,
-                                  justifyContent: "space-between",
-                                  borderBottom:
-                                    i <
-                                    (candidate.topDonorsByYear[electionYear]
-                                      ?.length ?? 0) -
-                                      1
-                                      ? "1px solid"
-                                      : "none",
-                                  borderColor: "divider",
-                                }}
-                              >
+                        {(candidate.topDonorsByYear[electionYear] ?? [])
+                          .sort((a, b) => b.value - a.value)
+                          .slice(0, 10)
+                          .map((donor, i) => (
+                            <ListItem
+                              key={donor.name}
+                              disablePadding
+                              sx={{
+                                py: 1,
+                                justifyContent: "space-between",
+                                borderBottom:
+                                  i <
+                                  (candidate.topDonorsByYear[electionYear]
+                                    ?.length ?? 0) -
+                                    1
+                                    ? "1px solid"
+                                    : "none",
+                                borderColor: "divider",
+                              }}
+                            >
                               <Stack
                                 direction="row"
                                 spacing={1.5}
@@ -818,74 +882,11 @@ export default function Summary() {
                                 ${Number(donor.value).toLocaleString()}
                               </Typography>
                             </ListItem>
-                          ),
-                        )}
+                          ))}
                       </List>
                     )}
                   </Card>
                 </Grow>
-
-                {/* News */}
-                {/* <Grow
-                  in={show}
-                  timeout={LOADING_ANIMATION_DURATION}
-                  style={{ transitionDelay: LOADING_DELAY_2 }}
-                >
-                  <Card variant="outlined">
-                    <CardContent>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                        Related news
-                      </Typography>
-                      <List disablePadding>
-                        {isLoading
-                          ? Array.from({ length: 3 }).map((_, index) => (
-                              <ListItem
-                                key={index}
-                                disablePadding
-                                sx={{
-                                  py: 1,
-                                  borderBottom:
-                                    index < 2 ? "1px solid" : "none",
-                                  borderColor: "divider",
-                                }}
-                              >
-                                <ListItemText
-                                  primary={<Skeleton width="80%" />}
-                                  secondary={<Skeleton width="40%" />}
-                                />
-                              </ListItem>
-                            ))
-                          : newsArticles.map((article, index) => (
-                              <ListItem
-                                key={index}
-                                disablePadding
-                                sx={{
-                                  py: 1,
-                                  borderBottom:
-                                    index < newsArticles.length - 1
-                                      ? "1px solid"
-                                      : "none",
-                                  borderColor: "divider",
-                                }}
-                              >
-                                <ListItemText
-                                  primary={
-                                    <Link
-                                      href={article.href}
-                                      variant="body2"
-                                      sx={{ fontWeight: 500 }}
-                                    >
-                                      {article.title}
-                                    </Link>
-                                  }
-                                  secondary={`${article.source} · ${article.date}`}
-                                />
-                              </ListItem>
-                            ))}
-                      </List>
-                    </CardContent>
-                  </Card>
-                </Grow> */}
               </Stack>
             </Grid>
           </Grid>

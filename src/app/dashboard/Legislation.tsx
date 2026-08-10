@@ -5,15 +5,18 @@ import { useState, useMemo, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Chip from "@mui/material/Chip";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
+import Pagination from "@mui/material/Pagination";
 import Skeleton from "@mui/material/Skeleton";
 import InputBase from "@mui/material/InputBase";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import GavelRoundedIcon from "@mui/icons-material/GavelRounded";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
+import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import { alpha } from "@mui/material/styles";
 import { useAtom } from "jotai";
 import { SelectedPoliticianDetailedAtom } from "#/util/State";
@@ -24,6 +27,15 @@ import { SelectedPoliticianDetailedAtom } from "#/util/State";
 // ---------------------------------------------------------------------------
 
 type PolicyDomain = "Economy" | "Society" | "Security" | "Governance";
+
+type Bill = {
+  title: string;
+  description: string;
+  state_link: string;
+  status_desc: string;
+  bill_number: string;
+  status_date: string;
+};
 
 const DOMAIN_BY_CATEGORY: Record<string, PolicyDomain> = {
   agriculture: "Economy",
@@ -95,18 +107,25 @@ const customScrollbarSx = {
   },
 } as const;
 
+const BILLS_PER_PAGE = 8;
+
 export default function Legislation() {
   const [candidate] = useAtom(SelectedPoliticianDetailedAtom);
 
-  const [year, setYear] = useState<string>("all");
+  const [termStart, setTermStart] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [visibleBills, setVisibleBills] = useState<Bill[]>([]);
+  const [billsLoading, setBillsLoading] = useState(false);
+  const [billsPage, setBillsPage] = useState(1);
 
   const isLoading = !candidate?.name;
   const hasCategoryData = !!candidate?.billCategoriesByYear;
 
   const years = useMemo(() => {
     if (!candidate?.billCategoriesByYear) return [];
+    setTermStart(Object.keys(candidate?.billCategoriesByYear)[0]);
+
     return Object.keys(candidate.billCategoriesByYear).sort((a, b) => {
       if (a === "all") return -1;
       if (b === "all") return 1;
@@ -116,8 +135,52 @@ export default function Legislation() {
 
   const categoriesForYear = useMemo(() => {
     if (!candidate?.billCategoriesByYear) return [];
-    return candidate.billCategoriesByYear[year] ?? [];
-  }, [candidate?.billCategoriesByYear, year]);
+    return candidate.billCategoriesByYear[termStart] ?? [];
+  }, [candidate?.billCategoriesByYear, termStart]);
+
+  // Reset to page 1 whenever the topic or term changes.
+  useEffect(() => {
+    setBillsPage(1);
+  }, [selectedTopic, termStart]);
+
+  useEffect(() => {
+    if (!candidate?.u_id || !selectedTopic) {
+      setVisibleBills([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function fetchData() {
+      setBillsLoading(true);
+      try {
+        const params = new URLSearchParams({
+          term_start_date: termStart,
+          category_name: selectedTopic as string,
+          page: String(billsPage),
+          per_page: String(BILLS_PER_PAGE),
+        });
+
+        const response = await fetch(
+          `https://thelazyvoter.org/api/politicians/${candidate?.u_id}/legislation?${params.toString()}`,
+        );
+        const bills: Bill[] = await response.json();
+
+        if (!cancelled) setVisibleBills(bills);
+      } catch (error) {
+        console.error("Failed to fetch Bills for", candidate?.u_id, error);
+        if (!cancelled) setVisibleBills([]);
+      } finally {
+        if (!cancelled) setBillsLoading(false);
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [candidate?.u_id, selectedTopic, termStart, billsPage]);
 
   const visibleTopics = useMemo(() => {
     return [...categoriesForYear]
@@ -144,6 +207,13 @@ export default function Legislation() {
   }, [visibleTopics]);
 
   const activeCategory = visibleTopics.find((c) => c.name === selectedTopic);
+
+  // The topic's total bill count is already known from the category data,
+  // so pagination math doesn't need a round trip through the API.
+  const billsTotal = activeCategory?.value ?? 0;
+  const billsPageCount = Math.max(1, Math.ceil(billsTotal / BILLS_PER_PAGE));
+  const billsRangeStart = billsTotal === 0 ? 0 : (billsPage - 1) * BILLS_PER_PAGE + 1;
+  const billsRangeEnd = Math.min(billsPage * BILLS_PER_PAGE, billsTotal);
 
   return (
     <Box
@@ -187,20 +257,22 @@ export default function Legislation() {
 
         {!isLoading && years.length > 0 && (
           <Tabs
-            value={year}
-            onChange={(_, value: string) => setYear(value)}
+            value={termStart}
+            onChange={(_, value: string) => setTermStart(value)}
             variant="scrollable"
             scrollButtons={false}
             sx={{ minHeight: 32 }}
           >
-            {years.map((y) => (
-              <Tab
-                key={y}
-                label={y === "all" ? "All years" : y}
-                value={y}
-                sx={{ minHeight: 32 }}
-              />
-            ))}
+            {years
+              .filter((x) => x != "all")
+              .map((y) => (
+                <Tab
+                  key={y}
+                  label={y === "all" ? "All years" : y}
+                  value={y}
+                  sx={{ minHeight: 32 }}
+                />
+              ))}
           </Tabs>
         )}
       </Stack>
@@ -226,7 +298,9 @@ export default function Legislation() {
             flexDirection: "column",
           }}
         >
-          <Box sx={{ p: 1.5, borderBottom: "1px solid", borderColor: "divider" }}>
+          <Box
+            sx={{ p: 1.5, borderBottom: "1px solid", borderColor: "divider" }}
+          >
             <Box
               sx={{
                 display: "flex",
@@ -241,7 +315,10 @@ export default function Legislation() {
                     : alpha(t.palette.common.black, 0.03),
               }}
             >
-              <SearchRoundedIcon fontSize="small" sx={{ color: "text.disabled" }} />
+              <SearchRoundedIcon
+                fontSize="small"
+                sx={{ color: "text.disabled" }}
+              />
               <InputBase
                 placeholder="Filter topics..."
                 value={query}
@@ -332,8 +409,7 @@ export default function Legislation() {
           </List>
         </Box>
 
-        {/* Detail: count summary for the selected topic. No bill-level
-            list is rendered here since there is no bill-level API yet. */}
+        {/* Detail: bills for the selected topic, fetched from the API. */}
         <Box
           sx={{
             flexGrow: 1,
@@ -347,20 +423,22 @@ export default function Legislation() {
           {isLoading || !hasCategoryData ? (
             <Stack spacing={1.5}>
               <Skeleton width="40%" height={32} />
-              <Skeleton width="60%" />
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} variant="rounded" height={56} />
+              ))}
             </Stack>
           ) : !activeCategory ? (
             <Box sx={{ py: 10, textAlign: "center" }}>
               <Typography variant="body2" sx={{ color: "text.disabled" }}>
-                Select a topic to see its details.
+                Select a topic to see its bills.
               </Typography>
             </Box>
           ) : (
-            <Box sx={{ py: 4, textAlign: "center" }}>
+            <>
               <Stack
                 direction="row"
                 spacing={1}
-                sx={{ alignItems: "center", justifyContent: "center", mb: 0.5 }}
+                sx={{ alignItems: "center", mb: 0.5 }}
               >
                 <Box
                   sx={{
@@ -375,22 +453,148 @@ export default function Legislation() {
                 </Typography>
               </Stack>
 
-              <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
+              <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
                 {activeCategory.value}{" "}
                 {activeCategory.value === 1 ? "bill" : "bills"} sponsored or
                 co-sponsored
               </Typography>
 
-              <DescriptionRoundedIcon
-                sx={{ color: "text.disabled", fontSize: 28, mb: 0.5 }}
-              />
-              <Typography variant="body2" sx={{ color: "text.disabled" }}>
-                Bill-level detail isn't available yet.
-              </Typography>
-            </Box>
+              <List
+                disablePadding
+                sx={{
+                  overflowY: "auto",
+                  maxHeight: 480,
+                  ...customScrollbarSx,
+                }}
+              >
+                {billsLoading ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <Box key={i} sx={{ py: 1.25 }}>
+                      <Skeleton variant="rounded" height={56} />
+                    </Box>
+                  ))
+                ) : visibleBills.length === 0 ? (
+                  <Box sx={{ py: 6, textAlign: "center" }}>
+                    <DescriptionRoundedIcon
+                      sx={{ color: "text.disabled", fontSize: 28, mb: 0.5 }}
+                    />
+                    <Typography variant="body2" sx={{ color: "text.disabled" }}>
+                      No bills to show for this topic.
+                    </Typography>
+                  </Box>
+                ) : (
+                  visibleBills.map((bill, index) => (
+                    <Box
+                      key={`${bill.bill_number}-${index}`}
+                      sx={{
+                        py: 1.25,
+                        borderTop: index === 0 ? "none" : "1px solid",
+                        borderColor: "divider",
+                      }}
+                    >
+                      <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        sx={{
+                          justifyContent: "space-between",
+                          alignItems: { sm: "flex-start" },
+                          gap: 0.5,
+                        }}
+                      >
+                        <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+                          <Typography
+                            component={bill.state_link ? "a" : "span"}
+                            href={bill.state_link || undefined}
+                            target={bill.state_link ? "_blank" : undefined}
+                            rel={bill.state_link ? "noopener noreferrer" : undefined}
+                            variant="body2"
+                            sx={{
+                              fontWeight: 500,
+                              color: "text.primary",
+                              textDecoration: "none",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 0.5,
+                              "&:hover": bill.state_link
+                                ? { textDecoration: "underline" }
+                                : undefined,
+                            }}
+                          >
+                            {bill.title}
+                            {bill.state_link && (
+                              <OpenInNewRoundedIcon
+                                sx={{ fontSize: 14, color: "text.disabled" }}
+                              />
+                            )}
+                          </Typography>
+
+                          {bill.description && (
+                            <Typography
+                              variant="body2"
+                              sx={{ color: "text.secondary" }}
+                            >
+                              {bill.description}
+                            </Typography>
+                          )}
+
+                          <Typography
+                            variant="caption"
+                            sx={{ color: "text.secondary" }}
+                          >
+                            {bill.bill_number}
+                            {bill.status_date ? ` · ${bill.status_date}` : ""}
+                          </Typography>
+                        </Stack>
+
+                        {bill.status_desc && (
+                          <Chip
+                            label={bill.status_desc}
+                            size="small"
+                            sx={{
+                              alignSelf: { xs: "flex-start", sm: "center" },
+                              flexShrink: 0,
+                              fontWeight: 600,
+                              bgcolor: (t) => alpha(t.palette.text.primary, 0.06),
+                            }}
+                          />
+                        )}
+                      </Stack>
+                    </Box>
+                  ))
+                )}
+              </List>
+
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1}
+                sx={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mt: 1.5,
+                  pt: 1.5,
+                  borderTop: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                  {billsTotal === 0
+                    ? "0 results"
+                    : `Showing ${billsRangeStart}–${billsRangeEnd} of ${billsTotal} · ${BILLS_PER_PAGE} per page`}
+                </Typography>
+
+                <Pagination
+                  count={billsPageCount}
+                  page={billsPage}
+                  onChange={(_, value) => setBillsPage(value)}
+                  disabled={billsLoading}
+                  size="small"
+                  shape="rounded"
+                />
+              </Stack>
+            </>
           )}
         </Box>
       </Stack>
+
     </Box>
   );
 }

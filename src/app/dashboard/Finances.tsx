@@ -11,6 +11,7 @@ import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import Skeleton from "@mui/material/Skeleton";
 import InputBase from "@mui/material/InputBase";
+import Pagination from "@mui/material/Pagination";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import PaidRoundedIcon from "@mui/icons-material/PaidRounded";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
@@ -57,6 +58,15 @@ const compactCurrencyFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 1,
 });
 
+type Donor = {
+  contributor_name: string;
+  total_amount: number;
+  donation_count: number;
+  last_contribution_date: string;
+};
+
+const DONORS_PER_PAGE = 8;
+
 // ---------------------------------------------------------------------------
 
 const customScrollbarSx = {
@@ -82,12 +92,17 @@ export default function Finances() {
   const [query, setQuery] = useState("");
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
 
+  const [donors, setDonors] = useState<Donor[]>([]);
+  const [donorsLoading, setDonorsLoading] = useState(false);
+  const [donorsPage, setDonorsPage] = useState(1);
+  const [donorsTotal, setDonorsTotal] = useState(0);
+
   const isLoading = !candidate?.name;
   const hasDonationData = !!candidate?.donationsByYear;
 
   const years = useMemo(() => {
     if (!candidate?.donationsByYear) return [];
-    return Object.keys(candidate.donationsByYear).sort((a, b) => {
+    return Object.keys(candidate.donationsByYear).filter((x) => x != 'all').sort((a, b) => {
       if (a === "all") return -1;
       if (b === "all") return 1;
       return b.localeCompare(a);
@@ -147,14 +162,64 @@ export default function Finances() {
     [visibleSources],
   );
 
-  const topDonors = useMemo(() => {
-    if (!candidate?.topDonorsByYear) return [];
-    return candidate.topDonorsByYear[year] ?? [];
-  }, [candidate?.topDonorsByYear, year]);
+  // Reset to page 1 whenever the source or year changes.
+  useEffect(() => {
+    setDonorsPage(1);
+  }, [selectedSource, year]);
+
+  useEffect(() => {
+    if (!candidate?.u_id || !selectedSource) {
+      setDonors([]);
+      setDonorsTotal(0);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function fetchData() {
+      setDonorsLoading(true);
+      try {
+        const params = new URLSearchParams({
+          election_year: year,
+          industry_category: selectedSource as string,
+          page: String(donorsPage),
+          per_page: String(DONORS_PER_PAGE),
+        });
+
+        const response = await fetch(
+          `https://thelazyvoter.org/api/politicians/${candidate?.u_id}/finance/donors?${params.toString()}`,
+        );
+        const data: { rows: Donor[]; total: number } = await response.json();
+
+        if (!cancelled) {
+          setDonors(data.rows ?? []);
+          setDonorsTotal(data.total ?? 0);
+        }
+      } catch (error) {
+        console.error("Failed to fetch donors for", candidate?.u_id, error);
+        if (!cancelled) {
+          setDonors([]);
+          setDonorsTotal(0);
+        }
+      } finally {
+        if (!cancelled) setDonorsLoading(false);
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [candidate?.u_id, selectedSource, year, donorsPage]);
+
+  const donorsPageCount = Math.max(1, Math.ceil(donorsTotal / DONORS_PER_PAGE));
+  const donorsRangeStart = donorsTotal === 0 ? 0 : (donorsPage - 1) * DONORS_PER_PAGE + 1;
+  const donorsRangeEnd = Math.min(donorsPage * DONORS_PER_PAGE, donorsTotal);
 
   const maxDonorValue = useMemo(
-    () => topDonors.reduce((max, d) => Math.max(max, d.value), 0),
-    [topDonors],
+    () => donors.reduce((max, d) => Math.max(max, d.total_amount), 0),
+    [donors],
   );
 
   return (
@@ -387,7 +452,7 @@ export default function Finances() {
           </List>
         </Box>
 
-        {/* Detail: selected source breakdown + top donors */}
+        {/* Detail: selected source breakdown + paginated top donors */}
         <Box
           sx={{
             flexGrow: 1,
@@ -396,6 +461,9 @@ export default function Finances() {
             borderColor: "divider",
             borderRadius: 3,
             p: 2.5,
+            display: "flex",
+            flexDirection: "column",
+            height: { xs: "auto", md: 624 },
           }}
         >
           {isLoading || !hasDonationData ? (
@@ -412,8 +480,19 @@ export default function Finances() {
               </Typography>
             </Box>
           ) : (
-            <>
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 0.5 }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                flexGrow: 1,
+                minHeight: 0,
+              }}
+            >
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ alignItems: "center", mb: 0.5, flexShrink: 0 }}
+              >
                 <Box
                   sx={{
                     width: 8,
@@ -429,14 +508,21 @@ export default function Finances() {
                 </Typography>
               </Stack>
 
-              <Typography variant="body2" sx={{ color: "text.secondary", mb: 2.5 }}>
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", mb: 2.5, flexShrink: 0 }}
+              >
                 {currencyFormatter.format(activeSource.value)}
                 {yearTotal > 0 &&
                   ` · ${((activeSource.value / yearTotal) * 100).toFixed(1)}% of total`}
               </Typography>
 
               {/* Top donors */}
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1 }}>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ alignItems: "center", mb: 1, flexShrink: 0 }}
+              >
                 <PaidRoundedIcon fontSize="small" sx={{ color: "text.secondary" }} />
                 <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                   Top Donors {year === "all" ? "" : `(${year})`}
@@ -447,11 +533,18 @@ export default function Finances() {
                 disablePadding
                 sx={{
                   overflowY: "auto",
-                  maxHeight: 420,
+                  flexGrow: 1,
+                  minHeight: 0,
                   ...customScrollbarSx,
                 }}
               >
-                {topDonors.length === 0 ? (
+                {donorsLoading ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <Box key={i} sx={{ py: 1.1 }}>
+                      <Skeleton variant="rounded" height={40} />
+                    </Box>
+                  ))
+                ) : donors.length === 0 ? (
                   <Box sx={{ py: 6, textAlign: "center" }}>
                     <PersonRoundedIcon
                       sx={{ color: "text.disabled", fontSize: 28, mb: 0.5 }}
@@ -461,78 +554,122 @@ export default function Finances() {
                     </Typography>
                   </Box>
                 ) : (
-                  topDonors
-                    .slice()
-                    .sort((a, b) => b.value - a.value)
-                    .map((donor, index) => {
-                      const pct =
-                        maxDonorValue > 0 ? (donor.value / maxDonorValue) * 100 : 0;
-                      return (
-                        <Box
-                          key={`${donor.name}-${index}`}
-                          sx={{
-                            py: 1.1,
-                            borderTop: index === 0 ? "none" : "1px solid",
-                            borderColor: "divider",
-                          }}
+                  donors.map((donor, index) => {
+                    const pct =
+                      maxDonorValue > 0
+                        ? (donor.total_amount / maxDonorValue) * 100
+                        : 0;
+                    const rank = donorsRangeStart + index;
+                    return (
+                      <Box
+                        key={donor.contributor_name}
+                        sx={{
+                          py: 1.1,
+                          borderTop: index === 0 ? "none" : "1px solid",
+                          borderColor: "divider",
+                        }}
+                      >
+                        <Stack
+                          direction="row"
+                          sx={{ justifyContent: "space-between", alignItems: "center" }}
                         >
                           <Stack
                             direction="row"
-                            sx={{ justifyContent: "space-between", alignItems: "center" }}
+                            spacing={1}
+                            sx={{ alignItems: "center", minWidth: 0 }}
                           >
-                            <Stack direction="row" spacing={1} sx={{ alignItems: "center", minWidth: 0 }}>
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  color: "text.disabled",
-                                  width: 18,
-                                  flexShrink: 0,
-                                  fontVariantNumeric: "tabular-nums",
-                                }}
-                              >
-                                {index + 1}
-                              </Typography>
-                              <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>
-                                {donor.name}
-                              </Typography>
-                            </Stack>
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: "text.disabled",
+                                width: 24,
+                                flexShrink: 0,
+                                fontVariantNumeric: "tabular-nums",
+                              }}
+                            >
+                              {rank}
+                            </Typography>
+                            <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>
+                              {donor.contributor_name}
+                            </Typography>
+                          </Stack>
+                          <Stack
+                            direction="row"
+                            spacing={0.75}
+                            sx={{ alignItems: "baseline", flexShrink: 0, ml: 1 }}
+                          >
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "text.disabled" }}
+                            >
+                              {donor.donation_count}{" "}
+                              {donor.donation_count === 1 ? "donation" : "donations"}
+                            </Typography>
                             <Typography
                               variant="body2"
                               sx={{
                                 fontWeight: 600,
-                                flexShrink: 0,
                                 fontVariantNumeric: "tabular-nums",
-                                ml: 1,
                               }}
                             >
-                              {currencyFormatter.format(donor.value)}
+                              {currencyFormatter.format(donor.total_amount)}
                             </Typography>
                           </Stack>
+                        </Stack>
+                        <Box
+                          sx={{
+                            mt: 0.5,
+                            ml: "32px",
+                            height: 3,
+                            borderRadius: 2,
+                            bgcolor: (t) => alpha(t.palette.text.primary, 0.06),
+                            overflow: "hidden",
+                          }}
+                        >
                           <Box
                             sx={{
-                              mt: 0.5,
-                              ml: "26px",
-                              height: 3,
+                              width: `${pct}%`,
+                              height: "100%",
                               borderRadius: 2,
-                              bgcolor: (t) => alpha(t.palette.text.primary, 0.06),
-                              overflow: "hidden",
+                              bgcolor: "text.secondary",
                             }}
-                          >
-                            <Box
-                              sx={{
-                                width: `${pct}%`,
-                                height: "100%",
-                                borderRadius: 2,
-                                bgcolor: "text.secondary",
-                              }}
-                            />
-                          </Box>
+                          />
                         </Box>
-                      );
-                    })
+                      </Box>
+                    );
+                  })
                 )}
               </List>
-            </>
+
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1}
+                sx={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mt: 1.5,
+                  pt: 1.5,
+                  borderTop: "1px solid",
+                  borderColor: "divider",
+                  flexShrink: 0,
+                }}
+              >
+                <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                  {donorsTotal === 0
+                    ? "0 results"
+                    : `Showing ${donorsRangeStart}–${donorsRangeEnd} of ${donorsTotal} · ${DONORS_PER_PAGE} per page`}
+                </Typography>
+
+                <Pagination
+                  count={donorsPageCount}
+                  page={donorsPage}
+                  onChange={(_, value) => setDonorsPage(value)}
+                  disabled={donorsLoading}
+                  size="small"
+                  shape="rounded"
+                />
+              </Stack>
+            </Box>
           )}
         </Box>
       </Stack>
