@@ -13,9 +13,18 @@ async function getClient() {
   return client;
 }
 
+// Metadata describing each field: key, display label, and explanation
+const FIELDS = [
+  { key: "receipts", label: "Total Receipts", explanation: "All money raised by the campaign" },
+  { key: "contributions", label: "Contributions", explanation: "Direct contributions from donors" },
+  { key: "large_donors", label: "Large Donors", explanation: "Contributions from donors giving over $200" },
+  { key: "small_donors", label: "Small Donors", explanation: "Contributions from donors giving $200 or less" },
+  { key: "pac", label: "PAC Contributions", explanation: "Money from political action committees" },
+  { key: "other", label: "Other", explanation: "Contributions not falling into the above categories" },
+];
+
 exports.handler = async (event) => {
   const peopleId = event.pathParameters?.people_id;
-  const election_year = event.pathParameters?.election_year;
 
   const client = await getClient();
 
@@ -29,32 +38,49 @@ exports.handler = async (event) => {
       };
     }
 
-    let totals = null;
+    const totals = await client.query(`
+      SELECT t.cycle as election_year, SUM(t.receipts) as receipts, SUM(t.contributions) as contributions,
+      SUM(t.large_donors) as large_donors, SUM(t.small_donors) as small_donors, SUM(t.pac) as pac, SUM(t.other) as other 
+      FROM the_lazy_voter_serving.fec_campaign_total t
+      JOIN the_lazy_voter_serving.unified_politician_record p 
+      ON p.fec_ids @> to_jsonb(t.fec_id::text)
+      WHERE p.u_id = $1
+      GROUP BY election_year
+      ORDER BY election_year
+    `, [peopleId]);
 
-    if(election_year) {
-      totals = await client.query(`
-        SELECT t.fec_id, t.receipts, t.contributions, t.large_donors, t.small_donors, t.pac, t.other 
-        FROM the_lazy_voter_serving.fec_campaign_total t
-        JOIN the_lazy_voter_serving.unified_politician_record p 
-        ON p.fec_ids @> to_jsonb(t.fec_id::text)
-        WHERE p.u_id = $1
-        AND cycle = $2
-      `, [peopleId, election_year]);
-    } else {
-      totals = await client.query(`
-        SELECT t.fec_id, SUM(t.receipts) as receipts, SUM(t.contributions) as contributions,
-        SUM(t.large_donors) as large_donors, SUM(t.small_donors) as small_donors, SUM(t.pac) as pac, SUM(t.other) as other 
-        FROM the_lazy_voter_serving.fec_campaign_total t
-        JOIN the_lazy_voter_serving.unified_politician_record p 
-        ON p.fec_ids @> to_jsonb(t.fec_id::text)
-        WHERE p.u_id = $1
-        GROUP BY t.fec_id
-      `, [peopleId, election_year]);
-    } 
-    
+    if (totals.rows.length === 0) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ message: "Finance data not found for this politician" }),
+      };
+    }
+
+    const byYear = totals.rows.reduce((acc, row) => {
+      const { election_year, ...rest } = row;
+      acc[election_year] = rest;
+      return acc;
+    }, {});
+
+    const numericKeys = FIELDS.map(f => f.key);
+    const all = totals.rows.reduce((acc, row) => {
+      for (const key of numericKeys) {
+        acc[key] = (acc[key] || 0) + Number(row[key] || 0);
+      }
+      return acc;
+    }, {});
+    for (const key of numericKeys) {
+      all[key] = String(all[key]);
+    }
+
+    byYear.all = all;
+
     return {
       statusCode: 200,
-      body: JSON.stringify(totals.rows),
+      body: JSON.stringify({
+        fields: FIELDS,
+        totals: byYear,
+      }),
     };
   } catch(error) {
     return {

@@ -44,52 +44,6 @@ import {
   DashboardSideMenuTabAtom,
 } from "#/util/State";
 
-//TEMPLATE DATE REMOVE LATER
-const receiptBreakdown: ReceiptRow[] = [
-  {
-    label: "Total receipts",
-    value: 32607753.66,
-    explanation: "Everything the committee brought in",
-    indent: 0,
-  },
-  {
-    label: "Total contributions",
-    value: 31991348.55,
-    explanation:
-      "Receipts minus loans, transfers, and other non-donation income",
-    indent: 1,
-  },
-  {
-    label: "Large Individual Donors",
-    value: 10415442.23,
-    explanation:
-      "Donors giving over $200 total, reported by name (large individual)",
-    indent: 3,
-  },
-  {
-    label: "Small Individual Contributions",
-    value: 21547856.32,
-    explanation:
-      "Donors giving $200 or less total, reported in bulk (small individual)",
-    indent: 3,
-  },
-  {
-    label: "PAC contributions",
-    value: 28050.0,
-    explanation:
-      "PAC contributions — money from other candidates' or organizations' committees",
-    indent: 1,
-  },
-];
-
-// Add near the top of the file, alongside `newsArticles` / `donationsByYear`
-type ReceiptRow = {
-  label: string;
-  value: number;
-  explanation: string;
-  indent: number; // 0 = top level, 1 = nested, 2 = deeply nested
-};
-
 const currency = (n: number) =>
   n.toLocaleString("en-US", {
     style: "currency",
@@ -97,26 +51,16 @@ const currency = (n: number) =>
     minimumFractionDigits: 2,
   });
 
-const newsArticles: NewsArticle[] = [
-  {
-    title: "Senator Ellis introduces rural broadband bill",
-    source: "Seattle Times",
-    date: "Jun 2, 2026",
-    href: "#",
-  },
-  {
-    title: "Q2 fundraising numbers show steady small-dollar growth",
-    source: "Politico",
-    date: "May 14, 2026",
-    href: "#",
-  },
-  {
-    title: "Ellis pushes back on proposed climate rider",
-    source: "AP News",
-    date: "Apr 30, 2026",
-    href: "#",
-  },
+// Breakdown fields for the stacked bar — order matters (matches bar segment order)
+const CONTRIBUTION_BREAKDOWN: { key: string; label: string; color: string }[] = [
+  { key: "large_donors", label: "Large Individual Contributions", color: "#0d3b2e" },
+  { key: "small_donors", label: "Small Individual Contributions (< $200)", color: "#2ecc71" },
+  { key: "pac", label: "PAC Contributions", color: "#c9b8f5" },
+  { key: "other", label: "Other", color: "#f5a623" },
 ];
+
+const percent = (n: number, total: number) =>
+  total > 0 ? `${((n / total) * 100).toFixed(2)}%` : "0.00%";
 
 // Animation Timings
 const LOADING_ANIMATION_DURATION = 500;
@@ -226,6 +170,10 @@ export default function Summary() {
     (sum, d) => sum + d.value,
     0,
   );
+
+  const campaignTotalsForYear = candidate?.campaignTotals?.[electionYear] as
+    | Record<string, number | undefined>
+    | undefined;
 
   // A single readiness flag drives every skeleton/loading state below.
   // Once the candidate record has come back from the API, everything
@@ -543,7 +491,7 @@ export default function Summary() {
                 >
                   News
                 </Button>
-                <List disablePadding>
+                {/* <List disablePadding>
                   {isLoading
                     ? Array.from({ length: 3 }).map((_, index) => (
                         <ListItem
@@ -577,18 +525,18 @@ export default function Summary() {
                           <ListItemText
                             primary={
                               <Link
-                                href={article.href}
+                                href={article.link}
                                 variant="body2"
                                 sx={{ fontWeight: 500 }}
                               >
                                 {article.title}
                               </Link>
                             }
-                            secondary={`${article.source} · ${article.date}`}
+                            secondary={`${article.source} · ${article.pubDate}`}
                           />
                         </ListItem>
                       ))}
-                </List>
+                </List> */}
               </CardContent>
             </Card>
           </Grow>
@@ -637,7 +585,7 @@ export default function Summary() {
                             .sort((a, b) => {
                               if (a === "all") return -1;
                               if (b === "all") return 1;
-                              return a.localeCompare(b);
+                              return b.localeCompare(a);
                             })
                             .map((year) => (
                               <Tab
@@ -693,20 +641,26 @@ export default function Summary() {
             {/* Right column */}
             <Grid size={{ xs: 12, lg: 6 }}>
               <Stack spacing={2}>
-                {/* Donations pie chart + top sponsor categories (merged) */}
                 <Grow
                   in={show}
                   timeout={LOADING_ANIMATION_DURATION}
                   style={{ transitionDelay: LOADING_DELAY_1 }}
                 >
+                  {/* Financial Totals */}
                   <Card variant="outlined">
                     <CardContent>
                       <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                         Financial Totals
                       </Typography>
-                      
-                      {/* goto */}
-                       <Tabs
+
+                      {!candidate?.campaignTotals ? (
+                        <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <Skeleton key={i} width={60} height={32} />
+                          ))}
+                        </Stack>
+                      ) : (
+                        <Tabs
                           value={electionYear}
                           onChange={(_, value: string) =>
                             setElectionYear(value)
@@ -715,11 +669,11 @@ export default function Summary() {
                           scrollButtons={true}
                           sx={{ minHeight: 32, mb: 1 }}
                         >
-                          {Object.keys(candidate?.donationsByYear ?? {})
+                          {Object.keys(candidate?.campaignTotals ?? {})
                             .sort((a, b) => {
                               if (a === "all") return -1;
                               if (b === "all") return 1;
-                              return a.localeCompare(b);
+                              return b.localeCompare(a);
                             })
                             .map((year) => (
                               <Tab
@@ -730,56 +684,144 @@ export default function Summary() {
                               />
                             ))}
                         </Tabs>
+                      )}
 
-                      <List disablePadding dense sx={{ mb: 1 }}>
-                        {receiptBreakdown.map((row, i) => (
-                          <ListItem
-                            key={row.label}
-                            disablePadding
-                            sx={{
-                              py: 0.5,
-                              pl: row.indent,
-                              alignItems: "baseline",
-                              justifyContent: "space-between",
-                              gap: 1.5,
-                              borderTop: i === 0 ? "none" : "1px solid",
-                              borderColor: "divider",
-                            }}
-                          >
-                            <Box sx={{ minWidth: 0 }}>
-                              <Typography
-                                variant="body2"
-                                sx={{fontWeight: row.indent === 0 ? 700 : 500}}
-                                noWrap
-                              >
-                                {row.label}
-                              </Typography>
-                              <Typography
-                                variant="caption"
+                      {/* Campaign Committee Contribution Sources breakdown */}
+                      {!candidate?.campaignTotals ? (
+                        <Stack spacing={2} sx={{ mb: 1 }}>
+                          <Skeleton variant="rounded" width="100%" height={40} />
+                          <List disablePadding dense>
+                            {Array.from({ length: 4 }).map((_, i) => (
+                              <ListItem
+                                key={i}
+                                disablePadding
                                 sx={{
-                                  color: "text.secondary",
-                                  display: "block",
-                                  lineHeight: 1.2,
+                                  py: 1,
+                                  justifyContent: "space-between",
+                                  borderTop: i === 0 ? "none" : "1px solid",
+                                  borderColor: "divider",
                                 }}
-                                noWrap
                               >
-                                {row.explanation}
-                              </Typography>
+                                <Skeleton width="50%" />
+                                <Skeleton width="20%" />
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Stack>
+                      ) : (
+                        (() => {
+                          const total = CONTRIBUTION_BREAKDOWN.reduce(
+                            (sum, field) =>
+                              sum +
+                              (Number(campaignTotalsForYear?.[field.key]) || 0),
+                            0,
+                          );
+
+                          return (
+                            <Box sx={{ mb: 1 }}>
+                              {/* Stacked bar */}
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  width: "100%",
+                                  height: 40,
+                                  borderRadius: 1,
+                                  overflow: "hidden",
+                                  mb: 2,
+                                }}
+                              >
+                                {CONTRIBUTION_BREAKDOWN.map((field) => {
+                                  const value =
+                                    Number(campaignTotalsForYear?.[field.key]) ||
+                                    0;
+                                  const widthPct =
+                                    total > 0 ? (value / total) * 100 : 0;
+                                  if (widthPct <= 0) return null;
+                                  return (
+                                    <Box
+                                      key={field.key}
+                                      sx={{
+                                        width: `${widthPct}%`,
+                                        bgcolor: field.color,
+                                        minWidth: value > 0 ? 4 : 0,
+                                      }}
+                                    />
+                                  );
+                                })}
+                              </Box>
+
+                              {/* Legend / breakdown list */}
+                              <List disablePadding dense>
+                                {CONTRIBUTION_BREAKDOWN.map((field, i) => {
+                                  const value =
+                                    Number(campaignTotalsForYear?.[field.key]) ||
+                                    0;
+                                  return (
+                                    <ListItem
+                                      key={field.key}
+                                      disablePadding
+                                      sx={{
+                                        py: 1,
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                        gap: 1.5,
+                                        borderTop:
+                                          i === 0 ? "none" : "1px solid",
+                                        borderColor: "divider",
+                                      }}
+                                    >
+                                      <Stack
+                                        direction="row"
+                                        spacing={1.5}
+                                        sx={{ alignItems: "center", minWidth: 0 }}
+                                      >
+                                        <Box
+                                          sx={{
+                                            width: 10,
+                                            height: 10,
+                                            borderRadius: "50%",
+                                            bgcolor: field.color,
+                                            flexShrink: 0,
+                                          }}
+                                        />
+                                        <Typography variant="body2" noWrap>
+                                          {field.label}
+                                        </Typography>
+                                      </Stack>
+
+                                      <Stack
+                                        direction="row"
+                                        spacing={2}
+                                        sx={{ flexShrink: 0 }}
+                                      >
+                                        <Typography
+                                          variant="body2"
+                                          sx={{
+                                            fontWeight: 600,
+                                            fontVariantNumeric: "tabular-nums",
+                                          }}
+                                        >
+                                          {currency(value)}
+                                        </Typography>
+                                        <Typography
+                                          variant="body2"
+                                          sx={{
+                                            color: "text.secondary",
+                                            width: 56,
+                                            textAlign: "right",
+                                          }}
+                                        >
+                                          {percent(value, total)}
+                                        </Typography>
+                                      </Stack>
+                                    </ListItem>
+                                  );
+                                })}
+                              </List>
                             </Box>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontWeight: row.indent === 0 ? 700 : 500,
-                                fontVariantNumeric: "tabular-nums",
-                                whiteSpace: "nowrap",
-                                flexShrink: 0,
-                              }}
-                            >
-                              {currency(row.value)}
-                            </Typography>
-                          </ListItem>
-                        ))}
-                      </List>
+                          );
+                        })()
+                      )}
 
                       <Divider sx={{ mb: 2 }} />
 
@@ -830,7 +872,7 @@ export default function Summary() {
                             .sort((a, b) => {
                               if (a === "all") return -1;
                               if (b === "all") return 1;
-                              return a.localeCompare(b);
+                              return b.localeCompare(a);
                             })
                             .map((year) => (
                               <Tab
@@ -914,8 +956,9 @@ export default function Summary() {
                         ))}
                       </Stack>
                     ) : (
+                      // Top donors per year
                       <List disablePadding>
-                        {(candidate.topDonorsByYear[electionYear] ?? [])
+                        {(candidate?.topDonorsByYear[electionYear] ?? [])
                           .sort((a, b) => b.value - a.value)
                           .slice(0, 10)
                           .map((donor, i) => (
@@ -925,13 +968,6 @@ export default function Summary() {
                               sx={{
                                 py: 1,
                                 justifyContent: "space-between",
-                                borderBottom:
-                                  i <
-                                  (candidate.topDonorsByYear[electionYear]
-                                    ?.length ?? 0) -
-                                    1
-                                    ? "1px solid"
-                                    : "none",
                                 borderColor: "divider",
                               }}
                             >

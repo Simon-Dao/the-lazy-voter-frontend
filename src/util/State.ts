@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atom } from "jotai";
 
 // Dashboard Side Menu
 export const DashboardSideMenuTabAtom = atom(0);
@@ -30,9 +30,10 @@ export type PoliticianBasicInfo = {
 
 export type NewsArticle = {
   title: string;
+  link: string;
+  pubDate: string;
+  description: string;
   source: string;
-  date: string;
-  href: string;
 };
 
 export type BillCategory = {
@@ -43,7 +44,16 @@ export type BillCategory = {
 export type DonorBasicInfo = {
   name: string;
   value: number;
-}
+};
+
+export type CampaignTotal = {
+  receipts: number;
+  contributions: number;
+  large_donors: number;
+  small_donors: number;
+  pac: number;
+  other: number;
+};
 
 export const IsPoliticianSelectedAtom = atom(false);
 
@@ -61,15 +71,16 @@ export type PoliticianDetailed = {
   timeline?: TimelineEvent[];
   billCategoriesByYear?: Record<string, BillCategory[]>;
   donationsByYear?: Record<string, DonationSlice[]>;
-  totalDonations? : number;
-  topDonorsByYear: Record<string, DonorBasicInfo[]>
+  totalDonations?: number;
+  topDonorsByYear?: Record<string, DonorBasicInfo[]>;
+  campaignTotals?: Record<string, CampaignTotal[]>;
   ballotpedia?: string;
-  photoSrc?:string;
+  photoSrc?: string;
 };
 
 export const PoliticiansDetailedAtom = atom<PoliticianDetailed[]>([]);
 export const SelectedPoliticianDetailedAtom = atom<PoliticianDetailed | null>();
-export type PoliticianUIDType = string | null; 
+export type PoliticianUIDType = string | null;
 export const SelectedPoliticianUIDAtom = atom<PoliticianUIDType>(null);
 
 export const STATE_MAP: Map<string, string> = new Map([

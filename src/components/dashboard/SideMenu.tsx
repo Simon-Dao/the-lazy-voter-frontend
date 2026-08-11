@@ -136,6 +136,7 @@ export default function SideMenu({ children }: SideMenuProps) {
       donationsByYear: null,
       topDonorsByYear: null,
       totalDonations: null,
+      campaignTotals: null,
       photoSrc: "",
     };
 
@@ -166,16 +167,16 @@ export default function SideMenu({ children }: SideMenuProps) {
       );
     }
 
-    // Fetch campaign totals
+    // Fetch Campaign Totals
     try {
-      const people_id_req = await fetch(
-        `https://thelazyvoter.org/api/politicians/${politician.u_id}`,
+      const req = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/donors/campaign_totals`,
       );
-      const people_id = await people_id_req.json();
+      const campaignTotals = await req.json();
 
       politicianObject = {
         ...politicianObject,
-        photoSrc: `https://thelazyvoter.org/avatars/${people_id}.jpg`,
+        campaignTotals
       };
       setPoliticiansDetailed((prev: any) =>
         prev.map((p: PoliticianDetailed) =>
@@ -184,7 +185,7 @@ export default function SideMenu({ children }: SideMenuProps) {
       );
     } catch (error) {
       console.error(
-        "Failed to fetch Bill Category for",
+        "Failed to fetch campaign totals for",
         politician.u_id,
         error,
       );
@@ -210,6 +211,33 @@ export default function SideMenu({ children }: SideMenuProps) {
       );
     } catch (error) {
       console.error("Failed to fetch timeline for", politician.u_id, error);
+    }
+
+    // Fetch news articles
+    try {
+      const res = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/legislation/totals`,
+      );
+      if (!res.ok) {
+        throw new Error(`Bill Category fetch failed: ${res.status}`);
+      }
+      const data = await res.json();
+
+      politicianObject = {
+        ...politicianObject,
+        billCategoriesByYear: data,
+      };
+      setPoliticiansDetailed((prev: any) =>
+        prev.map((p: PoliticianDetailed) =>
+          p.u_id === politician.u_id ? politicianObject : p,
+        ),
+      );
+    } catch (error) {
+      console.error(
+        "Failed to fetch Bill Category for",
+        politician.u_id,
+        error,
+      );
     }
 
     // Fetch Bill Categories By Year
