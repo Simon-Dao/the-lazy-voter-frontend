@@ -12,6 +12,8 @@ export type DonationSlice = {
   value: number;
 };
 
+export type NewsCategory = "bio" | "standing" | "policy" | "scrutiny" | ""
+
 export type TimelineEvent = {
   year: string;
   label: string;
@@ -46,6 +48,11 @@ export type DonorBasicInfo = {
   value: number;
 };
 
+export type CampaignField = {
+  label: number;
+  explaination: number;
+};
+
 export type CampaignTotal = {
   receipts: number;
   contributions: number;
@@ -67,12 +74,13 @@ export type PoliticianDetailed = {
   state?: string;
   status?: string;
   legislativeFocus?: string[];
-  newsArticles?: NewsArticle[];
+  newsArticles?: Record<string ,NewsArticle[]>;
   timeline?: TimelineEvent[];
   billCategoriesByYear?: Record<string, BillCategory[]>;
   donationsByYear?: Record<string, DonationSlice[]>;
   totalDonations?: number;
   topDonorsByYear?: Record<string, DonorBasicInfo[]>;
+  campaignFields?: Record<string, CampaignField[]>;
   campaignTotals?: Record<string, CampaignTotal[]>;
   ballotpedia?: string;
   photoSrc?: string;

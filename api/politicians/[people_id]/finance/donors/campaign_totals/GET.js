@@ -13,15 +13,15 @@ async function getClient() {
   return client;
 }
 
-// Metadata describing each field: key, display label, and explanation
-const FIELDS = [
-  { key: "receipts", label: "Total Receipts", explanation: "All money raised by the campaign" },
-  { key: "contributions", label: "Contributions", explanation: "Direct contributions from donors" },
-  { key: "large_donors", label: "Large Donors", explanation: "Contributions from donors giving over $200" },
-  { key: "small_donors", label: "Small Donors", explanation: "Contributions from donors giving $200 or less" },
-  { key: "pac", label: "PAC Contributions", explanation: "Money from political action committees" },
-  { key: "other", label: "Other", explanation: "Contributions not falling into the above categories" },
-];
+// Metadata describing each field, keyed by field key
+const FIELDS = {
+  receipts: { label: "Total Receipts", explanation: "All money raised by the campaign" },
+  contributions: { label: "Contributions", explanation: "Direct contributions from donors" },
+  large_donors: { label: "Large Donors", explanation: "Contributions from donors giving over $200" },
+  small_donors: { label: "Small Donors", explanation: "Contributions from donors giving $200 or less" },
+  pac: { label: "PAC Contributions", explanation: "Money from political action committees" },
+  other: { label: "Other", explanation: "Contributions not falling into the above categories" },
+};
 
 exports.handler = async (event) => {
   const peopleId = event.pathParameters?.people_id;
@@ -62,7 +62,7 @@ exports.handler = async (event) => {
       return acc;
     }, {});
 
-    const numericKeys = FIELDS.map(f => f.key);
+    const numericKeys = Object.keys(FIELDS);
     const all = totals.rows.reduce((acc, row) => {
       for (const key of numericKeys) {
         acc[key] = (acc[key] || 0) + Number(row[key] || 0);

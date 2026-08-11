@@ -38,10 +38,9 @@ import {
 
 import {
   IsPoliticianSelectedAtom,
-  DonationSlice,
-  TimelineEvent,
   NewsArticle,
   DashboardSideMenuTabAtom,
+  NewsCategory,
 } from "#/util/State";
 
 const currency = (n: number) =>
@@ -52,12 +51,21 @@ const currency = (n: number) =>
   });
 
 // Breakdown fields for the stacked bar — order matters (matches bar segment order)
-const CONTRIBUTION_BREAKDOWN: { key: string; label: string; color: string }[] = [
-  { key: "large_donors", label: "Large Individual Contributions", color: "#0d3b2e" },
-  { key: "small_donors", label: "Small Individual Contributions (< $200)", color: "#2ecc71" },
-  { key: "pac", label: "PAC Contributions", color: "#c9b8f5" },
-  { key: "other", label: "Other", color: "#f5a623" },
-];
+const CONTRIBUTION_BREAKDOWN: { key: string; label: string; color: string }[] =
+  [
+    {
+      key: "large_donors",
+      label: "Large Individual Contributions",
+      color: "#0d3b2e",
+    },
+    {
+      key: "small_donors",
+      label: "Small Individual Contributions (< $200)",
+      color: "#2ecc71",
+    },
+    { key: "pac", label: "PAC Contributions", color: "#c9b8f5" },
+    { key: "other", label: "Other", color: "#f5a623" },
+  ];
 
 const percent = (n: number, total: number) =>
   total > 0 ? `${((n / total) * 100).toFixed(2)}%` : "0.00%";
@@ -135,6 +143,8 @@ export default function Summary() {
   const candidateSummary = null;
   const [electionYear, setElectionYear] = useState<string>("all");
   const [termYear, setTermYear] = useState<string>("all");
+  const [newsCategory, setNewsCategory] = useState<NewsCategory>("scrutiny");
+
   const [personSelected, setPersonSelectedAtom] = useAtom(
     IsPoliticianSelectedAtom,
   );
@@ -163,7 +173,14 @@ export default function Summary() {
 
   const topBillCategories = candidate?.billCategoriesByYear?.[termYear] ?? [];
   const totalSponsored = topBillCategories.reduce((sum, d) => sum + d.value, 0);
-
+  const firstArticlePerBucket = Object.keys(candidate?.newsArticles ?? {})
+    .map((bucket) => {
+      const article = candidate?.newsArticles?.[bucket]?.[0];
+      return article ? { ...article, bucket } : null;
+    })
+    .filter(
+      (entry): entry is NewsArticle & { bucket: string } => entry !== null,
+    );
   const topDonationCategories =
     candidate?.donationsByYear?.[electionYear] ?? [];
   const totalDonations = topDonationCategories.reduce(
@@ -307,7 +324,7 @@ export default function Summary() {
               </Card>
             </Grow>
             {/* Summary */}
-            <Grow
+            {/* <Grow
               in={show}
               timeout={LOADING_ANIMATION_DURATION}
               style={{ transitionDelay: LOADING_DELAY_1 }}
@@ -316,7 +333,6 @@ export default function Summary() {
                 variant="outlined"
                 sx={{ flexGrow: 1, minWidth: 0, overflow: "hidden" }}
               >
-                {}
                 <Typography
                   variant="h6"
                   sx={{
@@ -331,6 +347,7 @@ export default function Summary() {
                 </Typography>
                 <CardContent sx={{ overflowX: "auto", ...customScrollbarSx }}>
                   <Typography
+                    component="div"
                     variant="body2"
                     color="textSecondary"
                     sx={{ fontWeight: 600, mb: 2, px: 2 }}
@@ -360,7 +377,7 @@ export default function Summary() {
                   </Typography>
                 </CardContent>
               </Card>
-            </Grow>
+            </Grow> */}
           </Stack>
 
           {/* Timeline */}
@@ -491,52 +508,55 @@ export default function Summary() {
                 >
                   News
                 </Button>
-                {/* <List disablePadding>
-                  {isLoading
-                    ? Array.from({ length: 3 }).map((_, index) => (
-                        <ListItem
-                          key={index}
-                          disablePadding
-                          sx={{
-                            py: 1,
-                            borderBottom: index < 2 ? "1px solid" : "none",
-                            borderColor: "divider",
-                          }}
-                        >
-                          <ListItemText
-                            primary={<Skeleton width="80%" />}
-                            secondary={<Skeleton width="40%" />}
-                          />
-                        </ListItem>
-                      ))
-                    : newsArticles.map((article, index) => (
-                        <ListItem
-                          key={index}
-                          disablePadding
-                          sx={{
-                            py: 1,
-                            borderBottom:
-                              index < newsArticles.length - 1
-                                ? "1px solid"
-                                : "none",
-                            borderColor: "divider",
-                          }}
-                        >
-                          <ListItemText
-                            primary={
-                              <Link
-                                href={article.link}
-                                variant="body2"
-                                sx={{ fontWeight: 500 }}
-                              >
-                                {article.title}
-                              </Link>
-                            }
-                            secondary={`${article.source} · ${article.pubDate}`}
-                          />
-                        </ListItem>
-                      ))}
-                </List> */}
+                <List disablePadding>
+                  {firstArticlePerBucket.map((article, i) => (
+                    <ListItem
+                      key={article.link || i}
+                      disablePadding
+                      sx={{
+                        py: 1,
+                        borderBottom:
+                          i < firstArticlePerBucket.length - 1
+                            ? "1px solid"
+                            : "none",
+                        borderColor: "divider",
+                      }}
+                    >
+                      <ListItemText
+                        primary={
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            sx={{ alignItems: "center" }}
+                          >
+                            <Chip
+                              label={article.bucket}
+                              size="small"
+                              variant="outlined"
+                              sx={{
+                                textTransform: "capitalize",
+                                height: 20,
+                                fontSize: 11,
+                              }}
+                            />
+                            <Link
+                              href={article.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              variant="body2"
+                              sx={{ fontWeight: 500 }}
+                            >
+                              {article.title}
+                            </Link>
+                          </Stack>
+                        }
+                        secondary={`${article.source}${
+                          article.source && article.pubDate ? " · " : ""
+                        }${article.pubDate ? new Date(article.pubDate).toLocaleDateString() : ""}`}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
               </CardContent>
             </Card>
           </Grow>
@@ -689,7 +709,11 @@ export default function Summary() {
                       {/* Campaign Committee Contribution Sources breakdown */}
                       {!candidate?.campaignTotals ? (
                         <Stack spacing={2} sx={{ mb: 1 }}>
-                          <Skeleton variant="rounded" width="100%" height={40} />
+                          <Skeleton
+                            variant="rounded"
+                            width="100%"
+                            height={40}
+                          />
                           <List disablePadding dense>
                             {Array.from({ length: 4 }).map((_, i) => (
                               <ListItem
@@ -732,8 +756,9 @@ export default function Summary() {
                               >
                                 {CONTRIBUTION_BREAKDOWN.map((field) => {
                                   const value =
-                                    Number(campaignTotalsForYear?.[field.key]) ||
-                                    0;
+                                    Number(
+                                      campaignTotalsForYear?.[field.key],
+                                    ) || 0;
                                   const widthPct =
                                     total > 0 ? (value / total) * 100 : 0;
                                   if (widthPct <= 0) return null;
@@ -754,8 +779,9 @@ export default function Summary() {
                               <List disablePadding dense>
                                 {CONTRIBUTION_BREAKDOWN.map((field, i) => {
                                   const value =
-                                    Number(campaignTotalsForYear?.[field.key]) ||
-                                    0;
+                                    Number(
+                                      campaignTotalsForYear?.[field.key],
+                                    ) || 0;
                                   return (
                                     <ListItem
                                       key={field.key}
@@ -773,7 +799,10 @@ export default function Summary() {
                                       <Stack
                                         direction="row"
                                         spacing={1.5}
-                                        sx={{ alignItems: "center", minWidth: 0 }}
+                                        sx={{
+                                          alignItems: "center",
+                                          minWidth: 0,
+                                        }}
                                       >
                                         <Box
                                           sx={{
@@ -958,7 +987,12 @@ export default function Summary() {
                     ) : (
                       // Top donors per year
                       <List disablePadding>
-                        {(candidate?.topDonorsByYear[electionYear] ?? [])
+                        {(Array.isArray(
+                          candidate?.topDonorsByYear?.[electionYear],
+                        )
+                          ? candidate.topDonorsByYear[electionYear]
+                          : []
+                        )
                           .sort((a, b) => b.value - a.value)
                           .slice(0, 10)
                           .map((donor, i) => (

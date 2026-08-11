@@ -4,7 +4,18 @@ const BUCKET_KEYWORDS = {
   bio: ["candidate", "congressional", "running for"],
   standing: ["poll", "polling", "fundraising", "endorsement"],
   policy: ["bill", "vote", "sponsored", "proposal"],
-  scrutiny: ["criticized", "controversy", "investigation", "opposed"],
+  scrutiny: [
+    "scandal",
+    "controversy",
+    "criticism",
+    "criticized",
+    "backlash",
+    "accused",
+    "investigation",
+    "lawsuit",
+    "under fire",
+    "opposed",
+  ],
 };
 
 function buildRssUrl(name, keywords, extra = "") {
@@ -42,7 +53,7 @@ async function fetchBucket(name, bucket, extra) {
 
 exports.handler = async (event) => {
   const name = event.queryStringParameters?.name;
-  const extra = event.queryStringParameters?.extra ?? "";
+  const extra = event.queryStringParameters?.extra ?? "congress";
 
   if (!name) {
     return {
