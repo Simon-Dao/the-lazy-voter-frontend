@@ -36,7 +36,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 // but flagging it in case that was meant to be a different route.
 const NAV_LINKS = [
   { label: "Home", href: "/" },
-  { label: "Politicians", href: "/dashboard" },
+  { label: "Congressmen", href: "/dashboard" },
   { label: "Legislation", href: "/legislation" },
   { label: "Vote", href: "/vote" },
   { label: "About", href: "/about" },
@@ -55,7 +55,7 @@ export default function AppAppBar() {
       position="fixed"
       enableColorOnDark
       sx={{
-        boxShadow: 0,
+      boxShadow: 0,
         bgcolor: "transparent",
         backgroundImage: "none",
         mt: "calc(var(--template-frame-height, 0px) + 28px)",

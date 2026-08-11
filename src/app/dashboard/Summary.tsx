@@ -44,46 +44,58 @@ import {
   DashboardSideMenuTabAtom,
 } from "#/util/State";
 
-const timeline: TimelineEvent[] = [
-  { year: "2010", label: "Ran for House (TN-3)", type: "campaign" },
-  { year: "2011", label: "Began term as House (TN-3)", type: "term" },
-  { year: "2012", label: "Ran for House (TN-3)", type: "campaign" },
-  { year: "2013", label: "Began term as House (TN-3)", type: "term" },
+//TEMPLATE DATE REMOVE LATER
+const receiptBreakdown: ReceiptRow[] = [
   {
-    year: "2024",
-    label: "Ran for re-election to House (TN-3)",
-    type: "campaign",
+    label: "Total receipts",
+    value: 32607753.66,
+    explanation: "Everything the committee brought in",
+    indent: 0,
   },
-  { year: "2025", label: "Began term as House (TN-3)", type: "term" },
+  {
+    label: "Total contributions",
+    value: 31991348.55,
+    explanation:
+      "Receipts minus loans, transfers, and other non-donation income",
+    indent: 1,
+  },
+  {
+    label: "Large Individual Donors",
+    value: 10415442.23,
+    explanation:
+      "Donors giving over $200 total, reported by name (large individual)",
+    indent: 3,
+  },
+  {
+    label: "Small Individual Contributions",
+    value: 21547856.32,
+    explanation:
+      "Donors giving $200 or less total, reported in bulk (small individual)",
+    indent: 3,
+  },
+  {
+    label: "PAC contributions",
+    value: 28050.0,
+    explanation:
+      "PAC contributions — money from other candidates' or organizations' committees",
+    indent: 1,
+  },
 ];
 
-// Top sponsor categories now vary by year, matching the donations tab structure
-const donationsByYear: Record<string, DonationSlice[]> = {
-  all: [
-    { name: "Healthcare", value: 410000 },
-    { name: "Technology", value: 275000 },
-    { name: "Energy", value: 190000 },
-    { name: "Finance", value: 140000 },
-  ],
-  "2024": [
-    { name: "Healthcare", value: 170000 },
-    { name: "Technology", value: 120000 },
-    { name: "Energy", value: 80000 },
-    { name: "Finance", value: 60000 },
-  ],
-  "2023": [
-    { name: "Healthcare", value: 140000 },
-    { name: "Technology", value: 95000 },
-    { name: "Energy", value: 65000 },
-    { name: "Finance", value: 45000 },
-  ],
-  "2022": [
-    { name: "Healthcare", value: 100000 },
-    { name: "Technology", value: 60000 },
-    { name: "Energy", value: 45000 },
-    { name: "Finance", value: 35000 },
-  ],
+// Add near the top of the file, alongside `newsArticles` / `donationsByYear`
+type ReceiptRow = {
+  label: string;
+  value: number;
+  explanation: string;
+  indent: number; // 0 = top level, 1 = nested, 2 = deeply nested
 };
+
+const currency = (n: number) =>
+  n.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+  });
 
 const newsArticles: NewsArticle[] = [
   {
@@ -689,6 +701,88 @@ export default function Summary() {
                 >
                   <Card variant="outlined">
                     <CardContent>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                        Financial Totals
+                      </Typography>
+                      
+                      {/* goto */}
+                       <Tabs
+                          value={electionYear}
+                          onChange={(_, value: string) =>
+                            setElectionYear(value)
+                          }
+                          variant="scrollable"
+                          scrollButtons={true}
+                          sx={{ minHeight: 32, mb: 1 }}
+                        >
+                          {Object.keys(candidate?.donationsByYear ?? {})
+                            .sort((a, b) => {
+                              if (a === "all") return -1;
+                              if (b === "all") return 1;
+                              return a.localeCompare(b);
+                            })
+                            .map((year) => (
+                              <Tab
+                                key={year}
+                                label={year === "all" ? "All" : year}
+                                value={year}
+                                sx={{ minHeight: 32 }}
+                              />
+                            ))}
+                        </Tabs>
+
+                      <List disablePadding dense sx={{ mb: 1 }}>
+                        {receiptBreakdown.map((row, i) => (
+                          <ListItem
+                            key={row.label}
+                            disablePadding
+                            sx={{
+                              py: 0.5,
+                              pl: row.indent,
+                              alignItems: "baseline",
+                              justifyContent: "space-between",
+                              gap: 1.5,
+                              borderTop: i === 0 ? "none" : "1px solid",
+                              borderColor: "divider",
+                            }}
+                          >
+                            <Box sx={{ minWidth: 0 }}>
+                              <Typography
+                                variant="body2"
+                                fontWeight={row.indent === 0 ? 700 : 500}
+                                noWrap
+                              >
+                                {row.label}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: "text.secondary",
+                                  display: "block",
+                                  lineHeight: 1.2,
+                                }}
+                                noWrap
+                              >
+                                {row.explanation}
+                              </Typography>
+                            </Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: row.indent === 0 ? 700 : 500,
+                                fontVariantNumeric: "tabular-nums",
+                                whiteSpace: "nowrap",
+                                flexShrink: 0,
+                              }}
+                            >
+                              {currency(row.value)}
+                            </Typography>
+                          </ListItem>
+                        ))}
+                      </List>
+
+                      <Divider sx={{ mb: 2 }} />
+
                       <Typography sx={{ fontWeight: 600, mb: 1 }}>
                         {isLoading ? (
                           <Skeleton variant="rounded" width={220} height={36} />
@@ -700,7 +794,7 @@ export default function Summary() {
                               setTab(3);
                             }}
                           >
-                            Campaign Donations
+                            Large Individual Contributions
                           </Button>
                         )}
                       </Typography>

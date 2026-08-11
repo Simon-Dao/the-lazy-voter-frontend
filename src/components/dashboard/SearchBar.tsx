@@ -268,7 +268,7 @@ export default function SearchBar({ onSelectPolitician }: SearchBarProps) {
             renderInput={(params) => (
               <TextField
                 {...params}
-                placeholder="Search politicians..."
+                placeholder="Search congressman..."
                 variant="outlined"
                 size="small"
                 sx={{
