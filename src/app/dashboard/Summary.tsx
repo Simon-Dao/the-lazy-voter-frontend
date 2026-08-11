@@ -749,7 +749,7 @@ export default function Summary() {
                             <Box sx={{ minWidth: 0 }}>
                               <Typography
                                 variant="body2"
-                                fontWeight={row.indent === 0 ? 700 : 500}
+                                sx={{fontWeight: row.indent === 0 ? 700 : 500}}
                                 noWrap
                               >
                                 {row.label}

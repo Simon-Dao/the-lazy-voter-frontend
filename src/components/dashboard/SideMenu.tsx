@@ -166,6 +166,30 @@ export default function SideMenu({ children }: SideMenuProps) {
       );
     }
 
+    // Fetch campaign totals
+    try {
+      const people_id_req = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}`,
+      );
+      const people_id = await people_id_req.json();
+
+      politicianObject = {
+        ...politicianObject,
+        photoSrc: `https://thelazyvoter.org/avatars/${people_id}.jpg`,
+      };
+      setPoliticiansDetailed((prev: any) =>
+        prev.map((p: PoliticianDetailed) =>
+          p.u_id === politician.u_id ? politicianObject : p,
+        ),
+      );
+    } catch (error) {
+      console.error(
+        "Failed to fetch Bill Category for",
+        politician.u_id,
+        error,
+      );
+    }
+
     // Fetch Timeline
     try {
       const res = await fetch(

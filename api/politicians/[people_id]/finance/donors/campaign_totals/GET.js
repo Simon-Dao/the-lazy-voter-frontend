@@ -29,14 +29,28 @@ exports.handler = async (event) => {
       };
     }
 
-    const totals = await client.query(`
-      SELECT *
-      FROM the_lazy_voter_serving.fec_campaign_total t
-      JOIN the_lazy_voter_serving.unified_politician_record p 
-      ON p.fec_ids @> to_jsonb(t.fec_id::text)
-      WHERE p.u_id = $1
-      AND cycle = $2
-    `, [peopleId, election_year]);
+    let totals = null;
+
+    if(election_year) {
+      totals = await client.query(`
+        SELECT t.fec_id, t.receipts, t.contributions, t.large_donors, t.small_donors, t.pac, t.other 
+        FROM the_lazy_voter_serving.fec_campaign_total t
+        JOIN the_lazy_voter_serving.unified_politician_record p 
+        ON p.fec_ids @> to_jsonb(t.fec_id::text)
+        WHERE p.u_id = $1
+        AND cycle = $2
+      `, [peopleId, election_year]);
+    } else {
+      totals = await client.query(`
+        SELECT t.fec_id, SUM(t.receipts) as receipts, SUM(t.contributions) as contributions,
+        SUM(t.large_donors) as large_donors, SUM(t.small_donors) as small_donors, SUM(t.pac) as pac, SUM(t.other) as other 
+        FROM the_lazy_voter_serving.fec_campaign_total t
+        JOIN the_lazy_voter_serving.unified_politician_record p 
+        ON p.fec_ids @> to_jsonb(t.fec_id::text)
+        WHERE p.u_id = $1
+        GROUP BY t.fec_id
+      `, [peopleId, election_year]);
+    } 
     
     return {
       statusCode: 200,
