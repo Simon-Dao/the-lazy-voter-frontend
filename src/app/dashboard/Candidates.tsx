@@ -24,16 +24,6 @@ const PARTY_COLOR: Record<string, string> = {
   Independent: "success.main",
 };
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
-
 // ---------------------------------------------------------------------------
 
 const customScrollbarSx = {
@@ -71,7 +61,7 @@ export default function Candidates({ addPolitician }: CandidatesProps) {
       setLoading(true);
       try {
         const res = await fetch(
-          `https://thelazyvoter.org/api/politicians/search?state=${selectedState}`,
+          `https://thelazyvoter.org/api/politicians/search/by-state?state=${selectedState}`,
         );
         if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
         const data = await res.json();
@@ -293,24 +283,6 @@ export default function Candidates({ addPolitician }: CandidatesProps) {
                     gap: 1.5,
                   }}
                 >
-                  <Box
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 14,
-                      fontWeight: 700,
-                      flexShrink: 0,
-                      color: "background.paper",
-                      bgcolor: PARTY_COLOR[candidate.party] ?? "text.disabled",
-                    }}
-                  >
-                    {getInitials(candidate.name)}
-                  </Box>
-
                   <Stack spacing={0.25} sx={{ flexGrow: 1, minWidth: 0 }}>
                     <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
                       {candidate.name}
@@ -320,23 +292,13 @@ export default function Candidates({ addPolitician }: CandidatesProps) {
                       spacing={0.75}
                       sx={{ alignItems: "center" }}
                     >
-                      <Box
-                        sx={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: "50%",
-                          bgcolor:
-                            PARTY_COLOR[candidate.party] ?? "text.disabled",
-                          flexShrink: 0,
-                        }}
-                      />
                       <Typography
                         variant="caption"
                         color="text.secondary"
                         noWrap
                         sx={{ fontWeight: 500 }}
                       >
-                        {[candidate.role, candidate.party, candidate.state]
+                        {[candidate.incumbent_challenge == 'C' ? 'Challenger' : "Incumbent", candidate.role, candidate.party, candidate.state, candidate.district]
                           .filter(Boolean)
                           .join(" · ")}
                       </Typography>
@@ -364,7 +326,7 @@ export default function Candidates({ addPolitician }: CandidatesProps) {
                       fontVariantNumeric: "tabular-nums",
                     }}
                   >
-                    since {candidate.latestYear}
+                    
                   </Typography>
                 </ListItemButton>
               ))}

@@ -24,10 +24,10 @@ function getCurrentElectionCycle() {
 exports.handler = async (event) => {
 
   const state = event.queryStringParameters?.state;
-  const election_year =
-    event.queryStringParameters?.election_year
-      ? parseInt(event.queryStringParameters.election_year, 10)
-      : getCurrentElectionCycle();
+  const election_year = getCurrentElectionCycle();
+
+  // event.queryStringParameters?.election_year
+    //   ? parseInt(event.queryStringParameters.election_year, 10)
 
   if (!state) {
     return {
@@ -41,10 +41,13 @@ exports.handler = async (event) => {
   try {
     
     const politicians = await client.query(`
-      SELECT fec_id, office_full AS role, party_full AS party, state, incumbent_challenge, district_number as district,election_years -> (jsonb_array_length(election_years) - 1) AS latest_election_year
-      FROM the_lazy_voter_serving.fec_candidate
-      WHERE c.election_year = $2
-      AND c.state = $3
+      SELECT can.name,can.fec_id, can.office_full AS role, can.party_full AS party, can.state, can.incumbent_challenge, can.district_number as district,can.election_years -> (jsonb_array_length(election_years) - 1) AS latest_election_year
+      FROM the_lazy_voter_serving.fec_candidate can
+      WHERE can.election_years @> to_jsonb($1::int)
+      AND state = $2
+      AND can.candidate_inactive = 'FALSE'
+      AND can.has_raised_funds = 'TRUE'
+      ORDER BY district
     `, [election_year, state]);
 
     return {

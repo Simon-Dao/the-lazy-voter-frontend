@@ -28,6 +28,9 @@ export type PoliticianBasicInfo = {
   party: string;
   state: string;
   status: string;
+  incumbent_challenge?: string;
+  district?: string;
+  latest_year?:string;
 };
 
 export type NewsArticle = {
