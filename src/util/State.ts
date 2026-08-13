@@ -90,6 +90,7 @@ export const PoliticiansDetailedAtom = atom<PoliticianDetailed[]>([]);
 export const SelectedPoliticianDetailedAtom = atom<PoliticianDetailed | null>();
 export type PoliticianUIDType = string | null;
 export const SelectedPoliticianUIDAtom = atom<PoliticianUIDType>(null);
+export const PoliticianBasicInfosAtom = atom<PoliticianBasicInfo[]>([]);
 
 export const STATE_MAP: Map<string, string> = new Map([
   ["AL", "Alabama"],

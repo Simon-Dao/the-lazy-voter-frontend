@@ -27,7 +27,8 @@ import {
   PoliticianUIDType,
   PoliticianDetailed,
   SelectedPoliticianDetailedAtom,
-  SelectedPoliticianUIDAtom,
+  PoliticianBasicInfosAtom,
+  SelectedPoliticianUIDAtom
 } from "#/util/State";
 
 const DRAWER_WIDTH = 300;
@@ -36,9 +37,10 @@ const REOPEN_BUTTON_DELAY = 80;
 
 type SideMenuProps = {
   children?: React.ReactNode;
+  addPolitician: (politician: PoliticianBasicInfo) => void;
 };
 
-export default function SideMenu({ children }: SideMenuProps) {
+export default function SideMenu({ children, addPolitician }: SideMenuProps) {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isPortrait = useMediaQuery("(orientation: portrait)");
@@ -56,9 +58,8 @@ export default function SideMenu({ children }: SideMenuProps) {
     PoliticiansDetailedAtom,
   );
 
-  const [politicianBasicInfos, setPoliticianBasicInfos] = useState<
-    PoliticianBasicInfo[]
-  >([]);
+  const [politicianBasicInfos, setPoliticianBasicInfos] = useAtom(PoliticianBasicInfosAtom);
+  
   const [selectedPoliticianDetailed, setSelectedPoliticianDetailed] = useAtom(
     SelectedPoliticianDetailedAtom,
   );
@@ -114,186 +115,6 @@ export default function SideMenu({ children }: SideMenuProps) {
 
   const toggleChat = (newOpen: boolean) => () => {
     setChatOpen(newOpen);
-  };
-
-  // Called by SearchBar when the user picks a politician from search results.
-  const addPolitician = async (politician: PoliticianBasicInfo) => {
-    setPoliticianBasicInfos((prev) => {
-      if (prev.some((p) => p.u_id === politician.u_id)) return prev;
-      return [...prev, politician];
-    });
-    setSelectedPoliticianId(politician.u_id);
-
-    const placeholder: PoliticianDetailed = {
-      u_id: politician.u_id,
-      name: politician.name,
-      latestYear: politician.latestYear,
-      party: politician.party,
-      state: politician.state,
-      status: politician.status,
-      timeline: undefined,
-      billCategoriesByYear: undefined,
-      donationsByYear: undefined,
-      topDonorsByYear: undefined,
-      totalDonations: undefined,
-      campaignTotals: undefined,
-      campaignFields: undefined,
-      newsArticles: undefined,
-      photoSrc: "",
-    };
-
-    // Add a placeholder entry immediately so the UI has something to render
-    setPoliticiansDetailed((prev: any) => [...prev, placeholder]);
-
-    const patch = (fields: Partial<PoliticianDetailed>) => {
-      setPoliticiansDetailed((prev: any) =>
-        prev.map((p: PoliticianDetailed) =>
-          p.u_id === politician.u_id ? { ...p, ...fields } : p,
-        ),
-      );
-    };
-
-    // Fetch Image
-    const fetchImage = async () => {
-      try {
-        const req = await fetch(
-          `https://thelazyvoter.org/api/politicians/${politician.u_id}`,
-        );
-        const people_id = await req.json();
-        patch({
-          photoSrc: `https://thelazyvoter.org/avatars/${people_id}.jpg`,
-        });
-      } catch (error) {
-        console.error("Failed to fetch Image for", politician.u_id, error);
-      }
-    };
-
-    // Fetch Campaign Totals
-    const fetchCampaignTotals = async () => {
-      try {
-        const req = await fetch(
-          `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/donors/campaign_totals`,
-        );
-        const data = await req.json();
-        patch({ campaignTotals: data.totals, campaignFields: data.fields });
-      } catch (error) {
-        console.error(
-          "Failed to fetch campaign totals for",
-          politician.u_id,
-          error,
-        );
-      }
-    };
-
-    // Fetch Timeline
-    const fetchTimeline = async () => {
-      try {
-        const res = await fetch(
-          `https://thelazyvoter.org/api/politicians/${politician.u_id}/timeline`,
-        );
-        if (!res.ok) throw new Error(`Timeline fetch failed: ${res.status}`);
-        const data = await res.json();
-        patch({ timeline: data.timeline });
-      } catch (error) {
-        console.error("Failed to fetch timeline for", politician.u_id, error);
-      }
-    };
-
-    // Fetch Bill Categories By Year
-    const fetchBillCategories = async () => {
-      try {
-        const res = await fetch(
-          `https://thelazyvoter.org/api/politicians/${politician.u_id}/legislation/totals`,
-        );
-        if (!res.ok)
-          throw new Error(`Bill Category fetch failed: ${res.status}`);
-        const data = await res.json();
-        patch({ billCategoriesByYear: data });
-      } catch (error) {
-        console.error(
-          "Failed to fetch Bill Category for",
-          politician.u_id,
-          error,
-        );
-      }
-    };
-
-    // Fetch Donation Totals By Year
-    const fetchDonationTotals = async () => {
-      try {
-        const res = await fetch(
-          `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/top-donor-totals`,
-        );
-        if (!res.ok)
-          throw new Error(`Bill Category fetch failed: ${res.status}`);
-        const data = await res.json();
-        patch({
-          donationsByYear: data.totals,
-          totalDonations: data.total_donations,
-        });
-      } catch (error) {
-        console.error(
-          "Failed to fetch Bill Category for",
-          politician.u_id,
-          error,
-        );
-      }
-    };
-
-    // Fetch Top Donors by Year
-    const fetchTopDonors = async () => {
-      try {
-        const res = await fetch(
-          `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/donors/top-donors`,
-        );
-        if (!res.ok)
-          throw new Error(`Bill Category fetch failed: ${res.status}`);
-        const data = await res.json();
-        patch({ topDonorsByYear: data });
-      } catch (error) {
-        console.error(
-          "Failed to fetch Bill Category for",
-          politician.u_id,
-          error,
-        );
-      }
-    };
-
-    // Fetch news articles
-    const fetchNews = async () => {
-      try {
-        const params = new URLSearchParams({
-          name: politician.name,
-          extra: (politician.state ?? "") + (politician.role ?? ""),
-        });
-
-        const res = await fetch(
-          `https://thelazyvoter.org/api/politicians/${politician.u_id}/news?${params.toString()}`,
-        );
-        if (!res.ok)
-          throw new Error(`Bill Category fetch failed: ${res.status}`);
-        const data = await res.json();
-        patch({ newsArticles: data });
-      } catch (error) {
-        console.error(
-          "Failed to fetch News Articles for",
-          politician.u_id,
-          error,
-        );
-      }
-    };
-
-    // Fire all fetches concurrently — each patches state independently as it resolves,
-    // so the UI fills in piece by piece instead of waiting on the slowest one.
-    await Promise.all([
-      fetchImage(),
-      fetchCampaignTotals(),
-      fetchTimeline(),
-      fetchBillCategories(),
-      fetchDonationTotals(),
-      fetchTopDonors(),
-      fetchNews(),
-    ]);
   };
 
   const removePolitician = (u_id: string) => {
