@@ -79,7 +79,7 @@ const sections = [
   {
     heading: "12. Governing law",
     body: [
-      `These Terms are governed by the laws of [YOUR STATE/JURISDICTION], without regard to conflict of law principles.`,
+      `These Terms are governed by the laws of Washington State, without regard to conflict of law principles.`,
     ],
   },
 ];
