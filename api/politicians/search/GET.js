@@ -205,7 +205,7 @@ exports.handler = async (event) => {
             status = `Running for ${officeLabel}`;
             break;
           case "O":
-            status = `Retiring from ${officeLabel} (open seat)`;
+            status = `Running for ${officeLabel} (open seat)`;
             break;
           default:
             status = `Running for ${officeLabel}`;

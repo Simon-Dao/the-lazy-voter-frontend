@@ -44,7 +44,7 @@ exports.handler = async (event) => {
     }
 
     const bills = await client.query(`
-      SELECT b.title, b.description, b.state_link, b.status_desc, b.bill_number, b.status_date
+      SELECT  b.title, b.description, b.state_link, b.status_desc, b.bill_number, b.status_date
       FROM the_lazy_voter_serving.legiscan_sponsor s
       JOIN the_lazy_voter_serving.unified_politician_record p
       ON p.legiscan_ids @> to_jsonb(s.people_id::text)
