@@ -42,7 +42,7 @@ The Lazy Voter aggregates open-source civic data and turns it into easy-to-follo
 
 ```mermaid
 flowchart LR
-    A[FEC / LegiScan] --> B[Databricks Medallion Pipeline]
+    A[Open Source Data] --> B[Databricks Medallion Pipeline]
     B --> C[(Databricks Lakebase)]
     C --> D[AWS Lambda + API Gateway]
     D --> E[Next.js Frontend]
