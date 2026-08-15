@@ -104,7 +104,7 @@ export default function Candidates({
         );
         if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
         const data = await res.json();
-        if (!cancelled) setCandidates(data.content ?? data ?? []);
+        if (!cancelled) setCandidates(data ?? []);
       } catch (error) {
         console.error("Failed to fetch candidates for", selectedState, error);
         if (!cancelled) setCandidates([]);
@@ -559,9 +559,7 @@ export default function Candidates({
                         sx={{ fontWeight: 500 }}
                       >
                         {[
-                          (candidate as any).incumbent_challenge === "C"
-                            ? "Challenger"
-                            : "Incumbent",
+                          candidate.incumbent_challenge,
                           candidate.role,
                           candidate.party,
                           candidate.state,

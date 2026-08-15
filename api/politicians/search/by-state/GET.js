@@ -40,7 +40,7 @@ exports.handler = async (event) => {
   try {
     const politicians = await client.query(
       `SELECT u.u_id, can.name, can.fec_id, can.office_full AS role,
-              can.party_full AS party, can.state, can.incumbent_challenge,
+              can.party_full AS party, can.state, can.incumbent_challenge, can.incumbent_challenge_full,
               can.district_number AS district,
               can.election_years -> (jsonb_array_length(can.election_years) - 1) AS latest_election_year
        FROM the_lazy_voter_serving.fec_candidate can
@@ -81,6 +81,7 @@ exports.handler = async (event) => {
         name: row.name,
         latestYear: row.latest_election_year ?? null,
         role: row.role ?? null,
+        incumbent_challenge: row.incumbent_challenge_full ?? null,
         party: row.party ?? null,
         state: row.state ?? null,
         status,
@@ -89,7 +90,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ content: result }),
+      body: JSON.stringify(result),
     };
   } catch (error) {
     console.error(error);
