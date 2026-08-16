@@ -84,6 +84,7 @@ exports.handler = async (event) => {
         incumbent_challenge: row.incumbent_challenge_full ?? null,
         party: row.party ?? null,
         state: row.state ?? null,
+        district: row.district ?? null,
         status,
       };
     });

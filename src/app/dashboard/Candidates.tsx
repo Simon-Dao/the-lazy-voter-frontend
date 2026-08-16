@@ -88,10 +88,10 @@ export default function Candidates({
   // Filters
   const [partyFilter, setPartyFilter] = useState<string>("all");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [districtFilter, setDistrictFilter] = useState<string>("all");
   const [incumbencyFilter, setIncumbencyFilter] = useState<
     "all" | "incumbent" | "challenger"
   >("all");
-  const [districtFilter, setDistrictFilter] = useState<string>("");
 
   useEffect(() => {
     let cancelled = false;
@@ -155,6 +155,7 @@ export default function Candidates({
 
       const matchesParty = partyFilter === "all" || c.party === partyFilter;
       const matchesRole = roleFilter === "all" || c.role === roleFilter;
+
 
       const matchesIncumbency =
         incumbencyFilter === "all" ||
@@ -423,7 +424,7 @@ export default function Candidates({
                 ))}
               </Select>
             </FormControl>
-
+            {JSON.stringify(candidates)}
             {districtOptions.length > 0 && (
               <FormControl size="small" sx={{ minWidth: 130 }}>
                 <InputLabel id="district-filter-label">District</InputLabel>
