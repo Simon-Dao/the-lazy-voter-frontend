@@ -424,7 +424,6 @@ export default function Candidates({
                 ))}
               </Select>
             </FormControl>
-            {JSON.stringify(candidates)}
             {districtOptions.length > 0 && (
               <FormControl size="small" sx={{ minWidth: 130 }}>
                 <InputLabel id="district-filter-label">District</InputLabel>

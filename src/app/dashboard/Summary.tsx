@@ -261,7 +261,6 @@ export default function Summary() {
                         />
                       </Skeleton>
                     )}
-
                     <Stack spacing={0.5}>
                       {candidate?.name ? (
                         <Typography
@@ -324,7 +323,7 @@ export default function Summary() {
               </Card>
             </Grow>
             {/* Summary */}
-            {/* <Grow
+            <Grow
               in={show}
               timeout={LOADING_ANIMATION_DURATION}
               style={{ transitionDelay: LOADING_DELAY_1 }}
@@ -377,7 +376,7 @@ export default function Summary() {
                   </Typography>
                 </CardContent>
               </Card>
-            </Grow> */}
+            </Grow>
           </Stack>
 
           {/* Timeline */}
@@ -503,7 +502,7 @@ export default function Summary() {
                   variant="contained"
                   endIcon={<ArrowOutwardOutlinedIcon />}
                   onClick={() => {
-                    setTab(1);
+                    setTab(2);
                   }}
                 >
                   News
@@ -580,7 +579,7 @@ export default function Summary() {
                             variant="contained"
                             endIcon={<ArrowOutwardOutlinedIcon />}
                             onClick={() => {
-                              setTab(2);
+                              setTab(3);
                             }}
                           >
                             Bills Sponsored / Co-sponsored
@@ -862,7 +861,7 @@ export default function Summary() {
                             variant="contained"
                             endIcon={<ArrowOutwardOutlinedIcon />}
                             onClick={() => {
-                              setTab(3);
+                              setTab(4);
                             }}
                           >
                             Large Individual Contributions

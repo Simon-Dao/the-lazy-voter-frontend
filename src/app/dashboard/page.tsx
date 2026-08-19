@@ -89,18 +89,10 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
   };
 
   // Fetch Image
-  const fetchImage = async () => {
-    try {
-      const req = await fetch(
-        `https://thelazyvoter.org/api/politicians/${politician.u_id}`,
-      );
-      const people_id = await req.json();
+  const fetchImage = () => {
       patch({
-        photoSrc: `https://thelazyvoter.org/avatars/${people_id}.jpg`,
+        photoSrc: `https://thelazyvoter.org/avatars/${politician.u_id}.jpg`,
       });
-    } catch (error) {
-      console.error("Failed to fetch Image for", politician.u_id, error);
-    }
   };
 
   // Fetch Campaign Totals
