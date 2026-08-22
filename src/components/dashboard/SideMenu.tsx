@@ -356,8 +356,8 @@ export default function SideMenu({ children, addPolitician }: SideMenuProps) {
                           noWrap
                           sx={{ fontWeight: 500, lineHeight: 1.2 }}
                         >
-                          {politician.name.length >= 25
-                            ? politician.name.substring(0, 25) + "..."
+                          {politician.name.length >= 20
+                            ? politician.name.substring(0, 20) + "..."
                             : politician.name}
                         </Typography>
                         {politician.party && (
