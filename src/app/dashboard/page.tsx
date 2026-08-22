@@ -97,19 +97,19 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
 
   // Fetch AI Summary
   const fetchAISummary = async () => {
-    // try {
-    //   const req = await fetch(
-    //     `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/donors/campaign_totals`,
-    //   );
-    //   const data = await req.json();
-    //   patch({ aiSummary: data.totals, campaignFields: data.fields });
-    // } catch (error) {
-    //   console.error(
-    //     "Failed to fetch campaign totals for",
-    //     politician.u_id,
-    //     error,
-    //   );
-    // }
+    try {
+      const req = await fetch(
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/donors/campaign_totals`,
+      );
+      const data = await req.json();
+      patch({ aiSummary: data.totals, campaignFields: data.fields });
+    } catch (error) {
+      console.error(
+        "Failed to fetch campaign totals for",
+        politician.u_id,
+        error,
+      );
+    }
   };
 
   // Fetch Campaign Totals
