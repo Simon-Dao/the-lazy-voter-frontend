@@ -31,7 +31,7 @@ exports.handler = async (event) => {
     }
     const info = await client.query(
       `
-      SELECT u_id,ai_summary,sources
+      SELECT ai_summary,sources as web_sources
       FROM the_lazy_voter_serving.politician_ai_summary
       WHERE u_id = $1
     `,
@@ -41,13 +41,13 @@ exports.handler = async (event) => {
     if(!info.rows || !info.rows[0]) {
        return {
         statusCode: 200,
-        body: JSON.stringify({"u_id":u_id, "ai_summary":"No data could be summarized from web based politician search", "sources":'[]'}),
+        body: JSON.stringify({"ai_summary":"No data could be summarized from web based politician search", "web_sources":'[]'}),
       };
     }
 
     return {
       statusCode: 200,
-      body: JSON.stringify(row.rows),
+      body: JSON.stringify(info.rows[0]),
     };
   } catch (error) {
     return {

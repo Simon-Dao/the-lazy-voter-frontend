@@ -16,12 +16,9 @@ import { useState, useEffect } from "react";
 import { useAtom } from "jotai";
 import {
     PoliticianBasicInfo,
-    IsPoliticianSelectedAtom,
     DashboardSideMenuTabAtom,
     PoliticiansDetailedAtom,
-    PoliticianUIDType,
     PoliticianDetailed,
-    SelectedPoliticianDetailedAtom,
     PoliticianBasicInfosAtom,
     SelectedPoliticianUIDAtom
  } from "#/util/State";
@@ -102,9 +99,8 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
         `https://thelazyvoter.org/api/politicians/${politician.u_id}/ai/summary`,
       );
       const data = await req.json();
-
-      console.log(data);
-      // patch({ aiSummary: data.totals, campaignFields: data.fields });
+      console.log(data.web_sources);
+      patch({ aiSummary: data.ai_summary, webSources: data.web_sources });
     } catch (error) {
       console.error(
         "Failed to fetch campaign totals for",

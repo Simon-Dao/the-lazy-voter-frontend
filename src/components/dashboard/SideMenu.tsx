@@ -397,7 +397,7 @@ export default function SideMenu({ children, addPolitician }: SideMenuProps) {
 
       <Divider />
 
-      <Box sx={{ p: 1.5 }}>
+      {/* <Box sx={{ p: 1.5 }}>
         <Box
           onClick={toggleChat(true)}
           role="button"
@@ -423,7 +423,7 @@ export default function SideMenu({ children, addPolitician }: SideMenuProps) {
             Ask AI to Summarize
           </Typography>
         </Box>
-      </Box>
+      </Box> */}
     </Box>
   );
 

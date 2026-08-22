@@ -140,7 +140,6 @@ function getPartyColor(theme: any, party: string | undefined): string {
 
 export default function Summary() {
   const theme = useTheme();
-  const candidateSummary = null;
   const [electionYear, setElectionYear] = useState<string>("all");
   const [termYear, setTermYear] = useState<string>("all");
   const [newsCategory, setNewsCategory] = useState<NewsCategory>("scrutiny");
@@ -344,15 +343,21 @@ export default function Summary() {
                   <SmartToyIcon />
                   AI Summary
                 </Typography>
-                <CardContent sx={{ overflowX: "auto", ...customScrollbarSx }}>
+                <CardContent
+                  sx={{
+                    overflowY: "auto",
+                    maxHeight: 400,
+                    ...customScrollbarSx,
+                  }}
+                >
                   <Typography
                     component="div"
                     variant="body2"
                     color="textSecondary"
                     sx={{ fontWeight: 600, mb: 2, px: 2 }}
                   >
-                    {candidateSummary ? (
-                      candidateSummary
+                    {candidate?.aiSummary ? (
+                      <p>{candidate?.aiSummary}</p>
                     ) : (
                       <Stack spacing={1} sx={{ width: "100%", py: 1 }}>
                         <Stack
@@ -374,6 +379,43 @@ export default function Summary() {
                       </Stack>
                     )}
                   </Typography>
+                  <Typography variant="caption" color="text.secondary"sx={{ fontWeight: 600, mb: 2, px: 2 }}>
+                    Sources
+                  </Typography>
+                  {candidate?.webSources &&
+                    candidate.webSources.length > 0 && (
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        useFlexGap
+                        sx={{ px: 2, mt: 1, flexWrap: "wrap" }}
+                      >
+                        {candidate.webSources.map((source, idx) => {
+                          let label = source;
+                          try {
+                            label = new URL(source).hostname.replace(
+                              "www.",
+                              "",
+                            );
+                          } catch {
+                            // fallback to raw string if not a valid URL
+                          }
+                          return (
+                            <Chip
+                              key={idx}
+                              component="a"
+                              href={source}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              label={label}
+                              size="small"
+                              clickable
+                              variant="outlined"
+                            />
+                          );
+                        })}
+                      </Stack>
+                    )}
                 </CardContent>
               </Card>
             </Grow>
