@@ -98,6 +98,13 @@ export default function SideMenu({ children, addPolitician }: SideMenuProps) {
     return () => clearTimeout(timer);
   }, [open]);
 
+  useEffect(() => {
+    if(!isPoliticianSelected) {
+      setTab(0)
+    }
+  }, [isPoliticianSelected]);
+
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
   };
