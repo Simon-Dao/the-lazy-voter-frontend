@@ -12,7 +12,11 @@ resource "aws_iam_policy" "bedrock_invoke_policy" {
         Effect = "Allow"
         Action = [
           "bedrock:InvokeModel",
-          "bedrock:InvokeModelWithResponseStream"
+          "bedrock:InvokeModelWithResponseStream",
+          "bedrock:Converse",
+          "bedrock:ConverseStream",
+          "bedrock:PutUseCaseForModelAccess",
+          "bedrock:GetUseCaseForModelAccess"
         ]
         Resource = "*"
       }

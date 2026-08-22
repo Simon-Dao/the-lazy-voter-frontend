@@ -87,6 +87,7 @@ export type PoliticianDetailed = {
   campaignTotals?: Record<string, CampaignTotal[]>;
   ballotpedia?: string;
   photoSrc?: string;
+  aiSummary?: string;
 };
 
 export const PoliticiansDetailedAtom = atom<PoliticianDetailed[]>([]);

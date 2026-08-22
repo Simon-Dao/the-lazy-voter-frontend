@@ -89,10 +89,27 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
   };
 
   // Fetch Image
-  const fetchImage = () => {
+  const fetchImage = async () => {
       patch({
         photoSrc: `https://thelazyvoter.org/avatars/${politician.u_id}.jpg`,
       });
+  };
+
+  // Fetch AI Summary
+  const fetchAISummary = async () => {
+    // try {
+    //   const req = await fetch(
+    //     `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/donors/campaign_totals`,
+    //   );
+    //   const data = await req.json();
+    //   patch({ aiSummary: data.totals, campaignFields: data.fields });
+    // } catch (error) {
+    //   console.error(
+    //     "Failed to fetch campaign totals for",
+    //     politician.u_id,
+    //     error,
+    //   );
+    // }
   };
 
   // Fetch Campaign Totals
@@ -210,6 +227,7 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
   // so the UI fills in piece by piece instead of waiting on the slowest one.
   await Promise.all([
     fetchImage(),
+    fetchAISummary(),
     fetchCampaignTotals(),
     fetchTimeline(),
     fetchBillCategories(),
