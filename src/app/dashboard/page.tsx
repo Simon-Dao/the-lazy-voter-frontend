@@ -99,10 +99,12 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
   const fetchAISummary = async () => {
     try {
       const req = await fetch(
-        `https://thelazyvoter.org/api/politicians/${politician.u_id}/finance/donors/campaign_totals`,
+        `https://thelazyvoter.org/api/politicians/${politician.u_id}/ai/summary`,
       );
       const data = await req.json();
-      patch({ aiSummary: data.totals, campaignFields: data.fields });
+
+      console.log(data);
+      // patch({ aiSummary: data.totals, campaignFields: data.fields });
     } catch (error) {
       console.error(
         "Failed to fetch campaign totals for",
